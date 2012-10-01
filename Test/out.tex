@@ -1,0 +1,471 @@
+\documentclass{beamer}
+
+\usepackage[latin1]{inputenc}
+\usepackage{graphicx}
+\usepackage{amssymb,amsmath}
+%\usepackage{pslatex}
+\usepackage{verbatim}
+\usepackage{pst-all}
+\usepackage{multicol}
+
+\usetheme{Goettingen}
+\title[CloneCloud]{Clonecloud: Elastic execution between mobile device and cloud \cite{clonecloud}}
+\author{B.G. Chun\\S. Ihm\\P. Maniatis\\M. Naik\\A. Patti}
+\institute{ACM, Intel, Berkeley, Princeton}
+\date{2011}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+		\tableofcontents
+\end{frame}
+
+%-----------------------------------------------------------------------------------
+\section{Context}
+
+\begin{frame}{Cloud Systems}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Utility Computing
+	\item Resources ``As A Service''
+	\item Distributed
+	\begin{itemize}
+		\item Internet
+		\item VPN
+	\end{itemize}
+	\item Reliable and Secure
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Mobile Computing}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Very Popular
+	\begin{itemize}
+		\item iPhones
+		\item Android
+	\end{itemize}
+	\item Very Pervasive
+	\begin{itemize}
+		\item Phones
+		\item Tablets
+		\item Clothes
+	\end{itemize}
+	\item Way of the future
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Diverse Architectures}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Traditional machines: x86
+	\item Mobile platforms: ARM
+	\item Others
+	\begin{itemize}
+		\item Security
+		\item Portability
+		\item Communication
+	\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Power/Cycle Limitations}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Short battery life
+	\item Resources used for screen/auxiliary services
+	\item Low speed processors
+	\begin{itemize}
+		\item Undervolted/underclocked to save power
+	\end{itemize}
+	\item Need to improve performance
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+%-----------------------------------------------------------------------------------
+\section{Code Migration}
+
+\begin{frame}{Virtual Machines}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Desktop virtualisation technologies
+	\item Abstraction between hardware and software
+	\item Common usage
+	\begin{itemize}
+		\item VMWare
+		\item Java
+	\end{itemize}
+	\item Mobile platforms
+	\begin{itemize}
+		\item iOS
+		\item Gengerbread
+	\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Managed Languages}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Garbage Collection
+	\item Threading/Parallelising
+	\item Security/Access control
+	\item Ease of programming
+	\begin{itemize}
+		\item Mobile developers are lazy
+	\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Native Methods}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Methods which must be run oncertain platforms
+	\item Mobile API to interface with hardware
+	\begin{itemize}
+		\item Camera
+		\item GPS
+		\item Microphone/Speaker
+		\item Screen
+	\end{itemize}
+	\item Partitioning needs to be aware of this
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+%-----------------------------------------------------------------------------------
+\section{Automation}
+
+\begin{frame}{Duality}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Binary cloud-mobile split
+	\item Cloud offers computation ``service'' to connected mobile
+	\begin{itemize}
+		\item Wi-fi
+		\item 3G/4G
+	\end{itemize}
+	\item Mobiles choose to offload execution to cloud
+	\item Multiple clouds?
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Migration Limitations}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Accessing native methods
+	\begin{itemize}
+		\item Methods accessing the phone's hardware API must be located on the mobile
+	\end{itemize}
+	\item Shared variables
+	\begin{itemize}
+		\item Methods which sharestate must be colocated
+	\end{itemize}
+	\item Nested deadlocking
+	\begin{itemize}
+		\item Methods blocking for migrated code may not migrate more code before the completion of previous migration
+	\end{itemize}
+	\item Save power
+	\item Save time
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Static Analysis}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Determine points of migration
+	\item Locked to method boundaries (can we do better?)
+	\item Per-thread basis
+	\item Control flow
+	\item Under-approximate migration points.
+	\begin{itemize}
+		\item Reachability is undecidable
+	\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Automatic Profiling}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Determine how well code runs on cloud/mobile
+	\item Ad hoc experimentation
+	\begin{itemize}
+		\item Run on both platforms
+		\item Run under varying (random) conditions
+		\item Run for different migrations
+	\end{itemize}
+	\item Viable for native-heavy applications?
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Management}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Management Threads
+	\begin{itemize}
+		\item Migration Manager
+		\begin{itemize}
+			\item Serializes objects/data
+			\item Blocks when migrated data is requested
+		\end{itemize}
+		\item Node Manager
+		\begin{itemize}
+			\item Connects with cloud
+			\item Determines what is best to migrate
+		\end{itemize}
+		\item Partition Database
+		\begin{itemize}
+			\item Records possible partitionings
+			\item Used by Node Manager
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{State Capture/Transmission}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Objects
+	\begin{itemize}
+		\item Java
+	\end{itemize}
+	\item Garbage collector runs on both mobile and clone
+	\item New object created
+	\item Synchronises mobile and cloud
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+%-----------------------------------------------------------------------------------
+\section{Performance}
+
+\begin{frame}{Implementation}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item HTC G1
+	\begin{itemize}
+		\item Cupcake
+		\item Wi-fi and 3G
+	\end{itemize}
+	\item Server
+	\begin{itemize}
+		\item Xeon 3.0 Ghz
+		\item VMWare
+	\end{itemize}
+	\item Extensive code modification
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Profiles}
+	\center{\includegraphics[width=10cm]{img/overhead.png}}
+\end{frame}
+
+\begin{frame}{Speedup}
+	\center{\includegraphics[width=10cm]{img/overhead.png}}
+\end{frame}
+
+\begin{frame}{Power Saving}
+	\center{\includegraphics[width=10cm]{img/overhead.png}}
+\end{frame}
+
+%-----------------------------------------------------------------------------------
+\section{Comments}
+
+\begin{frame}{Benchmarks}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Made their own
+	\begin{itemize}
+		\item Virus scan
+		\item Facial recognition
+		\item Advertising
+	\end{itemize}
+	\item Representative?
+	\item Business?
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Execution Machines}
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+	\item Only one phone
+	\item Better on phones with more serious networking?
+	\begin{itemize}
+		\item Bluetooth
+		\item Infra-red
+	\end{itemize}
+	\item Only one server
+	\item Worse on servers under heavy load?
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+	\begin{itemize}
+		\item \center{\includegraphics[width=5cm]{img/overhead.png}}
+	\end{itemize}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+\bibliographystyle{plain}
+\bibliography{biblio}
+\end{frame}
+
+\begin{frame}{Questions?}
+\end{frame}
+
+\end{document}
