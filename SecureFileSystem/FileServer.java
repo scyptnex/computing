@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import javax.swing.*;
+
 public class FileServer {
 
 	public static final int DEFAULT_PORT = 23456;
@@ -15,22 +17,66 @@ public class FileServer {
 	public static final int SMALL_BUFF = 1024*8;
 	public static final int BLOCK_SIZE = 1024*SMALL_BUFF;
 
-	public static void main(String[] args) throws Exception{
-		if(args.length == 0){
-			ServerSocket ss = new ServerSocket(DEFAULT_PORT);
-			Socket sck = ss.accept();
-			File fi = new File("ncd1.tar.gz");
-			byte[] hsh = SecureUtils.hash(fi);
-			System.out.println(SecureUtils.hexify(hsh));
-			sendFile(sck, fi, hsh);
-			sck.close();
+	public static void main(String[] args){
+		boolean sender = false;
+		File fi = null;
+		try{
+			if(args.length == 0){
+				int ret = JOptionPane.showConfirmDialog(null, "Are you the sender? (no = reciever)", "Send/Recieve", JOptionPane.YES_NO_OPTION);
+				JFileChooser chooser = new JFileChooser();
+				if(ret == JOptionPane.YES_OPTION){
+					chooser.showOpenDialog(null);
+					sender = true;
+				}
+				else{
+					chooser.showSaveDialog(null);
+					sender = false;
+				}
+				fi = chooser.getSelectedFile();
+			}
+			else{
+				if(args[0].equalsIgnoreCase("-s")){
+					sender = true;
+				}
+				else if(args[0].equalsIgnoreCase("-r")){
+					sender = false;
+				}
+				fi = new File(args[1]);
+			}
 		}
-		else{
-			Socket sck = new Socket("localhost", DEFAULT_PORT);
-			byte[] hsh = recvFile(sck, new File("transfer.tar.gz"));
-			System.out.println(SecureUtils.hexify(hsh));
-			sck.close();
+		catch(Exception e){
+			e.printStackTrace();
+			exit();
 		}
+		if(sender && !fi.exists()){
+			System.err.println("Cannot send, file doesn't exist");
+			exit();
+		}
+		try{
+			if(sender){
+				ServerSocket ss = new ServerSocket(DEFAULT_PORT);
+				Socket sck = ss.accept();
+				byte[] hsh = SecureUtils.hash(fi);
+				System.out.println(SecureUtils.hexify(hsh));
+				sendFile(sck, fi, hsh);
+				sck.close();
+			}
+			else{
+				Socket sck = new Socket("localhost", DEFAULT_PORT);
+				byte[] hsh = recvFile(sck, fi);
+				System.out.println(SecureUtils.hexify(hsh));
+				sck.close();
+			}
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void exit(){
+		System.exit(1);
 	}
 	
 	//TODO confirming final failed hash
