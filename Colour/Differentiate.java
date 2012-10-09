@@ -83,7 +83,7 @@ public class Differentiate extends JComponent implements KeyListener{
 			same = false;
 		}
 		c1 = Color.getHSBColor((float)h1, (float)sat, (float)bright);
-		c1 = Color.getHSBColor((float)h2, (float)sat, (float)bright);
+		c2 = Color.getHSBColor((float)h2, (float)sat, (float)bright);
 		if(Math.random() > 0.5) hue = h2;
 		double bgh = (hue) > 0.5 ? hue-0.5 : hue+0.5;
 		background = Color.getHSBColor((float)bgh, (float)sat, (float)bright);
@@ -91,6 +91,7 @@ public class Differentiate extends JComponent implements KeyListener{
 		if(avg > 128) textcol = Color.BLACK;
 		else textcol = Color.WHITE;
 		repaint();
+		//System.out.println(h2 + " - " + h1);
 	}
 	
 	public void paint(Graphics g){
