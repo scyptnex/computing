@@ -1,0 +1,15 @@
+CNUMBR = DSTR
+DSTR = DIG EDIG
+EDIG = epsilon
+EDIG = DIG EDIG
+EDIG = ZDIG EDIG
+ZDIG = 0
+DIG = 1
+DIG = 2
+DIG = 3
+DIG = 4
+DIG = 5
+DIG = 6
+DIG = 7
+DIG = 8
+DIG = 9
