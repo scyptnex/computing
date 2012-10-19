@@ -207,3 +207,133 @@ destruct H0.
 exact H.
 Qed.
 
+Lemma ex2: forall A B C D: Prop,(A->B)/\(C->D)/\A/\C -> B/\D.
+Proof.
+intros.
+destruct H as [HAB].
+destruct H as [HCD].
+destruct H.
+split.
+apply HAB.
+assumption.
+apply HCD.
+assumption.
+Qed.
+
+Lemma ex4: forall A B C: Prop, A\/(B\/C)->(A\/B)\/C.
+Proof.
+intros.
+destruct H as [H1 | [H2 | H3]].
+left;left;exact H1.
+left;right;exact H2.
+right; exact H3.
+Qed.
+
+Lemma ex5: forall A B: Prop, (A\/B)/\~A -> B.
+Proof.
+intros.
+destruct H.
+destruct H.
+destruct H0.
+exact H.
+exact H.
+Qed.
+
+Lemma euq:
+   forall A:Type,
+   forall P Q: A->Prop,
+   (forall x, P x) \/ (forall y, Q y)
+      -> forall x, P x \/ Q x.
+intros.
+destruct H as [HP | HQ].
+left.
+apply HP.
+right.
+apply HQ.
+Qed.
+
+Fixpoint sum_n n :=
+match n with
+0 => 0
+| S p => p + sum_n p
+end.
+
+Lemma sum_n_p : forall n, 2*sum_n n + n = n * n.
+Proof.
+induction n.
+reflexivity.
+assert (SnSn : S n * S n = n*n+2*n+1).
+ring.
+rewrite SnSn.
+rewrite <- IHn.
+simpl.
+ring.
+Qed.
+
+Lemma evenb_p : forall n, evenb n = true -> exists x, n=2*x.
+Proof.
+assert (Main: forall n, (evenb n = true -> exists x, n=2*x) /\ (evenb (S n) = true -> exists x, S n = 2*x)).
+induction n.
+split.
+exists 0.
+ring.
+simpl.
+intros H.
+discriminate H.
+split.
+destruct IHn as [_ IHn'].
+exact IHn'.
+simpl.
+intros H.
+destruct IHn as [IHn' _].
+assert (H' : exists x, n=2*x).
+apply IHn'.
+exact H.
+destruct H' as [x q].
+exists (x+1).
+rewrite q.
+ring.
+intros n ev.
+destruct (Main n) as [H _].
+apply H.
+exact ev.
+Qed.
+
+Fixpoint add n m := match n with 0 => m | S p => add p (S m) end.
+Eval compute in add 5 5.
+Eval compute in add 5 4.
+Eval compute in add 4 5.
+Eval compute in add 1 10.
+
+Require Import Arith.
+
+Lemma unit_commute : forall n m, add n (S m) = S (add n m).
+Proof.
+induction n; intros; simpl.
+reflexivity.
+rewrite IHn; reflexivity.
+Qed.
+
+Lemma unit_commute2 : forall n m, add (S n) m = S (add n m).
+Proof.
+induction n.
+intros.
+simpl.
+ring.
+intros.
+apply IHn.
+Qed.
+
+Lemma same_func : forall n m, add n m = n + m.
+Proof.
+induction n.
+simpl.
+reflexivity.
+intros.
+apply IHn.
+
+
+
+
+
+
