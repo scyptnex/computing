@@ -258,13 +258,18 @@ match n with
 | S p => p + sum_n p
 end.
 
+Lemma successor_squared : forall n, S n * S n = n*n+2*n+1.
+Proof.
+intros.
+ring.
+Qed.
+
+
 Lemma sum_n_p : forall n, 2*sum_n n + n = n * n.
 Proof.
 induction n.
 reflexivity.
-assert (SnSn : S n * S n = n*n+2*n+1).
-ring.
-rewrite SnSn.
+rewrite successor_squared.
 rewrite <- IHn.
 simpl.
 ring.
@@ -330,7 +335,64 @@ induction n.
 simpl.
 reflexivity.
 intros.
+simpl.
+rewrite unit_commute.
+Search (S _ = S _).
+apply eq_S.
 apply IHn.
+Qed.
+
+Fixpoint sum_odd_n (n:nat) : nat :=
+ match n with 0 => 0
+| S p => 1 + 2*p + sum_odd_n p end.
+
+Eval compute in sum_odd_n 0.
+Eval compute in sum_odd_n 1.
+Eval compute in sum_odd_n 2.
+Eval compute in sum_odd_n 3.
+
+Lemma odd_square : forall n:nat, sum_odd_n n = n*n.
+Proof.
+induction n.
+simpl.
+reflexivity.
+rewrite successor_squared.
+simpl.
+rewrite IHn.
+ring.
+Qed.
+
+Fixpoint count n l :=
+match l with
+nil => 0
+| a::tl =>
+let r := count n tl in if beq_nat n a then 1+r else r
+end.
+
+Lemma insert_incr : forall n l, count n (insert n l) = 1+count n l.
+Proof.
+induction l.
+simpl.
+rewrite <- beq_nat_refl.
+reflexivity.
+simpl.
+case (leb n a).
+simpl.
+rewrite <- beq_nat_refl.
+reflexivity.
+simpl.
+case (beq_nat n a).
+rewrite IHl.
+ring.
+rewrite IHl.
+ring.
+Qed.
+
+
+
+
+
+
 
 
 
