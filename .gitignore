@@ -2,6 +2,7 @@
 
 # Code::Blocks files #
 *.depend
+*.layout
 
 # Eclipse files #
 .classpath
