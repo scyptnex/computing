@@ -1,5 +1,8 @@
 *.class
 
+# Code::Blocks files #
+*.depend
+
 # Eclipse files #
 .classpath
 .project
