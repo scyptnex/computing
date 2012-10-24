@@ -11,19 +11,26 @@ public class Robomatic {
 	}
 	
 	public Robomatic(){
+		System.out.println("robotiq");
 		try {
+			Thread.sleep(30000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			System.out.println("entering");
 			Robot rbt = new Robot();
-			rbt.delay(1000);
-			System.out.println("top");
-			rbt.mouseMove(100, 100);
-			rbt.delay(5000);
-			System.out.println("mid");
-			rbt.mouseMove(500, 500);
-			rbt.delay(5000);
-			System.out.println("bot");
-			rbt.mouseMove(900, 900);
+			System.out.println("entered");
 			BufferedImage screenShot = rbt.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
 			ImageIO.write(screenShot, "PNG", new File("test.png"));
+			//rbt.delay();
+			System.out.println("top");
+			rbt.mouseMove(100, 100);
+			System.out.println("mid");
+			rbt.mouseMove(200, 200);
+			System.out.println("bot");
+			rbt.mouseMove(300, 300);
 		} catch (AWTException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
