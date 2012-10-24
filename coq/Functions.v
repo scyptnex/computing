@@ -388,10 +388,92 @@ rewrite IHl.
 ring.
 Qed.
 
+Inductive bin : Type :=
+L : bin
+| N : bin -> bin -> bin.
 
+Check N L (N L L).
 
+Inductive e6 : Type :=
+ e6_c
+| e6_w3 (n : nat) (t1 t2 : e6)
+| e6_4 (b : bool) (t1 t2 t3 : e6).
 
+Definition example7 (t : bin):bool :=
+match t with N L L => false | _ => true end.
 
+Fixpoint flatten_aux (t1 t2:bin) : bin :=
+match t1 with
+L => N L t2
+| N t'1 t'2 => flatten_aux t'1 (flatten_aux t'2 t2)
+end.
+
+Fixpoint flatten (t:bin) :bin :=
+match t with
+ L => L | N t1 t2 => flatten_aux t1 (flatten t2)
+end.
+
+Eval compute in flatten (N L (N L (N L (N L L)))).
+Eval compute in flatten (N (N (N (N (N (N L L) L) L) L) L) L).
+
+Fixpoint size (t:bin) : nat :=
+match t with
+L => 1 | N t1 t2 => 1 + size t1 + size t2
+end.
+
+Eval compute in flatten (N (N (N L L) (N L L)) (N (N L L) L)).
+
+Lemma example7_size : forall t, example7 t = false -> size t = 3.
+intros t.
+destruct t.
+simpl.
+intros H.
+discriminate H.
+destruct t1.
+destruct t2.
+simpl.
+intro.
+reflexivity.
+intros H.
+discriminate H.
+intros H.
+discriminate H.
+Qed.
+
+Lemma flatten_aux_size : forall t1 t2, size (flatten_aux t1 t2) = size t1 + size t2 + 1.
+induction t1.
+intros t2.
+simpl.
+ring.
+intros t2.
+simpl.
+rewrite IHt1_1.
+rewrite IHt1_2.
+ring.
+Qed.
+
+Lemma flatten_size : forall t, size (flatten t) = size t.
+induction t.
+simpl.
+reflexivity.
+simpl.
+rewrite flatten_aux_size.
+rewrite IHt2.
+ring.
+Qed.
+
+Lemma not_subterm_self_1 : forall x y, ~ x = N x y.
+induction x.
+intros y.
+discriminate.
+intros y abs.
+injection abs.
+intros h2 h1.
+assert (IHx1' : x1 <> N x1 x2).
+apply IHx1.
+case IHx1'.
+exact h1.
+Qed.
 
 
 
