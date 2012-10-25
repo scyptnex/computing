@@ -490,6 +490,91 @@ O => 1
 end
 end.
 
+Require Import ZArith.
+Open Scope Z_scope.
+
+Check (iter).
+
+Definition fact_aux (n:Z) :=
+iter n (Z*Z) (fun p => (fst p + 1, snd p * (fst p + 1))) (0,1).
+Definition Z_fact (n:Z) := snd(fact_aux n).
+Eval vm_compute in Z_fact 100.
+
+Lemma iter_nat_of_Z : forall n A f x, 0 <= n ->
+iter n A f x = iter_nat (Zabs_nat n) A f x.
+intros n A f x.
+case n.
+auto.
+intros p _.
+unfold iter, Zabs_nat.
+apply iter_nat_of_P.
+intros p abs.
+case abs.
+trivial.
+Qed.
+
+Lemma fact_aux_correct : forall n, fact_aux (Z_of_nat n) = (Z_of_nat n, Z_of_nat (nat_fact n)).
+intros n.
+unfold fact_aux.
+rewrite iter_nat_of_Z.
+induction n.
+auto.
+replace (nat_fact (S n)) with (S n * nat_fact n)%nat by auto.
+assert(U : forall k A f x, iter_nat (S k) A f x=f (iter_nat k A f x)) by auto.
+rewrite Zabs_nat_Z_of_nat in IHn |- *.
+rewrite U, IHn.
+unfold fst,snd.
+rewrite inj_mult, Zmult_comm, inj_S.
+unfold Zsucc.
+reflexivity.
+apply Zle_0_nat.
+Qed.
+
+Lemma Z_fact_correct : forall n:nat, Z_fact (Z_of_nat n) = Z_of_nat (nat_fact n).
+Proof.
+intros.
+unfold Z_fact.
+rewrite fact_aux_correct.
+simpl.
+reflexivity.
+Qed.
+
+Close Scope Z_scope.
+
+Inductive even : nat -> Prop :=
+even0 : even 0
+|evens : forall x:nat, even x -> even (S (S x)).
+
+Lemma even_mult : forall x, even x -> exists y, x=2*y.
+Proof.
+intros.
+elim H.
+exists 0.
+reflexivity.
+intros x0 Hevenx0 IHx.
+destruct IHx as [y HX0].
+rewrite HX0.
+exists (S y).
+ring.
+Qed.
+
+Lemma not_even_1 : ~even 1.
+Proof.
+intros even1.
+inversion even1.
+Qed.
+
+Lemma even_inv : forall x, even (S (S x)) -> even x.
+Proof.
+intros x H.
+inversion H.
+assumption.
+Qed.
+
+
+
+
+
 
 
 
