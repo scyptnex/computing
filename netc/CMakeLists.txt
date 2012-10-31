@@ -3,7 +3,7 @@ project(netc)
 
 set(CMAKE_C_FLAGS "-Wall")
 
-set(PROGRAMS showip server client listener talker)
+set(PROGRAMS showip server client listener talker select)
 
 foreach(program ${PROGRAMS})
   add_executable(${program} ${program}.c)
