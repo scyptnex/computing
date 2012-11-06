@@ -62,3 +62,7 @@ chain n
 	| even n = n:chain (n `div` 2)
 	| odd n = n:chain (n*3 + 1)
 
+choose n 0 = 1
+choose 0 k = 0
+choose n k = choose (n-1) (k-1) * n `div` k
+
