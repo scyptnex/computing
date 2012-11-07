@@ -86,13 +86,65 @@ Eval compute in pascall' 4 2.
 Eval compute in pascall' 4 3.
 Eval compute in pascall' 4 4.
 
-Lemma div_up : forall a b c, a = div c b -> a + b = S (div c b).
+Lemma xeror : forall x , x = 0 -> S x = 1.
+intros.
+induction x.
+reflexivity.
+rewrite H.
+reflexivity.
+Qed.
+
+Lemma da_trans : forall a b c, b = S c -> div a b = div_aux a b c.
+intros.
+induction b.
+discriminate H.
+simpl.
+rewrite H.
+assert (b = c).
+SearchRewrite ( S _ ).
+Check eq_S.
+auto.
+auto.
+Qed.
+
+
+
+Lemma div_unit : forall a, div a 1 = a.
 intros.
 induction a.
-induction b.
+simpl.
+ring.
+simpl.
+auto.
+Qed.
+
+
+Lemma div_up : forall a b c, b > 0 -> a = div c b -> (S a) = div (c + b) b.
+intros.
+destruct H.
+rewrite H0.
+simpl.
 induction c.
-apply H.
-rewrite div_frac.
+simpl.
+reflexivity.
+SearchRewrite (S _) .
+simpl.
+rewrite eq_S with (y := (div_aux (c + 1) 1 0)).
+ring.
+rewrite <- da_trans.
+rewrite <- da_trans.
+assert (c+1 = S c).
+ring.
+rewrite H.
+rewrite div_unit.
+rewrite div_unit.
+reflexivity.
+reflexivity.
+reflexivity.
+induction m.
+auto.
+simpl.
+
 
 
 
