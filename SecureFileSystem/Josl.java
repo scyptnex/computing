@@ -12,11 +12,11 @@ public class Josl {
 	public static final String CHAIN = "CBC";
 	public static final String PADD = "PKCS5Padding";
 	
-	public static final int KEY_LENGTH = 128;
+	public static final int KEY_LENGTH = 256;
 	public static final int IV_LENGTH = 128;
 	public static final int SALT_LENGTH = 64;
 	
-	public static final File swapdir = new File("/home/scyptnex/computing/csec/build");
+	public static final File swapdir = new File("/home/scyptnex/Desktop");
 	
 	public static void main(String[] args) throws Exception{
 		byte[] pwd = "hi".getBytes();
@@ -38,7 +38,12 @@ public class Josl {
 		Cipher dec = Cipher.getInstance(ALG + "/" + CHAIN + "/" + PADD);
 		dec.init(Cipher.DECRYPT_MODE, aesSpec, ivs);
 		
-		SecureUtils.fileSwap(new File(swapdir, "dart.pdf"), new File(swapdir, "j.enc"), enc, null);
+		long t = System.currentTimeMillis();
+		SecureUtils.fastFileSwap(new File(swapdir, "thirdrun.tar.gz"), new File(swapdir, "j.enc"), enc);
+		System.out.println("Encrypt Time(s) = " + ((System.currentTimeMillis()-t)/1000.0));
+		t = System.currentTimeMillis();
+		SecureUtils.fastFileSwap(new File(swapdir, "j.enc"), new File(swapdir, "j.tar.gz"), dec);
+		System.out.println("Decrypt Time(s) = " + ((System.currentTimeMillis()-t)/1000.0));
 	}
 	
 	//EVP_BytesToKey

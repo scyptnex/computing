@@ -94,6 +94,28 @@ public class SecureUtils {
 	 * STATIC CYPHERING
 	 */
 	
+	public static void fastFileSwap(File in, File out, Cipher cip) throws IOException{
+		InputStream is = new FileInputStream(in);
+		OutputStream os = new FileOutputStream(out);
+		byte[] buffer = new byte[FILE_BUFFERING_SIZE];
+		int rd = 0;
+		int tot = 0;
+		long start = System.currentTimeMillis();
+		while((rd = is.read(buffer)) >= 0){
+			tot+=rd;
+			os.write(cip.update(buffer, 0, rd));
+		}
+		try {
+			os.write(cip.doFinal());
+		} catch (IllegalBlockSizeException e) {
+			throw new IOException("Cipher final illegal block size");
+		} catch (BadPaddingException e) {
+			throw new IOException("Cipher final bad padding");
+		}
+		is.close();
+		os.close();
+	}
+	
 	public static void fileSwap(File in, File out, Cipher cip, SecureProgressMonitor spm) throws IOException{
 		//String msg = "Decrypting " + out.getName();
 		//if(enc) msg = "Encrypting " + in.getName();
