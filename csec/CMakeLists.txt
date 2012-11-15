@@ -3,6 +3,8 @@ project (EncTest)
 
 find_package(OpenSSL)
 
+set(CMAKE_C_FLAGS "-g -Wall")
+
 add_executable(encx enc.c apps.c)
 target_link_libraries(encx ${OPENSSL_LIBRARIES})
 
