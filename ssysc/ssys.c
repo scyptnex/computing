@@ -15,7 +15,9 @@ char *Base64Decode(char *input, int length);
 
 int main(int argc, char **argv)
 {
-
+	char tmpBuf[1024];
+	char* v1 = "aGk=";
+	char* v2 = "aGk=\n";
   if ( argc != 2 ) {
         fprintf(stdout,"Usage OpenSSLBase64E text \n");
         return 1;
@@ -31,12 +33,16 @@ int main(int argc, char **argv)
   strcpy(new_buffer,output);
   strcat(new_buffer,"\n\0");
 
-  char *temp = Base64Decode(new_buffer,strlen(new_buffer));
+  int temp = decode64(new_buffer, tmpBuf, strlen(new_buffer));
 
-  printf("Base64: %s\n", temp); 
+  printf("Base64: %s\n", tmpBuf); 
   
   free(output);
-  free(temp); 
+
+	int a = decode64(v1, tmpBuf, strlen(v1));
+	printf("%d: %s\n", a, tmpBuf);
+	int b = decode64(v2, tmpBuf, strlen(v2));
+	printf("%d: %s\n", b, tmpBuf);
 }
 
 /////////////////////////////////////////
@@ -67,10 +73,10 @@ char *Base64Encode( char *input, int length)
   return buff;
 }
 
-char *Base64Decode( char *input, int length)
+int decode64( char *input, char* output, int length)
 {
   BIO *b64, *bmem;
-
+  int len;
   char *buffer = (char *)malloc(length);
   memset(buffer, 0, length);
 
@@ -78,9 +84,11 @@ char *Base64Decode( char *input, int length)
   bmem = BIO_new_mem_buf(input, length);
   bmem = BIO_push(b64, bmem);
 
-  BIO_read(bmem, buffer, length);
-
+  len = BIO_read(bmem, buffer, length);
+  printf("length %d\n", len);
   BIO_free_all(bmem);
-
-  return buffer;
+  memcpy(output, buffer, len);
+  output[len] = '\0';
+  free(buffer);
+  return len;
 }
