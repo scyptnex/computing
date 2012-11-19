@@ -17,6 +17,7 @@ class PassCode
 		PassCode();
 		PassCode(const unsigned char* password);
 		~PassCode();
+		BIO* getCipher(bool enc);
 		void describe();
 	protected:
 	private:
@@ -28,8 +29,7 @@ class PassCode
 		void init();
 };
 
+std::string recode(std::string input, bool enc);
 std::string passcode(std::string input, char* pass, bool enc);
-
-BIO* passCipher(char* pass, bool enc);
 
 #endif //_SECURE_HH_

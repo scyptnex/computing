@@ -28,9 +28,6 @@ void PassCode::init(){
 	key = new unsigned char[keyLength];
 	iv = new unsigned char[ivLength];
 	EVP_BytesToKey(cipher,DIGEST, NULL, pass, strlen((char*)pass), 1, key, iv);
-	printf("key: ");
-	for (i=0; i<keyLength; i++) printf("%02X",key[i]);
-	printf("\n");
 }
 
 PassCode::PassCode() :
@@ -56,10 +53,9 @@ void PassCode::describe(){
 	cout << keyLength << " and " << ivLength << endl;
 }
 
-BIO* passCipher(char* pass, bool enc){
+BIO* PassCode::getCipher(bool enc){
 	BIO* ret = BIO_new(BIO_f_cipher());
-	const EVP_CIPHER* cipher = CIPHER;
-	//EVP_BytesToKey(cipher,dgst, sptr, (unsigned char *)str, strlen(str), 1, key, iv);
+	BIO_set_cipher(ret, cipher, key, iv, (enc ? 1 : 0));
 	return ret;
 }
 
