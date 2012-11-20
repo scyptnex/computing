@@ -19,6 +19,8 @@ class PassCode
 		~PassCode();
 		BIO* getCipher(bool enc);
 		void describe();
+		std::string codeString(std::string input, bool enc);
+		bool codeFile(std::string in, bool enc);
 	protected:
 	private:
 		size_t keyLength, ivLength;
@@ -28,8 +30,5 @@ class PassCode
 		unsigned char* iv;
 		void init();
 };
-
-std::string recode(std::string input, bool enc);
-std::string passcode(std::string input, char* pass, bool enc);
 
 #endif //_SECURE_HH_

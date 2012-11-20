@@ -17,7 +17,7 @@
 
 #include "secure.hh"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE (8*1024)
 
 using namespace std;
 
@@ -59,39 +59,60 @@ BIO* PassCode::getCipher(bool enc){
 	return ret;
 }
 
-string recode(string input, bool enc){
-	for(int i=0; i<input.length(); i++){
+void recode(string* input, bool enc){
+	for(int i=0; i<input->length(); i++){
 		if(enc){
-			if(input[i] == '=') input[i] = '.';
-			else if(input[i] == '/') input[i] = '_';
-			else if(input[i] == '+') input[i] = '-';
+			if((*input)[i] == '=') (*input)[i] = '.';
+			else if((*input)[i] == '/') (*input)[i] = '_';
+			else if((*input)[i] == '+') (*input)[i] = '-';
 		}
 		else{
-			if(input[i] == '.') input[i] = '=';
-			else if(input[i] == '_') input[i] = '/';
-			else if(input[i] == '-') input[i] = '+';
+			if((*input)[i] == '.') (*input)[i] = '=';
+			else if((*input)[i] == '_') (*input)[i] = '/';
+			else if((*input)[i] == '-') (*input)[i] = '+';
 		}
 	}
-	return input;
 }
 
-string passcode(string input,char* pass, bool enc){
+bool PassCode::codeFile(string in, bool enc){
+	BIO *bin, *bout, *benc;
+	int readin;
+	unsigned char buffer[BUFFER_SIZE];
+	string out = codeString(in, enc);
+	bin = BIO_new(BIO_s_file());
+	bout = BIO_new(BIO_s_file());
+	benc = getCipher(enc);
+	if (BIO_read_filename(bin, (char*)in.c_str()) <= 0) return false;
+	if (BIO_write_filename(bout, (char*)out.c_str()) <= 0) return false;
+	bout = BIO_push(benc,bout);
+	while(true){
+		readin = BIO_read(bin, buffer, BUFFER_SIZE);
+		if(readin <= 0){
+			BIO_flush(bout);
+			break;
+		}
+		BIO_write(bout, buffer, readin);
+	}
+	BIO_free_all(bin);
+	BIO_free_all(bout);
+	return true;
+}
+
+string PassCode::codeString(string input, bool enc){
 	BIO *bin, *b64, *benc, *bout;
 	BUF_MEM *bptr;
 	int readin, amt=1;
 	unsigned char buffer[BUFFER_SIZE];
 	if(!enc){
-		input = recode(input, enc);
+		recode(&input, enc);
 		input.append("\n");
 		amt=0;
 	}
 	//make the BIOs
-	//cout << "make bios: " << input << " : " << input.length() << endl;
 	bin = BIO_new_mem_buf((char*)input.c_str(), input.length());
 	b64 = BIO_new(BIO_f_base64());
 	bout = BIO_new(BIO_s_mem());
 	//push b64 onto in when decrupting and out when decrypting
-	//cout << "push bios\n";
 	if(enc){
 		bout=BIO_push(b64,bout);
 	}
@@ -99,24 +120,23 @@ string passcode(string input,char* pass, bool enc){
 		bin=BIO_push(b64,bin);
 	}
 	//push enc onto out always
+	benc = getCipher(enc);
+	bout = BIO_push(benc, bout);
 	//stream the BIOs
-	//cout << "stream bios\n";
-	readin = BIO_read(bin, buffer, input.length());
-	//cout << "read " << readin << endl;
-	//for(int i=0; i<readin; i++){
-	//	cout << buffer[i];
-	//}
-	//cout << endl;
-	BIO_write(bout, buffer, readin);
-	BIO_flush(bout);
+	while(true){
+		readin = BIO_read(bin, buffer, input.length());
+		if(readin <= 0){
+			BIO_flush(bout);
+			break;
+		}
+		BIO_write(bout, buffer, readin);
+	}
 	//clean up
-	//cout << "clean bios\n";
 	BIO_get_mem_ptr(bout, &bptr);
 	string ret(bptr->data, bptr->length-amt);
 	BIO_free_all(bin);
 	BIO_free_all(bout);
-	//cout << "recode " << ret << endl;
-	if(enc) ret = recode(ret, enc);
+	if(enc) recode(&ret, enc);
 	return ret;
 }
 
