@@ -74,28 +74,40 @@ void recode(string* input, bool enc){
 	}
 }
 
-bool PassCode::codeFile(string in, bool enc){
+string PassCode::codeFile(string in, bool enc){
 	BIO *bin, *bout, *benc;
 	int readin;
 	unsigned char buffer[BUFFER_SIZE];
+	bool writing = true;
 	string out = codeString(in, enc);
 	bin = BIO_new(BIO_s_file());
 	bout = BIO_new(BIO_s_file());
 	benc = getCipher(enc);
-	if (BIO_read_filename(bin, (char*)in.c_str()) <= 0) return false;
-	if (BIO_write_filename(bout, (char*)out.c_str()) <= 0) return false;
+	if (BIO_read_filename(bin, (char*)in.c_str()) <= 0){
+		cerr << "File not found" << endl;
+		writing = false;
+	}
+	if (BIO_write_filename(bout, (char*)out.c_str()) <= 0){
+		cerr << "Cannot write file" << endl;
+		writing = false;
+	}
 	bout = BIO_push(benc,bout);
-	while(true){
-		readin = BIO_read(bin, buffer, BUFFER_SIZE);
-		if(readin <= 0){
-			BIO_flush(bout);
-			break;
+	if(writing){
+		while(true){
+			readin = BIO_read(bin, buffer, BUFFER_SIZE);
+			if(readin <= 0){
+				BIO_flush(bout);
+				break;
+			}
+			BIO_write(bout, buffer, readin);
 		}
-		BIO_write(bout, buffer, readin);
 	}
 	BIO_free_all(bin);
 	BIO_free_all(bout);
-	return true;
+	if(writing){
+		return out;
+	}
+	return string();
 }
 
 string PassCode::codeString(string input, bool enc){
@@ -126,16 +138,20 @@ string PassCode::codeString(string input, bool enc){
 	while(true){
 		readin = BIO_read(bin, buffer, input.length());
 		if(readin <= 0){
-			BIO_flush(bout);
 			break;
 		}
 		BIO_write(bout, buffer, readin);
 	}
+	bool success = BIO_flush(bout);
 	//clean up
 	BIO_get_mem_ptr(bout, &bptr);
 	string ret(bptr->data, bptr->length-amt);
 	BIO_free_all(bin);
 	BIO_free_all(bout);
+	if(!success){
+		cerr << "Decryption failure" << endl;
+		return string();
+	}
 	if(enc) recode(&ret, enc);
 	return ret;
 }

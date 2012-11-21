@@ -20,7 +20,7 @@ class PassCode
 		BIO* getCipher(bool enc);
 		void describe();
 		std::string codeString(std::string input, bool enc);
-		bool codeFile(std::string in, bool enc);
+		std::string codeFile(std::string in, bool enc);
 	protected:
 	private:
 		size_t keyLength, ivLength;
