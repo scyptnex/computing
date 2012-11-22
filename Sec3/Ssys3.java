@@ -32,7 +32,7 @@ public class Ssys3 {
 		}
 	}
 	
-	public Ssys3(String[] storeDirs, boolean usePlayer, String sslX, String playX){
+	public Ssys3(String[] storeDirs, String sslX, String playX){
 		for(int i=0; i<storeDirs.length; i++){
 			File sd = new File(storeDirs[i]);
 			if(!sd.exists()) sd.mkdirs();
