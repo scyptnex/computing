@@ -5,6 +5,7 @@ public class OpenSSLCommander extends Secureify {
 	
 	private final String sslCommand;
 	private final char[] password;
+	private final byte[] passwordBytes;
 	private final boolean salting;
 	private final String algorithm;
 	
@@ -20,6 +21,7 @@ public class OpenSSLCommander extends Secureify {
 	
 	private OpenSSLCommander(char[] pass, String openSSLCom, boolean salt, String algo){
 		password = pass;
+		passwordBytes = new String(pass).getBytes();
 		sslCommand = openSSLCom;
 		algorithm = algo;
 		salting = salt;
@@ -27,31 +29,66 @@ public class OpenSSLCommander extends Secureify {
 
 	@Override
 	public boolean check(File checkFile) {
-		// TODO Auto-generated method stub
-		return false;
+		return encryptString(checkFile.getName(), false) != null;
 	}
 
 	@Override
-	public File encryptFile(File in, boolean encrypt) {
-		// TODO Auto-generated method stub
-		return null;
+	public File encryptFile(File in, File store, boolean encrypt) {
+		if(!store.exists() || !in.exists() || !store.isDirectory() || in.isDirectory()) return null;
+		String outName = encryptString(in.getName(), encrypt);
+		if(outName == null) return null;
+		File out = new File(store, outName);
+		String command = sslCommand + " enc -" + algorithm + " -a -in " + in.getAbsolutePath() + " -out " + out.getAbsolutePath();
+		if(!salting) command += " -nosalt";
+		if(!encrypt) command += " -d";
+		try {
+			Process p = Runtime.getRuntime().exec(command);
+			auth(p.getOutputStream(), encrypt);
+			p.getOutputStream().close();
+			boolean success = checkSuccess(p.getErrorStream(), encrypt);
+			p.waitFor();
+			return (success ? out : null);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	private void auth(OutputStream os, boolean encrypt) throws IOException{
+		//password, return, (password, return)
+		os.write(passwordBytes);
+		os.write("\n".getBytes());
+		if(encrypt){
+			os.write(passwordBytes);
+			os.write("\n".getBytes());
+		}
+	}
+	
+	private boolean checkSuccess(InputStream err, boolean encrypt) throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(err));
+		br.readLine();
+		if(encrypt) br.readLine();
+		return (br.readLine() == null);
 	}
 
 	@Override
 	public String encryptString(String in, boolean encrypt) {
-		String command = sslCommand + " enc -" + algorithm + " -k " + new String(password) + " -a";
+		String command = sslCommand + " enc -" + algorithm + " -a";
 		if(!salting) command += " -nosalt";
 		if(!encrypt){
 			command += " -d";
-			in = in.replaceAll("\\.", "=").replaceAll("-", "+");
-			in.replaceAll("-", "+");
-			in.replaceAll("-", "+");
+			in = in.replaceAll("\\.", "=").replaceAll("-", "+").replaceAll("_", "/");
 		}
 		try {
 			Process p = Runtime.getRuntime().exec(command);
+			auth(p.getOutputStream(), encrypt);
 			p.getOutputStream().write(in.getBytes());
 			if(!encrypt) p.getOutputStream().write("\n".getBytes());
 			p.getOutputStream().close();
+			
 			byte[] buff = new byte[2048];
 			int rd = 0;
 			while(true){
@@ -61,10 +98,15 @@ public class OpenSSLCommander extends Secureify {
 			}
 			String ret = new String(buff, 0, rd-(encrypt ? 1 : 0));
 			if(encrypt){
-				
+				ret = ret.replaceAll("=", ".").replaceAll("\\+", "-").replaceAll("/", "_");
 			}
-			return ret;
+			boolean success = checkSuccess(p.getErrorStream(), encrypt);
+			p.waitFor();
+			return (success ? ret : null);
 		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return null;
 		}
