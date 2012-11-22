@@ -19,7 +19,6 @@ public class RIncr {
 		x.sub = i;
 		x.range = RANGE;
 		x.incr = 7;
-		//primitiveRoot(new BigInteger("100"));
 		Modulo m = new Modulo(RANGE);
 		printSwaps(m, RANGE);
 	}
@@ -102,8 +101,13 @@ public class RIncr {
 		return(Math.min(incr - lp, lp));
 	}
 	
+	public static int efficientPrimitiveRoot(int n){
+		return n;
+	}
+	
 	public static BigInteger primitiveRoot(BigInteger n){
 		ArrayList<BigInteger> cps = coprimes(n);
+		System.out.println(cps.size() + " - " + coprimes(new BigInteger(cps.size()+"")).size());
 		ArrayList<BigInteger> primRoots = new ArrayList<BigInteger>();
 		BigInteger modul = new BigInteger(n + "");
 		//System.out.println(n);
@@ -118,7 +122,7 @@ public class RIncr {
 			//System.out.println("  -  " + modres.size());
 			if(modres.size() == cps.size()) primRoots.add(i);
 		}
-		//System.out.println("  " + primRoots.size());
+		System.out.println("  " + primRoots.size());
 		if(primRoots.size() == 0) return null;
 		return primRoots.get(primRoots.size()-1);
 	}
