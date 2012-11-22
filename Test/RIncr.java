@@ -1,4 +1,5 @@
 import java.util.*;
+import java.math.BigInteger;
 
 public class RIncr {
 	
@@ -18,7 +19,9 @@ public class RIncr {
 		x.sub = i;
 		x.range = RANGE;
 		x.incr = 7;
-		printSwaps(x, RANGE);
+		//primitiveRoot(new BigInteger("100"));
+		Modulo m = new Modulo(RANGE);
+		printSwaps(m, RANGE);
 	}
 	
 	public void printSwaps(ItoI swap, int range){
@@ -41,6 +44,25 @@ public class RIncr {
 	
 	public abstract class ItoI{
 		public abstract int get(int in);
+	}
+	
+	public class Modulo extends ItoI{
+		BigInteger a, m;
+		public Modulo(int range){
+			BigInteger tmp = new BigInteger((range-1) + "");
+			BigInteger prim = null;
+			while(prim == null){
+				tmp = tmp.add(BigInteger.ONE);
+				prim = primitiveRoot(tmp);
+			}
+			a = prim;
+			m = tmp;
+			System.out.println("mod " + a + ", " + m);
+		}
+		public int get(int idx){
+			BigInteger modpow = a.modPow(new BigInteger((idx+2) + ""), m);
+			return Integer.parseInt(modpow.toString());
+		}
 	}
 	
 	public class DRI extends ItoI{
@@ -78,6 +100,35 @@ public class RIncr {
 		if(gcd != 1) return -1;
 		int lp = rng%incr;
 		return(Math.min(incr - lp, lp));
+	}
+	
+	public static BigInteger primitiveRoot(BigInteger n){
+		ArrayList<BigInteger> cps = coprimes(n);
+		ArrayList<BigInteger> primRoots = new ArrayList<BigInteger>();
+		BigInteger modul = new BigInteger(n + "");
+		//System.out.println(n);
+		for(BigInteger i : cps){
+			//System.out.print("    " + i + "   ");
+			Set<BigInteger> modres = new HashSet<BigInteger>();
+			for(int pow=0; pow < cps.size(); pow++){
+				BigInteger res = i.modPow(new BigInteger(pow + ""), modul);
+				//System.out.print(" " + res);
+				modres.add(res);
+			}
+			//System.out.println("  -  " + modres.size());
+			if(modres.size() == cps.size()) primRoots.add(i);
+		}
+		//System.out.println("  " + primRoots.size());
+		if(primRoots.size() == 0) return null;
+		return primRoots.get(primRoots.size()-1);
+	}
+	
+	public static ArrayList<BigInteger> coprimes(BigInteger val){
+		ArrayList<BigInteger> coprimes = new ArrayList<BigInteger>();
+		for(BigInteger i = BigInteger.ZERO; i.compareTo(val) < 0; i = i.add(BigInteger.ONE)){
+			if(val.gcd(i).equals(BigInteger.ONE)) coprimes.add(i);
+		}
+		return coprimes;
 	}
 	
 	public static void listPrimes(){

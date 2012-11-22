@@ -10,8 +10,26 @@ public class Ssys3 {
 	Secureify sec;
 	
 	public static void main(String[] args){
-		Configure cfg = Configure.getConfig(CONF_FILE, CONF_OPTS, CONF_DEFAULTS);
-		if(cfg != null) new Ssys3(cfg.values[0].split(";"), cfg.values[2].equalsIgnoreCase("true"), cfg.values[1], cfg.values[3]);
+		//Configure cfg = Configure.getConfig(CONF_FILE, CONF_OPTS, CONF_DEFAULTS);
+		//if(cfg != null) new Ssys3(cfg.values[0].split(";"), cfg.values[2].equalsIgnoreCase("true"), cfg.values[1], cfg.values[3]);
+		String osslLoc = null;
+		String playerLoc = null;
+		ArrayList<String> stores = new ArrayList<String>();
+		if(CONF_FILE.exists()){
+			try{
+				Scanner sca = new Scanner(CONF_FILE);
+				osslLoc = sca.nextLine();
+				playerLoc = sca.nextLine();
+				while(sca.hasNextLine()) stores.add(sca.nextLine());
+				sca.close();
+			}
+			catch(IOException e){
+				
+			}
+		}
+		if(osslLoc == null || stores.size() == 0){
+			
+		}
 	}
 	
 	public Ssys3(String[] storeDirs, boolean usePlayer, String sslX, String playX){

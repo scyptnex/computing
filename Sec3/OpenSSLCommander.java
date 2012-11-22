@@ -38,7 +38,7 @@ public class OpenSSLCommander extends Secureify {
 		String outName = encryptString(in.getName(), encrypt);
 		if(outName == null) return null;
 		File out = new File(store, outName);
-		String command = sslCommand + " enc -" + algorithm + " -a -in " + in.getAbsolutePath() + " -out " + out.getAbsolutePath();
+		String command = sslCommand + " enc -" + algorithm + " -a -in \"" + in.getAbsolutePath() + "\" -out \"" + out.getAbsolutePath() + "\"";
 		if(!salting) command += " -nosalt";
 		if(!encrypt) command += " -d";
 		try {
