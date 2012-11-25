@@ -1,11 +1,27 @@
 import java.util.*;
 import java.io.*;
+import java.awt.*;
+import javax.swing.*;
 
 public class Ssys3 {
 	
 	public static final File CONF_FILE = new File("ssys3.cfg");
 	public static final String[] CONF_OPTS = {"secure_directories", "openssl_executable", "use_player", "player_executable"};
 	public static final String[] CONF_DEFAULTS = {"store", null, "false", "vlc"};
+	
+	/**
+	 * GUI
+	 */
+	private JFrame frm;
+	private Container c;
+	private JTable tblItems;
+	private JButton btnImport;
+	private JButton btnMove;
+	private JButton btnDelete;
+	private JPasswordField pswPass;
+	private JTextArea txaStatus;
+	private JTextArea txaSearch;
+	private JTextArea txaInfo;
 	
 	Secureify sec;
 	
@@ -28,25 +44,44 @@ public class Ssys3 {
 			}
 		}
 		if(osslLoc == null || stores.size() == 0){
-			
+			//TODO io default methods
+			osslLoc = "openssl";
+			playerLoc = "vlc";
+			stores.add("store");
+			//TODO write initial config file
 		}
+		new Ssys3(stores.toArray(new String[0]), osslLoc, playerLoc);
 	}
 	
 	public Ssys3(String[] storeDirs, String sslX, String playX){
+		makeGUI();
+		frm.setSize(800, 600);
+		frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frm.setVisible(true);
 		for(int i=0; i<storeDirs.length; i++){
 			File sd = new File(storeDirs[i]);
 			if(!sd.exists()) sd.mkdirs();
 		}
-		sec = OpenSSLCommander.getCommander(null, "hi".toCharArray(), sslX);
-		/**for(int i=0; i<1; i++){
-			String wrd = i + "";
-			String enc = sec.encryptString(wrd, true);
-			String dec = sec.encryptString(enc, false);
-			System.out.println(wrd + " -> " + enc + " -> " + dec);
-		}**/
-		File encry = sec.encryptFile(new File("test.txt"), new File("."), true);
-		System.out.println(encry.getAbsolutePath());
-		File decry = sec.encryptFile(encry, new File(storeDirs[0]), false);
+		//TODO sec = OpenSSLCommander.getCommander(null, "hi".toCharArray(), sslX);
+	}
+	
+	public void makeGUI(){
+		frm = new JFrame();
+		c = frm.getContentPane();
+		
+		btnImport = new JButton("Import");
+		btnMove = new JButton("Move");
+		btnDelete = new JButton("Delete");
+		
+		tblItems = new JTable();
+		
+		pswPass = new JPasswordField();
+		
+		JPanel pnlTop = new JPanel(new GridLayout());
+		JPanel pnlEast = new JPanel(new BorderLayout());
+		JPanel pnlCenterEast = new JPanel(new GridLayout());
+		
+		frm.setContentPane(c);
 	}
 	
 }
