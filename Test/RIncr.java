@@ -28,17 +28,22 @@ public class RIncr {
 		Set<Integer> available = new HashSet<Integer>();
 		for(int i=0; i<range; i++) available.add(i);
 		for(int i=0; i<range; i++){
-			if(!taken.contains(i) && available.contains(i)){
-				System.out.println(i + "\t" + swap.get(i));
+			int sw = swap.get(i);
+			if(!taken.contains(sw) && available.contains(sw)){
+				System.out.println(i + "\t" + sw);
 			}
 			else{
-				System.err.println(i + "\t to " + swap.get(i) + " TAKEN");
+				System.err.println(i + "\t to " + sw + " TAKEN");
 			}
-			taken.add(i);
-			available.remove(i);
+			taken.add(sw);
+			available.remove(sw);
 		}
 		if(available.size() == 0) System.out.println("All numbers accounted for");
-		else System.err.println("Numbers missing");
+		else{
+			System.err.print("Numbers missing: ");
+			for(int av : available) System.err.print(av + ", ");
+			System.err.println();
+		}
 	}
 	
 	public abstract class ItoI{
