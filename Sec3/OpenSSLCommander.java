@@ -33,11 +33,8 @@ public class OpenSSLCommander extends Secureify {
 	}
 
 	@Override
-	public File encryptFile(File in, File store, boolean encrypt) {
-		if(!store.exists() || !in.exists() || !store.isDirectory() || in.isDirectory()) return null;
-		String outName = encryptString(in.getName(), encrypt);
-		if(outName == null) return null;
-		File out = new File(store, outName);
+	public File encryptSpecialFile(File in, File out, boolean encrypt) {
+	//	File out = new File(store, outName);
 		String command = sslCommand + " enc -" + algorithm + " -a -in \"" + in.getAbsolutePath() + "\" -out \"" + out.getAbsolutePath() + "\"";
 		if(!salting) command += " -nosalt";
 		if(!encrypt) command += " -d";

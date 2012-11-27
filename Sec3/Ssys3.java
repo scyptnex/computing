@@ -8,6 +8,7 @@ import javax.swing.table.*;
 
 public class Ssys3 {
 	
+	public static final String LIBRARY_NAME = "zzlib.dat";
 	public static final File CONF_FILE = new File("ssys3.cfg");
 	public static final String[] CONF_OPTS = {"secure_directories", "openssl_executable", "use_player", "player_executable"};
 	public static final String[] CONF_DEFAULTS = {"store", null, "false", "vlc"};
@@ -21,17 +22,18 @@ public class Ssys3 {
 	private JButton btnImport;
 	private JButton btnMove;
 	private JButton btnDelete;
-	private JPasswordField pswPass;
 	private JTextArea txaStatus;
 	private JTextArea txaSearch;
 	private JTextArea txaInfo;
+	
+	private ArrayList<File> storeLocs;
 	
 	public final Secureify sec;
 	public final Storage store;
 	public final TableRowSorter<Storage> tableSorter;
 	
 	public static void main(String[] args){
-		//Configure cfg = Configure.getConfig(CONF_FILE, CONF_OPTS, CONF_DEFAULTS);
+		/**Configure cfg = Configure.getConfig(CONF_FILE, CONF_OPTS, CONF_DEFAULTS);
 		//if(cfg != null) new Ssys3(cfg.values[0].split(";"), cfg.values[2].equalsIgnoreCase("true"), cfg.values[1], cfg.values[3]);
 		String osslLoc = null;
 		String playerLoc = null;
@@ -52,26 +54,40 @@ public class Ssys3 {
 			//TODO io default methods
 			osslLoc = "openssl";
 			playerLoc = "vlc";
-			stores.add("store");
+			stores.add(new File("store").getAbsolutePath());
 			//TODO write initial config file
-		}
-		new Ssys3(stores.toArray(new String[0]), osslLoc, playerLoc);
+		}**/
+		new Ssys3();
 	}
 	
-	public Ssys3(String[] storeDirs, String sslX, String playX){
+	public Ssys3(){
 		//TODO sec = OpenSSLCommander.getCommander(null, "hi".toCharArray(), sslX);
-		sec = null;
 		store = new Storage();
-		store.testFill();
 		tableSorter = new TableRowSorter<Storage>(store);
+		
 		makeGUI();
 		frm.setSize(800, 600);
 		frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frm.setVisible(true);
-		for(int i=0; i<storeDirs.length; i++){
-			File sd = new File(storeDirs[i]);
-			if(!sd.exists()) sd.mkdirs();
+		//lockGUI();
+		
+		storeLocs = new ArrayList<File>();
+		String ossl = "openssl";
+		storeLocs.add(new File("store"));
+		
+		File chk = null;
+		ArrayList<File> libraries = new ArrayList<File>();
+		for(File fi : storeLocs){
+			File lib = new File(fi, LIBRARY_NAME);
+			if(lib.exists()){
+				System.out.println("library at " + lib.getAbsolutePath());
+				chk = lib;
+				libraries.add(lib);
+			}
 		}
+		//TODO if no libraries, ask for new pass
+		char[] pss = "hi".toCharArray();
+		sec = OpenSSLCommander.getCommander(chk, pss, ossl);
 	}
 	
 	public void makeGUI(){
@@ -86,9 +102,6 @@ public class Ssys3 {
 		tblItems.setRowSorter(tableSorter);
 		tblItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tblItems.setFillsViewportHeight(true);
-		
-		pswPass = new JPasswordField(20);
-		pswPass.setBorder(BorderFactory.createTitledBorder("Password"));
 		
 		txaStatus = new JTextArea();
 		txaStatus.setEditable(false);
@@ -119,7 +132,7 @@ public class Ssys3 {
 		pnlCenterEast.add(txaStatus);
 		pnlCenterEast.add(txaSearch);
 		pnlCenterEast.add(txaInfo);
-		pnlEast.add(pswPass, BorderLayout.NORTH);
+		//pnlEast.add(pswPass, BorderLayout.NORTH);
 		pnlEast.add(pnlCenterEast, BorderLayout.CENTER);
 		c.setLayout(new BorderLayout());
 		c.add(pnlTop, BorderLayout.NORTH);
@@ -187,6 +200,18 @@ public class Ssys3 {
 		}
 		
 		tableSorter.setRowFilter(omniFilter);
+	}
+	
+	public char[] jetPass(){
+		JPasswordField psf = new JPasswordField();
+		psf.grabFocus();
+		int opt = JOptionPane.showConfirmDialog(frm, psf, "Password", JOptionPane.PLAIN_MESSAGE);
+		if(opt == JOptionPane.OK_OPTION) return psf.getPassword();
+		return null;
+	}
+	
+	public String jetString(String msg, String ttl){
+		return JOptionPane.showInputDialog(frm, msg, ttl, JOptionPane.QUESTION_MESSAGE);
 	}
 	
 }

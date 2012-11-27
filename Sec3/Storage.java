@@ -1,4 +1,5 @@
 import java.util.*;
+import java.io.*;
 import javax.swing.table.*;
 
 public class Storage extends AbstractTableModel{
@@ -13,6 +14,7 @@ public class Storage extends AbstractTableModel{
 	private ArrayList<String> dates;
 	private ArrayList<Long> sizes;//kilobytes
 	private ArrayList<String> tags;
+	private ArrayList<Integer> storeOrigs;
 	
 	public Storage(){
 		cypNames = new ArrayList<String>();
@@ -20,19 +22,20 @@ public class Storage extends AbstractTableModel{
 		dates = new ArrayList<String>();
 		sizes = new ArrayList<Long>();
 		tags = new ArrayList<String>();
+		storeOrigs = new ArrayList<Integer>();
+	}
+	
+	public void add(String cname, String pname, String d, Long s, String t, int o){
+		cypNames.add(cname);
+		plainNames.add(pname);
+		dates.add(d);
+		sizes.add(s);
+		tags.add(t);
+		storeOrigs.add(o);
 	}
 	
 	public void testFill(){
-		cypNames.add("sd9csbdc7");
-		cypNames.add("sd9dfk");
-		plainNames.add("aa");
-		plainNames.add("bbbb");
-		dates.add("2010-11-07");
-		dates.add("2008-03-21");
-		sizes.add((long)324875);
-		sizes.add((long)934785);
-		tags.add("a b c");
-		tags.add("b a d");
+		//do nothing
 	}
 
 	@Override
