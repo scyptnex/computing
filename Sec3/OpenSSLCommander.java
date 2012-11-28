@@ -38,6 +38,7 @@ public class OpenSSLCommander extends Secureify {
 		String command = sslCommand + " enc -" + algorithm + " -a -in \"" + in.getAbsolutePath() + "\" -out \"" + out.getAbsolutePath() + "\"";
 		if(!salting) command += " -nosalt";
 		if(!encrypt) command += " -d";
+		System.out.println(command);
 		try {
 			Process p = Runtime.getRuntime().exec(command);
 			auth(p.getOutputStream(), encrypt);
@@ -68,7 +69,9 @@ public class OpenSSLCommander extends Secureify {
 		BufferedReader br = new BufferedReader(new InputStreamReader(err));
 		br.readLine();
 		if(encrypt) br.readLine();
-		return (br.readLine() == null);
+		String ln = br.readLine();
+		System.out.println(ln);
+		return (ln == null);
 	}
 
 	@Override

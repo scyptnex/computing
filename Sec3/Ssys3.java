@@ -27,67 +27,89 @@ public class Ssys3 {
 	private JTextArea txaInfo;
 	
 	private ArrayList<File> storeLocs;
+	private final File tempLoc;
 	
 	public final Secureify sec;
 	public final Storage store;
 	public final TableRowSorter<Storage> tableSorter;
 	
 	public static void main(String[] args){
-		/**Configure cfg = Configure.getConfig(CONF_FILE, CONF_OPTS, CONF_DEFAULTS);
-		//if(cfg != null) new Ssys3(cfg.values[0].split(";"), cfg.values[2].equalsIgnoreCase("true"), cfg.values[1], cfg.values[3]);
-		String osslLoc = null;
-		String playerLoc = null;
-		ArrayList<String> stores = new ArrayList<String>();
-		if(CONF_FILE.exists()){
-			try{
-				Scanner sca = new Scanner(CONF_FILE);
-				osslLoc = sca.nextLine();
-				playerLoc = sca.nextLine();
-				while(sca.hasNextLine()) stores.add(sca.nextLine());
-				sca.close();
-			}
-			catch(IOException e){
-				
-			}
-		}
-		if(osslLoc == null || stores.size() == 0){
-			//TODO io default methods
-			osslLoc = "openssl";
-			playerLoc = "vlc";
-			stores.add(new File("store").getAbsolutePath());
-			//TODO write initial config file
-		}**/
 		new Ssys3();
 	}
 	
 	public Ssys3(){
-		//TODO sec = OpenSSLCommander.getCommander(null, "hi".toCharArray(), sslX);
 		store = new Storage();
 		tableSorter = new TableRowSorter<Storage>(store);
+		tempLoc = new File("temp");
+		if(!tempLoc.exists()) tempLoc.mkdirs();
 		
 		makeGUI();
 		frm.setSize(800, 600);
-		frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frm.addWindowListener(new WindowListener(){
+			public void windowActivated(WindowEvent evt) {}
+			public void windowClosed(WindowEvent evt) {
+				try {
+					store.saveAll(storeLocs, tempLoc, sec);
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\nFailed to save properly\n\n!!!!!!!!!!!!!!!!!!!!!!!!!");
+					System.exit(1);
+				}
+				System.exit(0);
+			}
+			public void windowClosing(WindowEvent evt) {
+				windowClosed(evt);
+			}
+			public void windowDeactivated(WindowEvent evt) {}
+			public void windowDeiconified(WindowEvent evt) {}
+			public void windowIconified(WindowEvent evt) {}
+			public void windowOpened(WindowEvent evt) {}
+		});
 		frm.setVisible(true);
 		//lockGUI();
 		
+		//TODO load config
 		storeLocs = new ArrayList<File>();
 		String ossl = "openssl";
 		storeLocs.add(new File("store"));
 		
 		File chk = null;
-		ArrayList<File> libraries = new ArrayList<File>();
 		for(File fi : storeLocs){
 			File lib = new File(fi, LIBRARY_NAME);
 			if(lib.exists()){
-				System.out.println("library at " + lib.getAbsolutePath());
 				chk = lib;
-				libraries.add(lib);
+				break;
 			}
 		}
 		//TODO if no libraries, ask for new pass
 		char[] pss = "hi".toCharArray();
 		sec = OpenSSLCommander.getCommander(chk, pss, ossl);
+		if(sec == null){
+			System.err.println("Wrong Password");
+			System.exit(1);
+		}
+		
+		//load stores
+		try {
+			store.loadAll(storeLocs, tempLoc, sec);
+		} catch (IOException e) {
+			System.err.println("Storage loading failure");
+			System.exit(1);
+		}
+		/**int idx = 0;
+		for(File str : storeLocs){
+			if(!str.exists()) str.mkdirs();
+			else{
+				File lib = new File(str, LIBRARY_NAME);
+				if(lib.exists()) loadLib(lib, store, idx);
+			}
+			idx++;
+		}**/
+	}
+	
+	public void loadLib(File lib, Storage store, int idx){
+		//TODO load library
+		store.add(lib.getName(), lib.getAbsolutePath(), "2012-11-28", (long)0, sec.encryptString(lib.getAbsolutePath(), true), idx);
 	}
 	
 	public void makeGUI(){
