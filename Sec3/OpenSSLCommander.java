@@ -67,6 +67,7 @@ public class OpenSSLCommander extends Secureify {
 	
 	private boolean checkSuccess(InputStream err, boolean encrypt) throws IOException{
 		BufferedReader br = new BufferedReader(new InputStreamReader(err));
+		//TODO output all lines
 		br.readLine();
 		if(encrypt) br.readLine();
 		String ln = br.readLine();
