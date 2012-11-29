@@ -4,13 +4,12 @@ import javax.swing.table.*;
 
 public class Storage extends AbstractTableModel{
 	
+	public static final int DEFAULT_FIELDS = 5;
 	public static final String CRYP_IDENT = "cipher";
 	public static final String PLAIN_IDENT = "plain";
 	public static final String DATE_IDENT = "date";
 	public static final String SIZE_IDENT = "size";
 	public static final String TAG_IDENT = "tag";
-	
-	public static final String STORE_LIST = "zzList.dat";
 	
 	public static final int COL_NAME = 0;
 	public static final int COL_TAGS = 1;
@@ -42,15 +41,55 @@ public class Storage extends AbstractTableModel{
 		storeOrigs.add(o);
 	}
 	
+	public void loadLib(File libFile, int loc) throws IOException{
+		Scanner sca = new Scanner(libFile);
+		boolean header = true;
+		int stage = 0;
+		
+		String[] fields = new String[DEFAULT_FIELDS];
+		
+		while(sca.hasNextLine()){
+			String ln = sca.nextLine();
+			if(header){
+				if(ln.length() == 0){//skip line
+					header = false;
+				}
+				else{
+					//maybe when not lazy
+				}
+			}
+			else{
+				fields[stage] = ln;
+				stage++;
+				if(stage >= DEFAULT_FIELDS){
+					add(fields[0], fields[1], fields[2], Long.parseLong(fields[3]), fields[4], loc);
+					stage = 0;
+				}
+			}
+		}
+		sca.close();
+	}
+	
 	public void loadAll(ArrayList<File> stores, File tmp, Secureify sec) throws IOException{
-		//TODO this whole damn thing
+		ArrayList<File> tmpFiles = getTmpFiles(stores, tmp);
+		for(int i=0; i<stores.size(); i++){
+			if(!stores.get(i).exists()) stores.get(i).mkdirs();
+			else{
+				File lib = new File(stores.get(i), Ssys3.LIBRARY_NAME);
+				if(lib.exists()){
+					sec.encryptSpecialFile(lib, tmpFiles.get(i), false);
+					loadLib(tmpFiles.get(i), i);
+					add(lib.getName(), tmpFiles.get(i).getName(), curDate(), (long)stores.get(i).list().length, "some tag", i);
+				}
+			}
+		}
 	}
 	
 	public void saveAll(ArrayList<File> stores, File tmp, Secureify sec) throws IOException{
 		//init
 		ArrayList<File> tmpFiles = getTmpFiles(stores, tmp);
 		ArrayList<PrintWriter> pws = new ArrayList<PrintWriter>();
-		/**for(File fi : tmpFiles) pws.add(new PrintWriter(fi));
+		for(File fi : tmpFiles) pws.add(new PrintWriter(fi));
 		
 		//write the headers
 		for(PrintWriter pw : pws){
@@ -75,10 +114,6 @@ public class Storage extends AbstractTableModel{
 		//close the files
 		for(PrintWriter pw : pws) pw.close();
 		
-		try {
-			Thread.sleep(1000);//HAXX
-		} catch (InterruptedException e) {
-		}**/
 		//encrypt the files
 		for(int i=0; i<stores.size(); i++){
 			File ret = sec.encryptSpecialFile(tmpFiles.get(i), new File(stores.get(i), Ssys3.LIBRARY_NAME), true);
@@ -156,6 +191,12 @@ public class Storage extends AbstractTableModel{
 		else if(col == COL_TAGS){
 			tags.set(row, ((String)value).toLowerCase());
 		}
+	}
+	
+	public static String curDate(){
+		String mon = (Calendar.getInstance().get(Calendar.MONTH)+1) + "";
+		String day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "";
+		return Calendar.getInstance().get(Calendar.YEAR) + "-" + (mon.length() == 1 ? "0" + mon : mon) + "-" + (day.length() == 1 ? "0" + day : day);
 	}
 	
 }

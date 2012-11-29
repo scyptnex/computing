@@ -4,7 +4,7 @@ import java.io.*;
 public class OpenSSLCommander extends Secureify {
 	
 	private final String sslCommand;
-	private final char[] password;
+	//private final char[] password;
 	private final byte[] passwordBytes;
 	private final boolean salting;
 	private final String algorithm;
@@ -20,7 +20,7 @@ public class OpenSSLCommander extends Secureify {
 	}
 	
 	private OpenSSLCommander(char[] pass, String openSSLCom, boolean salt, String algo){
-		password = pass;
+		//password = pass;
 		passwordBytes = new String(pass).getBytes();
 		sslCommand = openSSLCom;
 		algorithm = algo;
@@ -29,16 +29,21 @@ public class OpenSSLCommander extends Secureify {
 
 	@Override
 	public boolean check(File checkFile) {
-		return encryptString(checkFile.getName(), false) != null;
+		File blob = new File("check");
+		File esf = encryptSpecialFile(checkFile, blob, false);
+		boolean ret = true;
+		if(esf == null) ret = false;
+		blob.delete();
+		return ret;
 	}
 
 	@Override
 	public File encryptSpecialFile(File in, File out, boolean encrypt) {
-	//	File out = new File(store, outName);
-		String command = sslCommand + " enc -" + algorithm + " -a -in \"" + in.getAbsolutePath() + "\" -out \"" + out.getAbsolutePath() + "\"";
+		//File out = new File(store, outName);
+		String command = sslCommand + " enc -" + algorithm + " -in " + commandLineFile(in.getAbsolutePath()) + " -out " + commandLineFile(out.getAbsolutePath());
 		if(!salting) command += " -nosalt";
 		if(!encrypt) command += " -d";
-		System.out.println(command);
+		//System.out.println(command);
 		try {
 			Process p = Runtime.getRuntime().exec(command);
 			auth(p.getOutputStream(), encrypt);
@@ -67,11 +72,14 @@ public class OpenSSLCommander extends Secureify {
 	
 	private boolean checkSuccess(InputStream err, boolean encrypt) throws IOException{
 		BufferedReader br = new BufferedReader(new InputStreamReader(err));
-		//TODO output all lines
 		br.readLine();
 		if(encrypt) br.readLine();
 		String ln = br.readLine();
-		System.out.println(ln);
+		//System.out.println(ln);
+		//String lyne = null;
+		//while((lyne = br.readLine()) != null){
+		//	System.out.println(lyne);
+		//}
 		return (ln == null);
 	}
 
@@ -111,6 +119,10 @@ public class OpenSSLCommander extends Secureify {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static String commandLineFile(String abs){
+		return abs;
 	}
 
 }

@@ -55,6 +55,7 @@ public class Ssys3 {
 					System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\nFailed to save properly\n\n!!!!!!!!!!!!!!!!!!!!!!!!!");
 					System.exit(1);
 				}
+				clean();
 				System.exit(0);
 			}
 			public void windowClosing(WindowEvent evt) {
@@ -71,6 +72,7 @@ public class Ssys3 {
 		//TODO load config
 		storeLocs = new ArrayList<File>();
 		String ossl = "openssl";
+		storeLocs.add(new File("store2"));
 		storeLocs.add(new File("store"));
 		
 		File chk = null;
@@ -78,7 +80,7 @@ public class Ssys3 {
 			File lib = new File(fi, LIBRARY_NAME);
 			if(lib.exists()){
 				chk = lib;
-				break;
+				//break;
 			}
 		}
 		//TODO if no libraries, ask for new pass
@@ -128,7 +130,7 @@ public class Ssys3 {
 		txaStatus = new JTextArea();
 		txaStatus.setEditable(false);
 		txaStatus.setBorder(BorderFactory.createTitledBorder("Status"));
-		txaSearch = new JTextArea();
+		txaSearch = new JTextArea(4, 15);
 		txaSearch.setBorder(BorderFactory.createTitledBorder("Search"));
 		txaSearch.addKeyListener(new KeyListener(){
 			public void keyPressed(KeyEvent arg0) {
@@ -222,6 +224,36 @@ public class Ssys3 {
 		}
 		
 		tableSorter.setRowFilter(omniFilter);
+	}
+	
+	public static boolean rmrf(File fi){
+		if(fi.isDirectory()){
+			boolean done = true;
+			for(File subfi : fi.listFiles()){
+				if(!rmrf(subfi)){
+					done = false;
+				}
+			}
+			if(!done) return false;
+			return fi.delete();
+		}
+		else{
+			boolean done = true;
+			for(int i=0; i<10; i++){
+				done = fi.delete();
+				if(done) break;
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					//do nothing
+				}
+			}
+			return done;
+		}
+	}
+	
+	public void clean(){
+		rmrf(tempLoc);
 	}
 	
 	public char[] jetPass(){
