@@ -1,0 +1,9 @@
+#! /bin/sh
+
+dir=
+if [ "$1lol" != "lol" ]
+then
+	dir="$1/*"
+fi
+
+du -sm $dir* | sort -n

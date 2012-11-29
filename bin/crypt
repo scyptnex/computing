@@ -1,0 +1,23 @@
+#! /bin/bash
+
+if [ "lol$1" = "lol" -o ! -f $1 ]
+then
+	echo "File not found:"
+	echo "    crypt <file> [-d]"
+	exit 1
+fi
+
+read -p "Password: " -s pass
+echo
+
+if [ "lol$2" = "lol" ]
+then
+	outname=`echo -n "$1" | openssl enc -aes-256-cbc -k $pass -a -nosalt | sed 's/=/./g' | sed 's/+/-/g' | sed 's/\//_/g'`
+	opt=
+else
+	outname=`echo "$1" | sed 's/_/\//g' | sed 's/-/+/g' | sed 's/\./=/g' | openssl enc -aes-256-cbc -k $pass -a -nosalt -d`
+	opt="-d"
+fi
+
+echo $1 ---> $outname
+openssl enc -aes-256-cbc -k $pass -nosalt $opt -in $1 -out $outname
