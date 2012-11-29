@@ -79,7 +79,6 @@ public class Storage extends AbstractTableModel{
 				if(lib.exists()){
 					sec.encryptSpecialFile(lib, tmpFiles.get(i), false);
 					loadLib(tmpFiles.get(i), i);
-					add(lib.getName(), tmpFiles.get(i).getName(), curDate(), (long)stores.get(i).list().length, "some tag", i);
 				}
 			}
 		}
@@ -186,7 +185,7 @@ public class Storage extends AbstractTableModel{
 	public void setValueAt(Object value, int row, int col) {
 		if(col == COL_NAME){
 			//TODO rename file
-			plainNames.set(row, ((String)value).toLowerCase());
+			plainNames.set(row, (String)value);
 		}
 		else if(col == COL_TAGS){
 			tags.set(row, ((String)value).toLowerCase());

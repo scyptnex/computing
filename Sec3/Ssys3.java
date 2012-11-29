@@ -8,6 +8,9 @@ import javax.swing.table.*;
 
 public class Ssys3 {
 	
+	public static final int TXA_WIDTH = 15;
+	public static final int TXA_HEIGHT = 13;
+	
 	public static final String LIBRARY_NAME = "zzlib.dat";
 	public static final File CONF_FILE = new File("ssys3.cfg");
 	public static final String[] CONF_OPTS = {"secure_directories", "openssl_executable", "use_player", "player_executable"};
@@ -109,6 +112,26 @@ public class Ssys3 {
 		}**/
 	}
 	
+	public void secureImport(){
+		JFileChooser imp = new JFileChooser();
+		imp.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		int ret = imp.showOpenDialog(frm);
+		if(ret != JFileChooser.APPROVE_OPTION){
+			return;
+		}
+		File fi = imp.getSelectedFile();
+		System.out.println("import not done: " + fi.getAbsolutePath());
+		//TODO working on importing files
+	}
+	
+	public void secureMove(){
+		System.out.println("move not done");
+	}
+	
+	public void secureDelete(){
+		System.out.println("delete not done");
+	}
+	
 	public void loadLib(File lib, Storage store, int idx){
 		//TODO load library
 		store.add(lib.getName(), lib.getAbsolutePath(), "2012-11-28", (long)0, sec.encryptString(lib.getAbsolutePath(), true), idx);
@@ -119,18 +142,33 @@ public class Ssys3 {
 		c = frm.getContentPane();
 		
 		btnImport = new JButton("Import");
+		btnImport.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				secureImport();
+			}
+		});
 		btnMove = new JButton("Move");
+		btnMove.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				secureMove();
+			}
+		});
 		btnDelete = new JButton("Delete");
+		btnDelete.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				secureDelete();
+			}
+		});
 		
 		tblItems = new JTable(store);
 		tblItems.setRowSorter(tableSorter);
 		tblItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tblItems.setFillsViewportHeight(true);
 		
-		txaStatus = new JTextArea();
+		txaStatus = new JTextArea(TXA_HEIGHT, TXA_WIDTH);
 		txaStatus.setEditable(false);
 		txaStatus.setBorder(BorderFactory.createTitledBorder("Status"));
-		txaSearch = new JTextArea(4, 15);
+		txaSearch = new JTextArea(4, TXA_WIDTH);
 		txaSearch.setBorder(BorderFactory.createTitledBorder("Search"));
 		txaSearch.addKeyListener(new KeyListener(){
 			public void keyPressed(KeyEvent arg0) {
@@ -141,21 +179,21 @@ public class Ssys3 {
 			public void keyTyped(KeyEvent arg0) {
 			}
 		});
-		txaInfo = new JTextArea();
+		txaInfo = new JTextArea(TXA_HEIGHT, TXA_WIDTH);
 		txaInfo.setEditable(false);
 		txaInfo.setBorder(BorderFactory.createTitledBorder("Info"));
 		
 		JPanel pnlTop = new JPanel(new GridLayout(1, 3));
 		JPanel pnlEast = new JPanel(new BorderLayout());
-		JPanel pnlCenterEast = new JPanel(new GridLayout(3, 1));
+		JPanel pnlCenterEast = new JPanel(new BorderLayout());
 		JScrollPane jspItems = new JScrollPane(tblItems);
 		
 		pnlTop.add(btnImport);
 		pnlTop.add(btnMove);
 		pnlTop.add(btnDelete);
-		pnlCenterEast.add(txaStatus);
-		pnlCenterEast.add(txaSearch);
-		pnlCenterEast.add(txaInfo);
+		pnlCenterEast.add(txaStatus, BorderLayout.NORTH);
+		pnlCenterEast.add(txaSearch, BorderLayout.CENTER);
+		pnlCenterEast.add(txaInfo, BorderLayout.SOUTH);
 		//pnlEast.add(pswPass, BorderLayout.NORTH);
 		pnlEast.add(pnlCenterEast, BorderLayout.CENTER);
 		c.setLayout(new BorderLayout());
