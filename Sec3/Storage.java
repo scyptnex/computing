@@ -35,12 +35,14 @@ public class Storage extends AbstractTableModel{
 	}
 	
 	public void add(String cname, String pname, String d, Long s, String t, int o){
-		cypNames.add(cname);
-		plainNames.add(pname);
-		dates.add(d);
-		sizes.add(s);
-		tags.add(t);
-		storeOrigs.add(o);
+		synchronized(this){
+			cypNames.add(cname);
+			plainNames.add(pname);
+			dates.add(d);
+			sizes.add(s);
+			tags.add(t);
+			storeOrigs.add(o);
+		}
 	}
 	
 	public void loadLib(File libFile, int loc) throws IOException{
@@ -185,12 +187,14 @@ public class Storage extends AbstractTableModel{
 	}
 	
 	public void setValueAt(Object value, int row, int col) {
-		if(col == COL_NAME){
-			//TODO rename file
-			plainNames.set(row, (String)value);
-		}
-		else if(col == COL_TAGS){
-			tags.set(row, ((String)value).toLowerCase());
+		synchronized(this){
+			if(col == COL_NAME){
+				//TODO rename file
+				plainNames.set(row, (String)value);
+			}
+			else if(col == COL_TAGS){
+				tags.set(row, ((String)value).toLowerCase());
+			}
 		}
 	}
 	

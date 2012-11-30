@@ -8,8 +8,15 @@ import javax.swing.table.*;
 
 public class Ssys3 {
 	
+	public static final int NUM_THREADS = 1;
+	
+	public static final int KILOBYTE = 1024;
+	
 	public static final int TXA_WIDTH = 15;
 	public static final int TXA_HEIGHT = 13;
+	
+	public static final char IMPORT_FLAG = 'I';
+	public static final char EXPORT_FLAG = 'X';
 	
 	public static final String LIBRARY_NAME = "zzlib.dat";
 	public static final File CONF_FILE = new File("ssys3.cfg");
@@ -32,6 +39,7 @@ public class Ssys3 {
 	private ArrayList<File> storeLocs;
 	private final File tempLoc;
 	private LinkedList<String> jobs;
+	private EDT[] encryptDecryptThreads;
 	
 	public final Secureify sec;
 	public final Storage store;
@@ -44,6 +52,8 @@ public class Ssys3 {
 	public Ssys3(){
 		store = new Storage();
 		jobs = new LinkedList<String>();
+		encryptDecryptThreads = new EDT[NUM_THREADS];
+		for(EDT edt : encryptDecryptThreads) edt.start();
 		tableSorter = new TableRowSorter<Storage>(store);
 		tempLoc = new File("temp");
 		if(!tempLoc.exists()) tempLoc.mkdirs();
@@ -54,6 +64,17 @@ public class Ssys3 {
 			public void windowActivated(WindowEvent evt) {}
 			public void windowClosed(WindowEvent evt) {
 				try {
+					System.out.println("joining EDT's");
+					for(EDT edt : encryptDecryptThreads){
+						edt.weakStop();
+						try {
+							edt.join();
+							System.out.println("  - joined");
+						} catch (InterruptedException e) {
+							System.out.println("  - Not joined");
+						}
+					}
+					System.out.println("saving storage");
 					store.saveAll(storeLocs, tempLoc, sec);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -114,15 +135,34 @@ public class Ssys3 {
 		}**/
 	}
 	
+	public String jobString(String job){
+		if(job.charAt(0) == IMPORT_FLAG){
+			String[] brk = job.split(",", 4);//4 parts to an import string
+			File if = new File()
+		}
+		else{
+			//TODO export
+		}
+	}
+	
 	public void updateStatus(){
 		txaStatus.setText("");
-		for(String s : jobs) txaStatus.append(s + "\n");
+		txaStatus.append("Threads:");
+		for(int i=0; i<NUM_THREADS; i++){
+			txaStatus.append(" " + i + "- ");
+			String jb = encryptDecryptThreads[i].getCur();
+			if(jb == null) txaStatus.append("idle\n");
+			else{
+				txaStatus.append(jobString(jb) + "\n");
+			}
+		}
+		for(String s : jobs) txaStatus.append(jobString(s) + "\n");
 	}
 	
 	public String impJob(File fi, String date, String tags){
 		if(date == null) date = Storage.curDate();
 		if(tags == null) tags = Storage.NEW_TAG;
-		return "I," + fi.getAbsolutePath() + "," + date + "," + tags;
+		return IMPORT_FLAG + "," + fi.getAbsolutePath() + "," + date + "," + tags;
 	}
 	
 	public void secureImport(){
@@ -369,4 +409,74 @@ public class Ssys3 {
 		return JOptionPane.showInputDialog(frm, msg, ttl, JOptionPane.QUESTION_MESSAGE);
 	}
 	
+	
+	/**
+	 * Helper thread
+	 */
+	
+	public class EDT extends Thread{
+		private boolean going = true;
+		private String cur;
+		public String getCur(){
+			if(cur == null) return null;
+			return cur;
+		}
+		public void weakStop(){
+			going = false;
+		}
+		
+		public boolean edtImport(File fi, String date, String tags){
+			if(!fi.exists()){
+				System.err.println("import: file " + fi.getAbsolutePath() + " doesnt exist");
+				return false;
+			}
+			long size = fi.length()/KILOBYTE;
+			File save = sec.encryptMainFile(fi, storeLocs.get(0), true);
+			if(save == null){
+				System.err.println("import: Encryption failure");
+				return false;
+			}
+			String pname = fi.getName();
+			if(!fi.delete()){
+				System.err.println("import: Couldnt delete old file - continuing");
+			}
+			store.add(save.getName(), pname, date, size, tags, 0);
+			return true;
+		}
+		
+		public void run(){
+			going = true;
+			while(going){
+				String chose = null;
+				synchronized(jobs){
+					chose = jobs.poll();
+				}
+				if(chose != null){
+					cur = chose;
+					updateStatus();
+					if(chose.charAt(0) == IMPORT_FLAG){
+						String[] brk = chose.split(",", 4);//4 parts to an import string
+						if(edtImport(new File(brk[1]), brk[2], brk[3])){
+							//import successful
+						}
+						else{
+							//no import
+						}
+					}
+					else{
+						//TODO export
+					}
+					cur = null;
+					updateStatus();
+				}
+				else{
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						//do nothing
+					}
+				}
+			}
+		}
+	}
 }
