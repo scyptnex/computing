@@ -31,6 +31,7 @@ public class Ssys3 {
 	
 	private ArrayList<File> storeLocs;
 	private final File tempLoc;
+	private LinkedList<String> jobs;
 	
 	public final Secureify sec;
 	public final Storage store;
@@ -42,6 +43,7 @@ public class Ssys3 {
 	
 	public Ssys3(){
 		store = new Storage();
+		jobs = new LinkedList<String>();
 		tableSorter = new TableRowSorter<Storage>(store);
 		tempLoc = new File("temp");
 		if(!tempLoc.exists()) tempLoc.mkdirs();
@@ -112,16 +114,77 @@ public class Ssys3 {
 		}**/
 	}
 	
+	public void updateStatus(){
+		txaStatus.setText("");
+		for(String s : jobs) txaStatus.append(s + "\n");
+	}
+	
+	public String impJob(File fi, String date, String tags){
+		if(date == null) date = Storage.curDate();
+		if(tags == null) tags = Storage.NEW_TAG;
+		return "I," + fi.getAbsolutePath() + "," + date + "," + tags;
+	}
+	
 	public void secureImport(){
 		JFileChooser imp = new JFileChooser();
 		imp.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		imp.setMultiSelectionEnabled(true);
 		int ret = imp.showOpenDialog(frm);
 		if(ret != JFileChooser.APPROVE_OPTION){
 			return;
 		}
-		File fi = imp.getSelectedFile();
-		System.out.println("import not done: " + fi.getAbsolutePath());
-		//TODO working on importing files
+		File[] fis = imp.getSelectedFiles();
+		ArrayList<String> impJobs = new ArrayList<String>();
+		boolean dirs = false;
+		for(File fi : fis){
+			if(fi.isDirectory()){
+				dirs = true;
+				File lib = new File(fi, LIBRARY_NAME);
+				if(lib.exists()){
+					try{
+						Scanner sca = new Scanner(lib);
+						while(sca.hasNextLine()){
+							String nm = sca.nextLine();
+							String date = sca.nextLine();
+							String tags = sca.nextLine();
+							File addr = new File(fi, nm);
+							if(addr.exists() && !addr.isDirectory()) impJobs.add(impJob(addr, date, tags));
+						}
+						sca.close();
+					}
+					catch(IOException exc){
+						//add nothing?
+					}
+				}
+				else{
+					for(File cont : fi.listFiles()) if(!cont.isDirectory()) impJobs.add(impJob(cont, null, null));
+				}
+			}
+			else{
+				impJobs.add(impJob(fi, null, null));
+			}
+		}
+		if(impJobs.size() > 1 || dirs){//dont bother user if selected single file
+			String shw = "Importing:";
+			if(impJobs.size() > 30) shw = null;
+			int pcount = 0;
+			for(String jb : impJobs){
+				String[] prts = jb.split(",", 4);//import jobs have 4 parts, import, name, date, tags
+				if(shw != null) shw = shw + "\n  - " + new File(prts[1]).getName();
+				if(!prts[3].equalsIgnoreCase(Storage.NEW_TAG)){
+					pcount++;
+					if(shw != null) shw = shw + " []";
+				}
+			}
+			if(shw == null) shw = "importing ";
+			else shw = shw + "\n";
+			shw = shw + impJobs.size() + "(" + pcount + ") files";
+			if(JOptionPane.showConfirmDialog(frm, shw, "Confirm Import", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
+		}
+		synchronized(jobs){
+			for(String j : impJobs) jobs.addFirst(j);
+		}
+		updateStatus();
 	}
 	
 	public void secureMove(){

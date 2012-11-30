@@ -11,6 +11,8 @@ public class Storage extends AbstractTableModel{
 	public static final String SIZE_IDENT = "size";
 	public static final String TAG_IDENT = "tag";
 	
+	public static final String NEW_TAG = "new";
+	
 	public static final int COL_NAME = 0;
 	public static final int COL_TAGS = 1;
 	public static final int COL_DATE = 2;
