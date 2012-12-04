@@ -53,7 +53,10 @@ public class Ssys3 {
 		store = new Storage();
 		jobs = new LinkedList<String>();
 		encryptDecryptThreads = new EDT[NUM_THREADS];
-		for(EDT edt : encryptDecryptThreads) edt.start();
+		for(int i=0; i<encryptDecryptThreads.length; i++){
+			encryptDecryptThreads[i] = new EDT();
+			encryptDecryptThreads[i].start();
+		}
 		tableSorter = new TableRowSorter<Storage>(store);
 		tempLoc = new File("temp");
 		if(!tempLoc.exists()) tempLoc.mkdirs();
@@ -75,7 +78,7 @@ public class Ssys3 {
 						}
 					}
 					System.out.println("saving storage");
-					store.saveAll(storeLocs, tempLoc, sec);
+					store.saveAll(tempLoc);
 				} catch (IOException e) {
 					e.printStackTrace();
 					System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\nFailed to save properly\n\n!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -98,8 +101,8 @@ public class Ssys3 {
 		//TODO load config
 		storeLocs = new ArrayList<File>();
 		String ossl = "openssl";
-		storeLocs.add(new File("store2"));
 		storeLocs.add(new File("store"));
+		storeLocs.add(new File("store2"));
 		
 		File chk = null;
 		for(File fi : storeLocs){
@@ -116,38 +119,37 @@ public class Ssys3 {
 			System.err.println("Wrong Password");
 			System.exit(1);
 		}
-		
+		store.useSecurity(sec);
+		store.useStorage(storeLocs);
 		//load stores
 		try {
-			store.loadAll(storeLocs, tempLoc, sec);
+			store.loadAll(tempLoc);
+			store.fireTableDataChanged();
 		} catch (IOException e) {
 			System.err.println("Storage loading failure");
 			System.exit(1);
 		}
-		/**int idx = 0;
-		for(File str : storeLocs){
-			if(!str.exists()) str.mkdirs();
-			else{
-				File lib = new File(str, LIBRARY_NAME);
-				if(lib.exists()) loadLib(lib, store, idx);
-			}
-			idx++;
-		}**/
+		
+		updateStatus();
 	}
 	
 	public String jobString(String job){
 		if(job.charAt(0) == IMPORT_FLAG){
 			String[] brk = job.split(",", 4);//4 parts to an import string
-			File if = new File()
+			File inf = new File(brk[1]);
+			return "import " + inf.getName();
 		}
 		else{
 			//TODO export
+			return "";
 		}
 	}
 	
 	public void updateStatus(){
 		txaStatus.setText("");
-		txaStatus.append("Threads:");
+		txaStatus.append("size\t" + store.getRowCount() + "\n");
+		txaStatus.append("total\t" + store.sumLengths() + "KB\n");
+		txaStatus.append("Threads:\n");
 		for(int i=0; i<NUM_THREADS; i++){
 			txaStatus.append(" " + i + "- ");
 			String jb = encryptDecryptThreads[i].getCur();
@@ -228,16 +230,40 @@ public class Ssys3 {
 	}
 	
 	public void secureMove(){
-		System.out.println("move not done");
+		int rw = tblItems.getSelectedRow();
+		if(rw == -1){
+			JOptionPane.showMessageDialog(frm, "No item selected", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		int idx = tblItems.convertRowIndexToModel(rw);
+		String[] opts = new String[storeLocs.size()];
+		for(int i=0; i<opts.length; i++) opts[i] = storeLocs.get(i).getAbsolutePath();
+		JComboBox cmbMove = new JComboBox(opts);
+		cmbMove.setSelectedIndex(store.curStore(idx));
+		if(JOptionPane.showConfirmDialog(frm, cmbMove, "Move item", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+		File newLoc = store.move(idx, cmbMove.getSelectedIndex());
+		if(newLoc == null) System.err.println("move " + store.plainName(idx) + " unsuccessful");
 	}
 	
 	public void secureDelete(){
-		System.out.println("delete not done");
-	}
-	
-	public void loadLib(File lib, Storage store, int idx){
-		//TODO load library
-		store.add(lib.getName(), lib.getAbsolutePath(), "2012-11-28", (long)0, sec.encryptString(lib.getAbsolutePath(), true), idx);
+		int rw = tblItems.getSelectedRow();
+		if(rw == -1){
+			JOptionPane.showMessageDialog(frm, "No item selected", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		int idx = tblItems.convertRowIndexToModel(rw);
+		if(JOptionPane.showConfirmDialog(frm, "Delete " + store.plainName(idx) + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
+		File del = store.delete(idx);
+		store.fireTableDataChanged();
+		if(del != null){
+			if(del.delete()){
+				//successful
+			}
+			else{
+				System.err.println("Delete " + del.getAbsolutePath() + " failed");
+			}
+		}
+		updateStatus();
 	}
 	
 	public void makeGUI(){
@@ -267,6 +293,22 @@ public class Ssys3 {
 		tblItems.setRowSorter(tableSorter);
 		tblItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tblItems.setFillsViewportHeight(true);
+		tblItems.addMouseListener(new MouseListener(){
+			public void mouseClicked(MouseEvent e){
+				if(e.getButton() == MouseEvent.BUTTON3){
+					tblItems.setRowSelectionInterval(e.getY()/tblItems.getRowHeight(), e.getY()/tblItems.getRowHeight());
+				}
+				if(e.getClickCount() > 1 || e.getButton() == MouseEvent.BUTTON3){
+					int idx = tblItems.convertRowIndexToModel(tblItems.getSelectedRow());
+					System.out.println("idx " +  idx);
+					//TODO queue export job
+				}
+			}
+			public void mouseEntered(MouseEvent arg0) {}
+			public void mouseExited(MouseEvent arg0) {}
+			public void mousePressed(MouseEvent arg0) {}
+			public void mouseReleased(MouseEvent arg0) {}
+		});
 		
 		txaStatus = new JTextArea(TXA_HEIGHT, TXA_WIDTH);
 		txaStatus.setEditable(false);
@@ -430,13 +472,17 @@ public class Ssys3 {
 				System.err.println("import: file " + fi.getAbsolutePath() + " doesnt exist");
 				return false;
 			}
+			String pname = fi.getName();
+			if(store.containsEntry(pname)){
+				System.err.println("import: already have a file named " + pname);
+				return false;
+			}
 			long size = fi.length()/KILOBYTE;
 			File save = sec.encryptMainFile(fi, storeLocs.get(0), true);
 			if(save == null){
 				System.err.println("import: Encryption failure");
 				return false;
 			}
-			String pname = fi.getName();
 			if(!fi.delete()){
 				System.err.println("import: Couldnt delete old file - continuing");
 			}
@@ -458,6 +504,7 @@ public class Ssys3 {
 						String[] brk = chose.split(",", 4);//4 parts to an import string
 						if(edtImport(new File(brk[1]), brk[2], brk[3])){
 							//import successful
+							store.fireTableDataChanged();
 						}
 						else{
 							//no import
@@ -471,7 +518,7 @@ public class Ssys3 {
 				}
 				else{
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(500);
 					} catch (InterruptedException e) {
 						//do nothing
 					}

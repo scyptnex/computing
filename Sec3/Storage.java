@@ -18,6 +18,8 @@ public class Storage extends AbstractTableModel{
 	public static final int COL_DATE = 2;
 	public static final int COL_SIZE = 3;
 	
+	private Secureify sec;
+	private ArrayList<File> stores;
 	private ArrayList<String> cypNames;
 	private ArrayList<String> plainNames;
 	private ArrayList<String> dates;
@@ -25,7 +27,15 @@ public class Storage extends AbstractTableModel{
 	private ArrayList<String> tags;
 	private ArrayList<Integer> storeOrigs;
 	
+	private long totSize;
+	
+	public long sumLengths(){
+		return totSize;
+	}
+	
 	public Storage(){
+		sec = null;
+		stores = null;
 		cypNames = new ArrayList<String>();
 		plainNames = new ArrayList<String>();
 		dates = new ArrayList<String>();
@@ -34,7 +44,19 @@ public class Storage extends AbstractTableModel{
 		storeOrigs = new ArrayList<Integer>();
 	}
 	
+	public void useSecurity(Secureify s){
+		sec = s;
+	}
+	
+	public void useStorage(ArrayList<File> s){
+		stores = s;
+	}
+	
 	public void add(String cname, String pname, String d, Long s, String t, int o){
+		if(containsEntry(pname)){
+			System.err.println("Refusing to add duplicate entry " + pname);
+			return;
+		}
 		synchronized(this){
 			cypNames.add(cname);
 			plainNames.add(pname);
@@ -42,7 +64,49 @@ public class Storage extends AbstractTableModel{
 			sizes.add(s);
 			tags.add(t);
 			storeOrigs.add(o);
+			totSize += s;
 		}
+	}
+	
+	public boolean containsEntry(String plain){
+		return plainNames.contains(plain);
+	}
+	
+	public File move(int idx, int newLoc){
+		synchronized(this){
+			File old = locate(idx);
+			if(old == null) return null;
+			File nw = new File(stores.get(newLoc), old.getName());
+			boolean succeed = old.renameTo(nw);
+			if(succeed){
+				storeOrigs.set(idx, newLoc);
+				return nw;
+			}
+			else return null;
+		}
+	}
+	
+	public File delete(int i){
+		File ret = null;
+		synchronized(this){
+			ret = locate(i);
+			cypNames.remove(i);
+			plainNames.remove(i);
+			dates.remove(i);
+			totSize -= sizes.get(i);
+			sizes.remove(i);
+			tags.remove(i);
+			storeOrigs.remove(i);
+		}
+		return ret;
+	}
+	
+	public String plainName(int i){
+		return plainNames.get(i);
+	}
+	
+	public int curStore(int i){
+		return storeOrigs.get(i);
 	}
 	
 	public void loadLib(File libFile, int loc) throws IOException{
@@ -74,7 +138,14 @@ public class Storage extends AbstractTableModel{
 		sca.close();
 	}
 	
-	public void loadAll(ArrayList<File> stores, File tmp, Secureify sec) throws IOException{
+	public File locate(int i){
+		File ret = new File(stores.get(storeOrigs.get(i)), cypNames.get(i));
+		if(!ret.exists()) return null;
+		if(ret.isDirectory()) return null;
+		return ret;
+	}
+	
+	public void loadAll(File tmp) throws IOException{
 		ArrayList<File> tmpFiles = getTmpFiles(stores, tmp);
 		for(int i=0; i<stores.size(); i++){
 			if(!stores.get(i).exists()) stores.get(i).mkdirs();
@@ -88,7 +159,7 @@ public class Storage extends AbstractTableModel{
 		}
 	}
 	
-	public void saveAll(ArrayList<File> stores, File tmp, Secureify sec) throws IOException{
+	public void saveAll(File tmp) throws IOException{
 		//init
 		ArrayList<File> tmpFiles = getTmpFiles(stores, tmp);
 		ArrayList<PrintWriter> pws = new ArrayList<PrintWriter>();
@@ -189,8 +260,25 @@ public class Storage extends AbstractTableModel{
 	public void setValueAt(Object value, int row, int col) {
 		synchronized(this){
 			if(col == COL_NAME){
-				//TODO rename file
-				plainNames.set(row, (String)value);
+				String newPlain = (String) value;
+				if(containsEntry(newPlain)){
+					System.err.println("Refusing to rename duplicate " + newPlain);
+					return;
+				}
+				String newCipher = sec.encryptString(newPlain, true);
+				File oldf = locate(row);
+				if(oldf == null){
+					System.err.println("Failed to locate " + plainNames.get(row));
+					return;
+				}
+				File newf = new File(stores.get(storeOrigs.get(row)), newCipher);
+				if(oldf.renameTo(newf)){
+					plainNames.set(row, newPlain);
+					cypNames.set(row, newCipher);
+				}
+				else{
+					System.err.println("Name change failed");
+				}
 			}
 			else if(col == COL_TAGS){
 				tags.set(row, ((String)value).toLowerCase());
