@@ -52,6 +52,63 @@ public class Storage extends AbstractTableModel{
 		stores = s;
 	}
 	
+	public String describe(int i){
+		synchronized(this){
+			String ret = "Name:   " + plainNames.get(i) + "\n\n";
+			ret += "Added:   " + dates.get(i) + "\n";
+			ret += "Size:   " + sizes.get(i) + "KB\n";
+			ret += "Tagged:   " + tags.get(i) + "\n\n";
+			ret += "Cipher:   " + cypNames.get(i) + "\n";
+			ret += "Store:   " + stores.get(storeOrigs.get(i)).getAbsolutePath() + " (" + storeOrigs.get(i) + ")";
+			return ret;
+		}
+	}
+	
+	public String tagDesc(){
+		synchronized(this){
+			HashMap<String, Integer> counter = new HashMap<String, Integer>();
+			int tot = 0;
+			for(int i=0; i<getRowCount(); i++){
+				String[] tgs = tags.get(i).split(" ");
+				for(String t : tgs){
+					if(!counter.containsKey(t)) counter.put(t, 0);
+					counter.put(t, counter.get(t)+1);
+					tot++;
+				}
+			}
+			int ntc = ("" + tot).length();
+			ArrayList<String> lst = new ArrayList<String>();
+			for(String tag : counter.keySet()){
+				String add = "" + counter.get(tag);
+				while(add.length() < ntc) add = "0" + add;
+				add = add + "  -  " + tag;
+				lst.add(add);
+			}
+			Collections.sort(lst);
+			String ret = "";
+			for(String s : lst){
+				ret = "\n   " + s.replaceFirst("0*", "") + ret;
+			}
+			return "Total " + tot + "\nDistinct " + counter.size() + ret;
+		}
+		
+	}
+	
+	public String storeDesc(){
+		synchronized(this){
+			int[] scounts = new int[stores.size()];
+			for(int so : storeOrigs){
+				scounts[so] = scounts[so]+1;
+			}
+			String ret = "";
+			for(int i=0; i<stores.size(); i++){
+				if(i!=0) ret += "\n";
+				ret+= stores.get(i).getAbsolutePath() + "  -  " + scounts[i];
+			}
+			return ret;
+		}
+	}
+	
 	public void add(String cname, String pname, String d, Long s, String t, int o){
 		if(containsEntry(pname)){
 			System.err.println("Refusing to add duplicate entry " + pname);

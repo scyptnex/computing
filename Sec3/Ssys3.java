@@ -32,9 +32,9 @@ public class Ssys3 {
 	private JButton btnImport;
 	private JButton btnMove;
 	private JButton btnDelete;
+	private JButton btnAnalyse;
 	private JTextArea txaStatus;
 	private JTextArea txaSearch;
-	private JTextArea txaInfo;
 	
 	private ArrayList<File> storeLocs;
 	private final File tempLoc;
@@ -51,15 +51,13 @@ public class Ssys3 {
 	
 	public Ssys3(){
 		store = new Storage();
+		tableSorter = new TableRowSorter<Storage>(store);
 		jobs = new LinkedList<String>();
 		encryptDecryptThreads = new EDT[NUM_THREADS];
 		for(int i=0; i<encryptDecryptThreads.length; i++){
 			encryptDecryptThreads[i] = new EDT();
 			encryptDecryptThreads[i].start();
 		}
-		tableSorter = new TableRowSorter<Storage>(store);
-		tempLoc = new File("temp");
-		if(!tempLoc.exists()) tempLoc.mkdirs();
 		
 		makeGUI();
 		frm.setSize(800, 600);
@@ -113,14 +111,37 @@ public class Ssys3 {
 			}
 		}
 		//TODO if no libraries, ask for new pass
-		char[] pss = "hi".toCharArray();
-		sec = OpenSSLCommander.getCommander(chk, pss, ossl);
+		char[] pass = null;
+		if(chk == null){
+			JOptionPane.showMessageDialog(frm, "First time run\n  Create your password", "Create Password", JOptionPane.INFORMATION_MESSAGE);
+			char[] p1 = askPassword();
+			char[] p2 = askPassword();
+			boolean same = p1.length == p2.length;
+			for(int i=0; i<Math.min(p1.length, p2.length); i++){
+				if(p1[i] != p2[i]) same = false;
+			}
+			if(same){
+				JOptionPane.showMessageDialog(frm, "Password created", "Create Password", JOptionPane.INFORMATION_MESSAGE);
+				pass = p1;
+			}
+			else{
+				JOptionPane.showMessageDialog(frm, "Passwords dont match", "Create Password", JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
+		}
+		else{
+			pass = askPassword();
+		}
+		sec = OpenSSLCommander.getCommander(chk, pass, ossl);
 		if(sec == null){
 			System.err.println("Wrong Password");
 			System.exit(1);
 		}
 		store.useSecurity(sec);
 		store.useStorage(storeLocs);
+		
+		tempLoc = new File("temp");
+		if(!tempLoc.exists()) tempLoc.mkdirs();
 		//load stores
 		try {
 			store.loadAll(tempLoc);
@@ -133,6 +154,20 @@ public class Ssys3 {
 		updateStatus();
 	}
 	
+	public char[] askPassword(){
+		final JPasswordField jpf = new JPasswordField();
+		int result = JOptionPane.showConfirmDialog(frm, jpf, "Password", JOptionPane.DEFAULT_OPTION);
+		char[] password = null;
+		if(result == JOptionPane.OK_OPTION){
+			password = jpf.getPassword();
+		}
+		else{
+			System.err.println("No password given");
+			System.exit(1);
+		}
+		return password;
+	}
+	
 	public String jobString(String job){
 		if(job.charAt(0) == IMPORT_FLAG){
 			String[] brk = job.split(",", 4);//4 parts to an import string
@@ -140,8 +175,9 @@ public class Ssys3 {
 			return "import " + inf.getName();
 		}
 		else{
-			//TODO export
-			return "";
+			String[] brk = job.split(",", 3);//3 parts to export string
+			File plf = new File(brk[2]);
+			return "export " + plf.getName();
 		}
 	}
 	
@@ -165,6 +201,42 @@ public class Ssys3 {
 		if(date == null) date = Storage.curDate();
 		if(tags == null) tags = Storage.NEW_TAG;
 		return IMPORT_FLAG + "," + fi.getAbsolutePath() + "," + date + "," + tags;
+	}
+	public String expJob(File cip, File plain){
+		return EXPORT_FLAG + "," + cip.getAbsolutePath() + "," + plain.getAbsolutePath();
+	}
+	
+	public void secureAnalysis(){
+		int rw = tblItems.getSelectedRow();
+		if(rw != -1){
+			int idx = tblItems.convertRowIndexToModel(rw);
+			String desc = store.describe(idx);
+			if(JOptionPane.showConfirmDialog(frm, desc, "Details", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) return;
+		}
+		if(JOptionPane.showConfirmDialog(frm, store.tagDesc(), "Tags", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) return;
+		if(JOptionPane.showConfirmDialog(frm, store.storeDesc(), "Storage", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) return;
+	}
+	
+	public void secureUse(File fi){
+		try {
+			Desktop.getDesktop().open(fi);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private File getExportTempFile(String trueName){
+		return new File(tempLoc, trueName);
+	}
+	public void secureExport(int i){
+		File expf = getExportTempFile(store.plainName(i));
+		//check if its already been exported
+		if(expf.exists()) secureUse(expf);
+		else{//otherwise add to work queue
+			File cipf = store.locate(i);
+			jobs.addLast(expJob(cipf, expf));
+		}
+		updateStatus();
 	}
 	
 	public void secureImport(){
@@ -288,6 +360,12 @@ public class Ssys3 {
 				secureDelete();
 			}
 		});
+		btnAnalyse = new JButton("Analyse");
+		btnAnalyse.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				secureAnalysis();
+			}
+		});
 		
 		tblItems = new JTable(store);
 		tblItems.setRowSorter(tableSorter);
@@ -300,8 +378,7 @@ public class Ssys3 {
 				}
 				if(e.getClickCount() > 1 || e.getButton() == MouseEvent.BUTTON3){
 					int idx = tblItems.convertRowIndexToModel(tblItems.getSelectedRow());
-					System.out.println("idx " +  idx);
-					//TODO queue export job
+					secureExport(idx);
 				}
 			}
 			public void mouseEntered(MouseEvent arg0) {}
@@ -324,11 +401,8 @@ public class Ssys3 {
 			public void keyTyped(KeyEvent arg0) {
 			}
 		});
-		txaInfo = new JTextArea(TXA_HEIGHT, TXA_WIDTH);
-		txaInfo.setEditable(false);
-		txaInfo.setBorder(BorderFactory.createTitledBorder("Info"));
 		
-		JPanel pnlTop = new JPanel(new GridLayout(1, 3));
+		JPanel pnlTop = new JPanel(new GridLayout(1, 4));
 		JPanel pnlEast = new JPanel(new BorderLayout());
 		JPanel pnlCenterEast = new JPanel(new BorderLayout());
 		JScrollPane jspItems = new JScrollPane(tblItems);
@@ -336,9 +410,9 @@ public class Ssys3 {
 		pnlTop.add(btnImport);
 		pnlTop.add(btnMove);
 		pnlTop.add(btnDelete);
-		pnlCenterEast.add(txaStatus, BorderLayout.NORTH);
-		pnlCenterEast.add(txaSearch, BorderLayout.CENTER);
-		pnlCenterEast.add(txaInfo, BorderLayout.SOUTH);
+		pnlTop.add(btnAnalyse);
+		pnlCenterEast.add(txaStatus, BorderLayout.CENTER);
+		pnlCenterEast.add(txaSearch, BorderLayout.NORTH);
 		//pnlEast.add(pswPass, BorderLayout.NORTH);
 		pnlEast.add(pnlCenterEast, BorderLayout.CENTER);
 		c.setLayout(new BorderLayout());
@@ -467,6 +541,21 @@ public class Ssys3 {
 			going = false;
 		}
 		
+		public boolean edtExport(File cip, File pla){
+			if(!cip.exists()){
+				System.err.println("export: file " + cip.getAbsolutePath() + " doesnt exist for " + pla.getName());
+				pla.delete();
+				return false;
+			}
+			File save = sec.encryptSpecialFile(cip, pla, false);
+			if(save == null){
+				System.err.println("export: Encryption failure");
+				pla.delete();
+				return false;
+			}
+			return true;
+		}
+		
 		public boolean edtImport(File fi, String date, String tags){
 			if(!fi.exists()){
 				System.err.println("import: file " + fi.getAbsolutePath() + " doesnt exist");
@@ -511,7 +600,15 @@ public class Ssys3 {
 						}
 					}
 					else{
-						//TODO export
+						String[] brk = chose.split(",", 3);//3 parts to an export string
+						File pla = new File(brk[2]);
+						if(edtExport(new File(brk[1]), pla)){
+							//export succeeded
+							secureUse(pla);
+						}
+						else{
+							//export failed
+						}
 					}
 					cur = null;
 					updateStatus();
