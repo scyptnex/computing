@@ -20,8 +20,6 @@ public class Ssys3 {
 	
 	public static final String LIBRARY_NAME = "zzlib.dat";
 	public static final File CONF_FILE = new File("ssys3.cfg");
-	public static final String[] CONF_OPTS = {"secure_directories", "openssl_executable", "use_player", "player_executable"};
-	public static final String[] CONF_DEFAULTS = {"store", null, "false", "vlc"};
 	
 	/**
 	 * GUI
@@ -94,13 +92,51 @@ public class Ssys3 {
 			public void windowOpened(WindowEvent evt) {}
 		});
 		frm.setVisible(true);
-		//lockGUI();
 		
-		//TODO load config
+		//load config
 		storeLocs = new ArrayList<File>();
 		String ossl = "openssl";
-		storeLocs.add(new File("store"));
-		storeLocs.add(new File("store2"));
+		try{
+			Scanner sca = new Scanner(CONF_FILE);
+			if(sca.hasNextLine()) ossl = sca.nextLine();
+			while(sca.hasNextLine()) storeLocs.add(new File(sca.nextLine()));
+			sca.close();
+		}
+		catch(IOException e){
+			
+		}
+		String osslWorks = OpenSSLCommander.test(ossl);
+		while(osslWorks == null){
+			ossl = JOptionPane.showInputDialog(frm, "Please input the command used to run open ssl\n  We will run \"<command> version\" to confirm\n  Previous command: " + ossl, "Find open ssl", JOptionPane.OK_CANCEL_OPTION);
+			if(ossl == null){
+				System.err.println("Refused to provide openssl executable location");
+				System.exit(1);
+			}
+			osslWorks = OpenSSLCommander.test(ossl);
+			if(osslWorks == null) JOptionPane.showMessageDialog(frm, "Command " + ossl + " unsuccessful", "Unsuccessful", JOptionPane.ERROR_MESSAGE);
+		}
+		while(storeLocs.size() < 1){
+			JFileChooser jfc = new JFileChooser();
+			jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			if(jfc.showOpenDialog(frm) != JFileChooser.APPROVE_OPTION){
+				System.err.println("Refused to provide an initial store folder");
+				System.exit(1);
+			}
+			File sel = jfc.getSelectedFile();
+			if(sel.isDirectory()) storeLocs.add(sel); 
+		}
+		
+		try{
+			PrintWriter pw = new PrintWriter(CONF_FILE);
+			pw.println(ossl);
+			for(File fi : storeLocs){
+				pw.println(fi.getAbsolutePath());
+			}
+			pw.close();
+		}
+		catch(IOException e){
+			System.err.println("Failed to save config");
+		}
 		
 		File chk = null;
 		for(File fi : storeLocs){
@@ -110,7 +146,7 @@ public class Ssys3 {
 				//break;
 			}
 		}
-		//TODO if no libraries, ask for new pass
+		
 		char[] pass = null;
 		if(chk == null){
 			JOptionPane.showMessageDialog(frm, "First time run\n  Create your password", "Create Password", JOptionPane.INFORMATION_MESSAGE);

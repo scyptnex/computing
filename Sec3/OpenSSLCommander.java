@@ -124,5 +124,26 @@ public class OpenSSLCommander extends Secureify {
 	public static String commandLineFile(String abs){
 		return abs;
 	}
-
+	
+	public static String test(String command){
+		if(!command.contains("open") || !command.contains("ssl")) return null;
+		try{
+			Process p = Runtime.getRuntime().exec(command + " version");
+			String ret = "";
+			String ers = "";
+			String ln = "";
+			BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			BufferedReader er = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+			while((ln = br.readLine()) != null) ret = ret + ln + "\n";
+			while((ln = er.readLine()) != null) ers = ers + ln + "\n";
+			br.close();
+			er.close();
+			if(ers.length() > 0) return null;
+			return ret.trim();
+		}
+		catch(Exception e){
+			return null;
+		}
+		
+	}
 }

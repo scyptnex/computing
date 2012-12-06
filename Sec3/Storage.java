@@ -1,6 +1,7 @@
 import java.util.*;
 import java.io.*;
 import javax.swing.table.*;
+import javax.swing.*;
 
 public class Storage extends AbstractTableModel{
 	
@@ -18,6 +19,7 @@ public class Storage extends AbstractTableModel{
 	public static final int COL_DATE = 2;
 	public static final int COL_SIZE = 3;
 	
+	private JFrame frm;
 	private Secureify sec;
 	private ArrayList<File> stores;
 	private ArrayList<String> cypNames;
@@ -50,6 +52,10 @@ public class Storage extends AbstractTableModel{
 	
 	public void useStorage(ArrayList<File> s){
 		stores = s;
+	}
+	
+	public void useFrame(JFrame fram){
+		frm = fram;
 	}
 	
 	public String describe(int i){
@@ -111,7 +117,7 @@ public class Storage extends AbstractTableModel{
 	
 	public void add(String cname, String pname, String d, Long s, String t, int o){
 		if(containsEntry(pname)){
-			System.err.println("Refusing to add duplicate entry " + pname);
+			JOptionPane.showMessageDialog(frm, "Refusing to add duplicate entry " + pname, "Duplicate", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		synchronized(this){
@@ -319,13 +325,13 @@ public class Storage extends AbstractTableModel{
 			if(col == COL_NAME){
 				String newPlain = (String) value;
 				if(containsEntry(newPlain)){
-					System.err.println("Refusing to rename duplicate " + newPlain);
+					JOptionPane.showMessageDialog(frm, "Refusing to rename duplicate " + newPlain, "Duplicate", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				String newCipher = sec.encryptString(newPlain, true);
 				File oldf = locate(row);
 				if(oldf == null){
-					System.err.println("Failed to locate " + plainNames.get(row));
+					JOptionPane.showMessageDialog(frm, "Failed to locate " + plainNames.get(row), "Duplicate", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				File newf = new File(stores.get(storeOrigs.get(row)), newCipher);
@@ -334,7 +340,7 @@ public class Storage extends AbstractTableModel{
 					cypNames.set(row, newCipher);
 				}
 				else{
-					System.err.println("Name change failed");
+					JOptionPane.showMessageDialog(frm, "Name change failed", "Duplicate", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 			else if(col == COL_TAGS){
