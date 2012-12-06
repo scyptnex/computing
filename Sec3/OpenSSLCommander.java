@@ -1,5 +1,5 @@
 import java.io.*;
-
+import java.util.*;
 
 public class OpenSSLCommander extends Secureify {
 	
@@ -40,11 +40,21 @@ public class OpenSSLCommander extends Secureify {
 	@Override
 	public File encryptSpecialFile(File in, File out, boolean encrypt) {
 		//File out = new File(store, outName);
-		String command = sslCommand + " enc -" + algorithm + " -pass stdin -in " + commandLineFile(in.getAbsolutePath()) + " -out " + commandLineFile(out.getAbsolutePath());
-		if(!salting) command += " -nosalt";
-		if(!encrypt) command += " -d";
+		ArrayList<String> command = new ArrayList<String>();
+		command.add(sslCommand);
+		command.add("enc");
+		command.add("-" + algorithm);
+		command.add("-pass");
+		command.add("stdin");
+		command.add("-in");
+		command.add(commandLineFile(in.getAbsolutePath()));
+		command.add("-out");
+		command.add(commandLineFile(out.getAbsolutePath()));
+		//String command = sslCommand + " enc -" + algorithm + " -pass stdin -in " + commandLineFile(in.getAbsolutePath()) + " -out " + commandLineFile(out.getAbsolutePath());
+		if(!salting) command.add("-nosalt");
+		if(!encrypt) command.add("-d");
 		try {
-			Process p = Runtime.getRuntime().exec(command);
+			Process p = Runtime.getRuntime().exec(command.toArray(new String[0]));
 			auth(p.getOutputStream());
 			p.getOutputStream().close();
 			boolean success = checkSuccess(p);
