@@ -9,6 +9,79 @@ public class OpenSSLCommander extends Secureify {
 	private final boolean salting;
 	private final String algorithm;
 	
+	public static void main(String[] args) throws Exception{
+		String command = "openssl";
+		char[] pass = "hi".toCharArray();
+		char[] notPass = "lo".toCharArray();
+		System.out.print("Result of test: ");
+		System.out.println(test(command));
+		System.out.print("Result of test + x: ");
+		System.out.println(test(command + "x"));
+		Secureify sec = getCommander(null, pass, command);
+		
+		File a = new File("a.txt");
+		File b = new File("a.enc");
+		File c = new File("a.dec");
+		File d = new File("d.dec");
+		PrintWriter pw = new PrintWriter(new FileWriter(a));
+		for(char ch='a'; ch<='z'; ch++){
+			pw.println(ch + " - " + (int)ch);
+		}
+		pw.close();
+		File enc = sec.encryptSpecialFile(a, b, true);
+		File dec = sec.encryptSpecialFile(b, c, false);
+		
+		System.out.println("Digest a = " + digest(a, command));
+		System.out.println("Digest c = " + digest(c, command));
+		
+		boolean success = false;
+		if(enc != null && dec != null){
+			Scanner sc1 = new Scanner(a);
+			Scanner sc2 = new Scanner(c);
+			success = true;
+			while(sc1.hasNextLine()){
+				String l1 = sc1.nextLine();
+				String l2 = sc2.nextLine();
+				if(!l1.equals(l2)){
+					System.err.println("Unmatched: " + l1 + " VS " + l2);
+					success = false;
+				}
+			}
+			if(sc2.hasNext()) success = false;
+			sc1.close();
+			sc2.close();
+		}
+		
+		if(success) System.out.println("test decryption successful");
+		else System.out.println("test decryption failed");
+		
+		String chks = "abcd";
+		String encs = sec.encryptString(chks, true);
+		System.out.println("Encrypt string\t" + chks + " -> " + encs + " -> " + sec.encryptString(encs, false));
+		chks = "abcde";
+		encs = sec.encryptString(chks, true);
+		System.out.println("Encrypt string\t" + chks + " -> " + encs + " -> " + sec.encryptString(encs, false));
+		chks = "abcdef";
+		encs = sec.encryptString(chks, true);
+		System.out.println("Encrypt string\t" + chks + " -> " + encs + " -> " + sec.encryptString(encs, false));
+		
+		boolean checkPass = sec.check(a);
+		System.out.println("Test check (true): " + !checkPass);
+		Secureify notSec = getCommander(a, notPass, command);
+		System.out.println("Test fail pass (true): " + (notSec == null));
+		notSec = getCommander(null, notPass, command);
+		System.out.println("Test forced fail pass (true): " + (notSec != null));
+		File failure = notSec.encryptSpecialFile(b, d, false);
+		System.out.println("Test fail decrypt (true): " + (failure == null));
+		String dr = notSec.encryptString(sec.encryptString("Hello", true), false);
+		System.out.println("Test fail string decrypt (true): " + (dr == null));
+		
+		a.delete();
+		b.delete();
+		c.delete();
+		d.delete();
+	}
+	
 	public static OpenSSLCommander getCommander(File checkFile, char[] pass, String openSSLCom){
 		return getCommander(checkFile, pass, openSSLCom, false, "aes-256-cbc");
 	}
@@ -138,12 +211,27 @@ public class OpenSSLCommander extends Secureify {
 			while((ln = er.readLine()) != null) ers = ers + ln + "\n";
 			br.close();
 			er.close();
+			p.waitFor();
 			if(ers.length() > 0) return null;
 			return ret.trim();
 		}
 		catch(Exception e){
 			return null;
 		}
-		
+	}
+	
+	public static String digest(File loc, String command){
+		String[] cmds = new String[]{command, "dgst", loc.getAbsolutePath()};
+		try{
+			Process p = Runtime.getRuntime().exec(cmds);
+			String str = new BufferedReader(new InputStreamReader(p.getInputStream())).readLine();
+			p.waitFor();
+			p.getOutputStream().close();
+			return str.substring(str.indexOf("=") + 1).trim();
+		}
+		catch(Exception exc){
+			//do nothing
+			return null;
+		}
 	}
 }

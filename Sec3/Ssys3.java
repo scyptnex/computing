@@ -8,18 +8,24 @@ import javax.swing.table.*;
 
 public class Ssys3 {
 	
-	public static final int NUM_THREADS = 1;
+	//TODO import checking, failed import reaquisition
 	
 	public static final int KILOBYTE = 1024;
 	
 	public static final int TXA_WIDTH = 15;
-	public static final int TXA_HEIGHT = 13;
+	public static final int TXA_HEIGHT = 29;
 	
 	public static final char IMPORT_FLAG = 'I';
 	public static final char EXPORT_FLAG = 'X';
 	
 	public static final String LIBRARY_NAME = "zzlib.dat";
+	
 	public static final File CONF_FILE = new File("ssys3.cfg");
+	public static final String CONF_SSL = "Open_SSL_Command = ";
+	public static final String CONF_THREAD = "Worker_Thread_Count = ";
+	public static final String CONF_PRIORITY = "Prioritise_Decryption = ";
+	public static final String CONF_EXPORT = "Allow_Export = ";
+	public static final String CONF_STORE = "Storage_Locations:";
 	
 	/**
 	 * GUI
@@ -43,6 +49,18 @@ public class Ssys3 {
 	public final Storage store;
 	public final TableRowSorter<Storage> tableSorter;
 	
+	/**
+	 * Guide to adding configuration
+	 *  - Add the configure variable here
+	 *  - Add a config flag CONF_XXXXXX above
+	 *  - Modify the config reader to read the config coption into a temporary variable
+	 *  - Set the configure variable from the temp
+	 *  - Modify the configure writer to save the option
+	 */
+	public final int numThreads;
+	public final boolean priorityExport;
+	public final boolean allowExport;
+	
 	public static void main(String[] args){
 		new Ssys3();
 	}
@@ -51,11 +69,6 @@ public class Ssys3 {
 		store = new Storage();
 		tableSorter = new TableRowSorter<Storage>(store);
 		jobs = new LinkedList<String>();
-		encryptDecryptThreads = new EDT[NUM_THREADS];
-		for(int i=0; i<encryptDecryptThreads.length; i++){
-			encryptDecryptThreads[i] = new EDT();
-			encryptDecryptThreads[i].start();
-		}
 		
 		makeGUI();
 		frm.setSize(800, 600);
@@ -96,10 +109,44 @@ public class Ssys3 {
 		//load config
 		storeLocs = new ArrayList<File>();
 		String ossl = "openssl";
+		int numThreadTemp = 2;
+		boolean priorityDecryptTemp = true;
+		boolean allowExportTemp = false;
 		try{
 			Scanner sca = new Scanner(CONF_FILE);
-			if(sca.hasNextLine()) ossl = sca.nextLine();
-			while(sca.hasNextLine()) storeLocs.add(new File(sca.nextLine()));
+			while(sca.hasNextLine()){
+				String ln = sca.nextLine();
+				if(ln.startsWith(CONF_SSL)){
+					ossl = ln.substring(CONF_SSL.length());
+				}
+				else if(ln.startsWith(CONF_THREAD)){
+					try{
+						numThreadTemp = Integer.parseInt(ln.substring(CONF_THREAD.length()));
+					}
+					catch(Exception exc){
+						//do Nothing
+					}
+				}
+				else if(ln.equals(CONF_STORE)){
+					while(sca.hasNextLine()) storeLocs.add(new File(sca.nextLine()));
+				}
+				else if(ln.startsWith(CONF_PRIORITY)){
+					try{
+						priorityDecryptTemp = Boolean.parseBoolean(ln.substring(CONF_PRIORITY.length()));
+					}
+					catch(Exception exc){
+						//do Nothing
+					}
+				}
+				else if(ln.startsWith(CONF_EXPORT)){
+					try{
+						allowExportTemp = Boolean.parseBoolean(ln.substring(CONF_EXPORT.length()));
+					}
+					catch(Exception exc){
+						//do Nothing
+					}
+				}
+			}
 			sca.close();
 		}
 		catch(IOException e){
@@ -125,10 +172,17 @@ public class Ssys3 {
 			File sel = jfc.getSelectedFile();
 			if(sel.isDirectory()) storeLocs.add(sel); 
 		}
+		numThreads = numThreadTemp;
+		priorityExport = priorityDecryptTemp;
+		allowExport = allowExportTemp;
 		
 		try{
 			PrintWriter pw = new PrintWriter(CONF_FILE);
-			pw.println(ossl);
+			pw.println(CONF_SSL + ossl);
+			pw.println(CONF_THREAD + numThreads);
+			pw.println(CONF_PRIORITY + priorityExport);
+			pw.println(CONF_EXPORT + allowExport);
+			pw.println(CONF_STORE);
 			for(File fi : storeLocs){
 				pw.println(fi.getAbsolutePath());
 			}
@@ -187,7 +241,14 @@ public class Ssys3 {
 			System.exit(1);
 		}
 		
+		encryptDecryptThreads = new EDT[numThreads];
+		for(int i=0; i<encryptDecryptThreads.length; i++){
+			encryptDecryptThreads[i] = new EDT();
+			encryptDecryptThreads[i].start();
+		}
+		
 		updateStatus();
+		txaSearch.grabFocus();
 	}
 	
 	public char[] askPassword(){
@@ -221,8 +282,8 @@ public class Ssys3 {
 		txaStatus.setText("");
 		txaStatus.append("size\t" + store.getRowCount() + "\n");
 		txaStatus.append("total\t" + store.sumLengths() + "KB\n");
-		txaStatus.append("Threads:\n");
-		for(int i=0; i<NUM_THREADS; i++){
+		txaStatus.append("\nThreads:\n");
+		for(int i=0; i<numThreads; i++){
 			txaStatus.append(" " + i + "- ");
 			String jb = encryptDecryptThreads[i].getCur();
 			if(jb == null) txaStatus.append("idle\n");
@@ -230,7 +291,16 @@ public class Ssys3 {
 				txaStatus.append(jobString(jb) + "\n");
 			}
 		}
-		for(String s : jobs) txaStatus.append(jobString(s) + "\n");
+		txaStatus.append("\nJobs:\n");
+		int c = 6 + numThreads;
+		int i = 0;
+		for(String s : jobs){
+			if(c + i < TXA_HEIGHT - 1) txaStatus.append(" - " + jobString(s) + "\n");
+			else if (c + i == TXA_HEIGHT-1){
+				txaStatus.append(" - [" + (jobs.size()-i) + "more ]");
+			}
+			i++;
+		}
 	}
 	
 	public String impJob(File fi, String date, String tags){
@@ -270,7 +340,10 @@ public class Ssys3 {
 		if(expf.exists()) secureUse(expf);
 		else{//otherwise add to work queue
 			File cipf = store.locate(i);
-			jobs.addLast(expJob(cipf, expf));
+			synchronized(jobs){
+				if(priorityExport) jobs.addFirst(expJob(cipf, expf));
+				else jobs.addLast(expJob(cipf, expf));
+			}
 		}
 		updateStatus();
 	}
@@ -332,7 +405,10 @@ public class Ssys3 {
 			if(JOptionPane.showConfirmDialog(frm, shw, "Confirm Import", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
 		}
 		synchronized(jobs){
-			for(String j : impJobs) jobs.addFirst(j);
+			for(String j : impJobs){
+				if(priorityExport) jobs.addLast(j);
+				else jobs.addFirst(j);
+			}
 		}
 		updateStatus();
 	}
@@ -407,6 +483,7 @@ public class Ssys3 {
 		tblItems.setRowSorter(tableSorter);
 		tblItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tblItems.setFillsViewportHeight(true);
+		tblItems.getRowSorter().toggleSortOrder(Storage.COL_DATE);
 		tblItems.addMouseListener(new MouseListener(){
 			public void mouseClicked(MouseEvent e){
 				if(e.getButton() == MouseEvent.BUTTON3){
@@ -433,6 +510,13 @@ public class Ssys3 {
 			}
 			public void keyReleased(KeyEvent arg0) {
 				filterBase(txaSearch.getText());
+				//EXPORT settings here, as in mass export (export everything)
+				if(allowExport && txaSearch.getText().equalsIgnoreCase("-export")){
+					//txaSearch.setText("");
+					if(JOptionPane.showConfirmDialog(frm, "Do you really want to export the whole secure base?", "Confirm Export", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
+						totalExport();
+					}
+				}
 			}
 			public void keyTyped(KeyEvent arg0) {
 			}
@@ -549,7 +633,26 @@ public class Ssys3 {
 		rmrf(tempLoc);
 	}
 	
-	public char[] jetPass(){
+	public void totalExport(){
+		File expf = new File("export");
+		if(expf.exists()) rmrf(expf);
+		expf.mkdirs();
+		for(int sto=0; sto<storeLocs.size(); sto++){
+			String sl = storeLocs.get(sto).getAbsolutePath().replaceAll("/", "-").replaceAll("\\\\", "-");
+			File estore = new File(expf, sl);
+			estore.mkdir();
+			for(int i=0; i<store.getRowCount(); i++) if(store.curStore(i) == sto){
+				File enc = store.locate(i);
+				File dec = sec.prepareMainFile(enc, estore, false);
+				synchronized(jobs){
+					jobs.addLast(expJob(enc, dec));
+				}
+			}
+		}
+		JOptionPane.showMessageDialog(frm, "Exported to:\n   " + expf.getAbsolutePath());
+	}
+	
+	/**public char[] jetPass(){
 		JPasswordField psf = new JPasswordField();
 		psf.grabFocus();
 		int opt = JOptionPane.showConfirmDialog(frm, psf, "Password", JOptionPane.PLAIN_MESSAGE);
@@ -559,7 +662,9 @@ public class Ssys3 {
 	
 	public String jetString(String msg, String ttl){
 		return JOptionPane.showInputDialog(frm, msg, ttl, JOptionPane.QUESTION_MESSAGE);
-	}
+	}**/
+	
+	
 	
 	
 	/**
@@ -640,7 +745,13 @@ public class Ssys3 {
 						File pla = new File(brk[2]);
 						if(edtExport(new File(brk[1]), pla)){
 							//export succeeded
-							secureUse(pla);
+							//System.out.println(pla.getParentFile().getAbsolutePath() + ", " + tempLoc.getAbsolutePath() + ", " + pla.getParentFile().equals(tempLoc));
+							try{
+								if(pla.getCanonicalPath().equals(tempLoc.getCanonicalPath()))secureUse(pla);
+							}
+							catch(IOException exc){
+								System.err.println("Failed to retrieve canonical path?");
+							}
 						}
 						else{
 							//export failed
