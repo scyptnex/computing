@@ -8,7 +8,7 @@ import javax.swing.table.*;
 
 public class Ssys3 {
 	
-	//TODO automatic save, delete-list, ximport (lost import)
+	//TODO ximport (lost import)
 	
 	public static final int KILOBYTE = 1024;
 	
@@ -28,6 +28,9 @@ public class Ssys3 {
 	public static final String CONF_CONFIRM = "Check_Imports = ";
 	public static final String CONF_STORE = "Storage_Locations:";
 	
+	public static final String CMD_EXPORT = "-export";
+	public static final String CMD_STOCKTAKE = "-stocktake";
+	
 	/**
 	 * GUI
 	 */
@@ -43,8 +46,10 @@ public class Ssys3 {
 	
 	private ArrayList<File> storeLocs;
 	private final File tempLoc;
+	
 	private LinkedList<String> jobs;
 	private EDT[] encryptDecryptThreads;
+	private boolean needsSave;
 	
 	public final Secureify sec;
 	public final Storage store;
@@ -253,6 +258,7 @@ public class Ssys3 {
 			System.exit(1);
 		}
 		
+		needsSave = false;
 		encryptDecryptThreads = new EDT[numThreads];
 		for(int i=0; i<encryptDecryptThreads.length; i++){
 			encryptDecryptThreads[i] = new EDT(i);
@@ -314,6 +320,7 @@ public class Ssys3 {
 	}
 	
 	public void secureUse(File fi){
+		System.out.println("Using " + fi.getAbsolutePath());
 		try {
 			Desktop.getDesktop().open(fi);
 		} catch (IOException e) {
@@ -330,10 +337,13 @@ public class Ssys3 {
 		if(expf.exists()) secureUse(expf);
 		else{//otherwise add to work queue
 			File cipf = store.locate(i);
-			synchronized(jobs){
-				if(priorityExport) jobs.addFirst(expJob(cipf, expf));
-				else jobs.addLast(expJob(cipf, expf));
+			if(cipf != null){
+				synchronized(jobs){
+					if(priorityExport) jobs.addFirst(expJob(cipf, expf));
+					else jobs.addLast(expJob(cipf, expf));
+				}
 			}
+			else System.err.println("Cannot export, missing encrypted file");
 		}
 		updateStatus();
 	}
@@ -417,6 +427,7 @@ public class Ssys3 {
 		if(JOptionPane.showConfirmDialog(frm, cmbMove, "Move item", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
 		File newLoc = store.move(idx, cmbMove.getSelectedIndex());
 		if(newLoc == null) System.err.println("move " + store.plainName(idx) + " unsuccessful");
+		else needsSave = true;
 	}
 	
 	public void secureDelete(){
@@ -432,6 +443,7 @@ public class Ssys3 {
 		if(del != null){
 			if(del.delete()){
 				//successful
+				needsSave = true;
 			}
 			else{
 				System.err.println("Delete " + del.getAbsolutePath() + " failed");
@@ -501,10 +513,16 @@ public class Ssys3 {
 			public void keyReleased(KeyEvent arg0) {
 				filterBase(txaSearch.getText());
 				//EXPORT settings here, as in mass export (export everything)
-				if(allowExport && txaSearch.getText().equalsIgnoreCase("-export")){
+				if(allowExport && txaSearch.getText().equalsIgnoreCase(CMD_EXPORT)){
 					//txaSearch.setText("");
 					if(JOptionPane.showConfirmDialog(frm, "Do you really want to export the whole secure base?", "Confirm Export", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
 						totalExport();
+					}
+				}
+				//LOST X IMPORT asin look through the store for files not listed
+				if(txaSearch.getText().equalsIgnoreCase(CMD_STOCKTAKE)){
+					for(int i=0; i<storeLocs.size(); i++){
+						if(store.stockTake(i)) needsSave = true;
 					}
 				}
 			}
@@ -773,6 +791,7 @@ public class Ssys3 {
 				System.err.println("import: Couldnt delete old file - continuing");
 			}
 			store.add(save.getName(), pname, date, size, tags, 0);
+			needsSave = true;
 			return true;
 		}
 		
@@ -803,7 +822,7 @@ public class Ssys3 {
 							//export succeeded
 							//System.out.println(pla.getParentFile().getAbsolutePath() + ", " + tempLoc.getAbsolutePath() + ", " + pla.getParentFile().equals(tempLoc));
 							try{
-								if(pla.getCanonicalPath().equals(tempLoc.getCanonicalPath()))secureUse(pla);
+								if(pla.getParentFile().getCanonicalPath().equals(tempLoc.getCanonicalPath()))secureUse(pla);
 							}
 							catch(IOException exc){
 								System.err.println("Failed to retrieve canonical path?");
@@ -817,6 +836,15 @@ public class Ssys3 {
 					updateStatus();
 				}
 				else{
+					if(needsSave && idx == 0){
+						System.out.println("Automatically saving");
+						try {
+							store.saveAll(tempLoc);
+						} catch (IOException e) {
+							System.err.println("Automatic save failed");
+						}
+						needsSave = false;
+					}
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException e) {

@@ -149,17 +149,22 @@ public class Storage extends AbstractTableModel{
 		}
 	}
 	
+	private File unsyncDelete(int i){
+		File ret = locate(i);
+		cypNames.remove(i);
+		plainNames.remove(i);
+		dates.remove(i);
+		totSize -= sizes.get(i);
+		sizes.remove(i);
+		tags.remove(i);
+		storeOrigs.remove(i);
+		return ret;
+	}
+	
 	public File delete(int i){
 		File ret = null;
 		synchronized(this){
-			ret = locate(i);
-			cypNames.remove(i);
-			plainNames.remove(i);
-			dates.remove(i);
-			totSize -= sizes.get(i);
-			sizes.remove(i);
-			tags.remove(i);
-			storeOrigs.remove(i);
+			ret = unsyncDelete(i);
 		}
 		return ret;
 	}
@@ -223,39 +228,71 @@ public class Storage extends AbstractTableModel{
 	}
 	
 	public void saveAll(File tmp) throws IOException{
-		//init
-		ArrayList<File> tmpFiles = getTmpFiles(stores, tmp);
-		ArrayList<PrintWriter> pws = new ArrayList<PrintWriter>();
-		for(File fi : tmpFiles) pws.add(new PrintWriter(fi));
-		
-		//write the headers
-		for(PrintWriter pw : pws){
-			pw.println(CRYP_IDENT);
-			pw.println(PLAIN_IDENT);
-			pw.println(DATE_IDENT);
-			pw.println(SIZE_IDENT);
-			pw.println(TAG_IDENT);
-			pw.println();//empty line designates end of header
+		synchronized(this){
+			//init
+			ArrayList<File> tmpFiles = getTmpFiles(stores, tmp);
+			ArrayList<PrintWriter> pws = new ArrayList<PrintWriter>();
+			for(File fi : tmpFiles) pws.add(new PrintWriter(fi));
+			
+			//write the headers
+			for(PrintWriter pw : pws){
+				pw.println(CRYP_IDENT);
+				pw.println(PLAIN_IDENT);
+				pw.println(DATE_IDENT);
+				pw.println(SIZE_IDENT);
+				pw.println(TAG_IDENT);
+				pw.println();//empty line designates end of header
+			}
+			
+			//write the content
+			for(int i=0; i<cypNames.size(); i++){
+				PrintWriter pw = pws.get(storeOrigs.get(i));
+				pw.println(cypNames.get(i));
+				pw.println(plainNames.get(i));
+				pw.println(dates.get(i));
+				pw.println(sizes.get(i));
+				pw.println(tags.get(i));
+			}
+			
+			//close the files
+			for(PrintWriter pw : pws) pw.close();
+			
+			//encrypt the files
+			for(int i=0; i<stores.size(); i++){
+				File ret = sec.encryptSpecialFile(tmpFiles.get(i), new File(stores.get(i), Ssys3.LIBRARY_NAME), true);
+				if(ret == null) throw new IOException("Failed to encrypt temp file");
+			}
 		}
-		
-		//write the content
-		for(int i=0; i<cypNames.size(); i++){
-			PrintWriter pw = pws.get(storeOrigs.get(i));
-			pw.println(cypNames.get(i));
-			pw.println(plainNames.get(i));
-			pw.println(dates.get(i));
-			pw.println(sizes.get(i));
-			pw.println(tags.get(i));
+	}
+	
+	public boolean stockTake(int sto){
+		boolean madeChange = false;
+		synchronized(this){
+			ArrayList<Integer> losts = new ArrayList<Integer>();
+			Set<String> unknowns = new HashSet<String>();
+			for(String fn : stores.get(sto).list()) unknowns.add(fn);
+			for(int i=0; i<cypNames.size(); i++) if(storeOrigs.get(i) == sto){
+				if(unknowns.contains(cypNames.get(i))) unknowns.remove(cypNames.get(i));
+				else losts.add(i);
+			}
+			if(losts.size() > 0){
+				String removal = stores.get(sto).getAbsolutePath() + " has lost track of " + losts.size() + " files.\nRemove the following:";
+				for(int i : losts) removal = removal + "\n - " + plainNames.get(i);
+				if(JOptionPane.showConfirmDialog(frm, removal, "Remove lost files", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+					for(int i : losts) unsyncDelete(i);
+					madeChange = true;
+				}
+			}
+			//TODO unknowns
+			unknowns.remove(Ssys3.LIBRARY_NAME);
+			for(String fn : unknowns){
+				String decr = sec.encryptString(fn, false);
+				int res = JOptionPane.NO_OPTION;
+				if(decr != null){
+					res = JOptionPane.
+			}
 		}
-		
-		//close the files
-		for(PrintWriter pw : pws) pw.close();
-		
-		//encrypt the files
-		for(int i=0; i<stores.size(); i++){
-			File ret = sec.encryptSpecialFile(tmpFiles.get(i), new File(stores.get(i), Ssys3.LIBRARY_NAME), true);
-			if(ret == null) throw new IOException("Failed to encrypt temp file");
-		}
+		return madeChange;
 	}
 	
 	public static ArrayList<File> getTmpFiles(ArrayList<File> stores, File tmp){
