@@ -8,7 +8,7 @@ import javax.swing.table.*;
 
 public class Ssys3 {
 	
-	//TODO import checking, failed import reaquisition
+	//TODO automatic save, delete-list, ximport (lost import)
 	
 	public static final int KILOBYTE = 1024;
 	
@@ -25,6 +25,7 @@ public class Ssys3 {
 	public static final String CONF_THREAD = "Worker_Thread_Count = ";
 	public static final String CONF_PRIORITY = "Prioritise_Decryption = ";
 	public static final String CONF_EXPORT = "Allow_Export = ";
+	public static final String CONF_CONFIRM = "Check_Imports = ";
 	public static final String CONF_STORE = "Storage_Locations:";
 	
 	/**
@@ -53,13 +54,14 @@ public class Ssys3 {
 	 * Guide to adding configuration
 	 *  - Add the configure variable here
 	 *  - Add a config flag CONF_XXXXXX above
-	 *  - Modify the config reader to read the config coption into a temporary variable
+	 *  - Modify the config reader to read the config option into a temporary variable
 	 *  - Set the configure variable from the temp
 	 *  - Modify the configure writer to save the option
 	 */
 	public final int numThreads;
 	public final boolean priorityExport;
 	public final boolean allowExport;
+	public final boolean checkImports;
 	
 	public static void main(String[] args){
 		new Ssys3();
@@ -112,6 +114,7 @@ public class Ssys3 {
 		int numThreadTemp = 2;
 		boolean priorityDecryptTemp = true;
 		boolean allowExportTemp = false;
+		boolean checkImportTemp = true;
 		try{
 			Scanner sca = new Scanner(CONF_FILE);
 			while(sca.hasNextLine()){
@@ -146,6 +149,14 @@ public class Ssys3 {
 						//do Nothing
 					}
 				}
+				else if(ln.startsWith(CONF_CONFIRM)){
+					try{
+						checkImportTemp = Boolean.parseBoolean(ln.substring(CONF_CONFIRM.length()));
+					}
+					catch(Exception exc){
+						//do Nothing
+					}
+				}
 			}
 			sca.close();
 		}
@@ -175,6 +186,7 @@ public class Ssys3 {
 		numThreads = numThreadTemp;
 		priorityExport = priorityDecryptTemp;
 		allowExport = allowExportTemp;
+		checkImports = checkImportTemp;
 		
 		try{
 			PrintWriter pw = new PrintWriter(CONF_FILE);
@@ -243,7 +255,7 @@ public class Ssys3 {
 		
 		encryptDecryptThreads = new EDT[numThreads];
 		for(int i=0; i<encryptDecryptThreads.length; i++){
-			encryptDecryptThreads[i] = new EDT();
+			encryptDecryptThreads[i] = new EDT(i);
 			encryptDecryptThreads[i].start();
 		}
 		
@@ -263,19 +275,6 @@ public class Ssys3 {
 			System.exit(1);
 		}
 		return password;
-	}
-	
-	public String jobString(String job){
-		if(job.charAt(0) == IMPORT_FLAG){
-			String[] brk = job.split(",", 4);//4 parts to an import string
-			File inf = new File(brk[1]);
-			return "import " + inf.getName();
-		}
-		else{
-			String[] brk = job.split(",", 3);//3 parts to export string
-			File plf = new File(brk[2]);
-			return "export " + plf.getName();
-		}
 	}
 	
 	public void updateStatus(){
@@ -301,15 +300,6 @@ public class Ssys3 {
 			}
 			i++;
 		}
-	}
-	
-	public String impJob(File fi, String date, String tags){
-		if(date == null) date = Storage.curDate();
-		if(tags == null) tags = Storage.NEW_TAG;
-		return IMPORT_FLAG + "," + fi.getAbsolutePath() + "," + date + "," + tags;
-	}
-	public String expJob(File cip, File plain){
-		return EXPORT_FLAG + "," + cip.getAbsolutePath() + "," + plain.getAbsolutePath();
 	}
 	
 	public void secureAnalysis(){
@@ -638,18 +628,31 @@ public class Ssys3 {
 		if(expf.exists()) rmrf(expf);
 		expf.mkdirs();
 		for(int sto=0; sto<storeLocs.size(); sto++){
-			String sl = storeLocs.get(sto).getAbsolutePath().replaceAll("/", "-").replaceAll("\\\\", "-");
-			File estore = new File(expf, sl);
-			estore.mkdir();
-			for(int i=0; i<store.getRowCount(); i++) if(store.curStore(i) == sto){
-				File enc = store.locate(i);
-				File dec = sec.prepareMainFile(enc, estore, false);
-				synchronized(jobs){
-					jobs.addLast(expJob(enc, dec));
+			try{
+				String sl = storeLocs.get(sto).getAbsolutePath().replaceAll("/", "-").replaceAll("\\\\", "-");
+				File estore = new File(expf, sl);
+				estore.mkdir();
+				File log = new File(estore, LIBRARY_NAME);
+				PrintWriter pw = new PrintWriter(log);
+				for(int i=0; i<store.getRowCount(); i++) if(store.curStore(i) == sto){
+					File enc = store.locate(i);
+					File dec = sec.prepareMainFile(enc, estore, false);
+					pw.println(dec.getName());
+					pw.println(store.getValueAt(i, Storage.COL_DATE));
+					pw.println(store.getValueAt(i, Storage.COL_TAGS));
+					synchronized(jobs){
+						jobs.addLast(expJob(enc, dec));
+					}
 				}
+				pw.close();
+			}
+			catch(IOException exc){
+				exc.printStackTrace();
+				JOptionPane.showMessageDialog(frm, "Exporting Failed");
+				return;
 			}
 		}
-		JOptionPane.showMessageDialog(frm, "Exported to:\n   " + expf.getAbsolutePath());
+		JOptionPane.showMessageDialog(frm, "Exporting to:\n   " + expf.getAbsolutePath());
 	}
 	
 	/**public char[] jetPass(){
@@ -665,15 +668,40 @@ public class Ssys3 {
 	}**/
 	
 	
+
 	
+	public static String jobString(String job){
+		if(job.charAt(0) == IMPORT_FLAG){
+			String[] brk = job.split(",", 4);//4 parts to an import string
+			File inf = new File(brk[1]);
+			return "import " + inf.getName();
+		}
+		else{
+			String[] brk = job.split(",", 3);//3 parts to export string
+			File plf = new File(brk[2]);
+			return "export " + plf.getName();
+		}
+	}
+	public static String impJob(File fi, String date, String tags){
+		if(date == null) date = Storage.curDate();
+		if(tags == null) tags = Storage.NEW_TAG;
+		return IMPORT_FLAG + "," + fi.getAbsolutePath() + "," + date + "," + tags;
+	}
+	public static String expJob(File cip, File plain){
+		return EXPORT_FLAG + "," + cip.getAbsolutePath() + "," + plain.getAbsolutePath();
+	}
 	
 	/**
 	 * Helper thread
 	 */
 	
 	public class EDT extends Thread{
+		public final int idx;
 		private boolean going = true;
 		private String cur;
+		public EDT(int i){
+			idx = i;
+		}
 		public String getCur(){
 			if(cur == null) return null;
 			return cur;
@@ -712,6 +740,34 @@ public class Ssys3 {
 			if(save == null){
 				System.err.println("import: Encryption failure");
 				return false;
+			}
+			if(checkImports){
+				long tim = System.currentTimeMillis();
+				boolean success = true;
+				File checkfi = new File(idx + ".check");
+				File checkOut = sec.encryptSpecialFile(save, checkfi, false);
+				if(checkOut == null) success = false;
+				else{
+					String fiHash = sec.digest(fi);
+					String outHash = sec.digest(checkOut);
+					if(fiHash == null || outHash == null || fiHash.length() < 1 || !fiHash.equals(outHash)) success = false;
+				}
+				checkfi.delete();
+				if(!success){
+					save.delete();
+					if(JOptionPane.showConfirmDialog(frm, "Confirming " + fi.getName() + "failed\n\n - Would you like to re-import the file?", "Import failed", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+						String j = impJob(fi, date, tags);
+						synchronized(jobs){
+							if(priorityExport) jobs.addLast(j);
+							else jobs.addFirst(j);
+						}
+					}
+					return false;
+				}
+				else{
+					System.out.println("Import: checked " + fi.getName() + " in " + (System.currentTimeMillis()-tim) + "ms");
+				}
+				
 			}
 			if(!fi.delete()){
 				System.err.println("import: Couldnt delete old file - continuing");

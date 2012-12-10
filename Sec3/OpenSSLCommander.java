@@ -220,6 +220,10 @@ public class OpenSSLCommander extends Secureify {
 		}
 	}
 	
+	public String digest(File fi){
+		return digest(fi, sslCommand);
+	}
+	
 	public static String digest(File loc, String command){
 		String[] cmds = new String[]{command, "dgst", loc.getAbsolutePath()};
 		try{

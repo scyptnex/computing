@@ -8,6 +8,8 @@ public abstract class Secureify {
 	
 	public abstract String encryptString(String in, boolean encrypt);
 	
+	public abstract String digest(File in);
+	
 	public File prepareMainFile(File in, File store, boolean encrypt){
 		if(!store.exists() || !in.exists() || !store.isDirectory() || in.isDirectory()) return null;
 		String newName = encryptString(in.getName(), encrypt);
