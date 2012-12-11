@@ -8,8 +8,6 @@ import javax.swing.table.*;
 
 public class Ssys3 {
 	
-	//TODO ximport (lost import)
-	
 	public static final int KILOBYTE = 1024;
 	
 	public static final int TXA_WIDTH = 15;
@@ -199,6 +197,7 @@ public class Ssys3 {
 			pw.println(CONF_THREAD + numThreads);
 			pw.println(CONF_PRIORITY + priorityExport);
 			pw.println(CONF_EXPORT + allowExport);
+			pw.println(CONF_CONFIRM + checkImports);
 			pw.println(CONF_STORE);
 			for(File fi : storeLocs){
 				pw.println(fi.getAbsolutePath());
@@ -270,12 +269,26 @@ public class Ssys3 {
 	}
 	
 	public char[] askPassword(){
-		final JPasswordField jpf = new JPasswordField();
-		int result = JOptionPane.showConfirmDialog(frm, jpf, "Password", JOptionPane.DEFAULT_OPTION);
 		char[] password = null;
+		final JPasswordField jpf = new JPasswordField(15);
+		JDialog dlg = new JDialog(frm, "Password");
+		GridBagConstraints gbc = new GridBagConstraints();
+		dlg.setLayout(new GridBagLayout());
+		gbc.gridwidth = 2;
+		dlg.add(new JLabel("Password?:"), gbc);
+		gbc.gridy++;
+		dlg.add(jpf, gbc);
+		dlg.pack();
+		dlg.setAlwaysOnTop(true);
+		dlg.setLocationRelativeTo(frm);
+		dlg.setVisible(true);
+		/**
+		int result = JOptionPane.showConfirmDialog(frm, jpf, "Password", JOptionPane.DEFAULT_OPTION);
 		if(result == JOptionPane.OK_OPTION){
 			password = jpf.getPassword();
-		}
+		}**/
+		String pss = JOptionPane.showInputDialog(frm, "Please type your password:");
+		if(pss != null) password = pss.toCharArray();
 		else{
 			System.err.println("No password given");
 			System.exit(1);
@@ -299,12 +312,14 @@ public class Ssys3 {
 		txaStatus.append("\nJobs:\n");
 		int c = 6 + numThreads;
 		int i = 0;
-		for(String s : jobs){
-			if(c + i < TXA_HEIGHT - 1) txaStatus.append(" - " + jobString(s) + "\n");
-			else if (c + i == TXA_HEIGHT-1){
-				txaStatus.append(" - [" + (jobs.size()-i) + "more ]");
+		synchronized(jobs){
+			for(String s : jobs){
+				if(c + i < TXA_HEIGHT - 1) txaStatus.append(" - " + jobString(s) + "\n");
+				else if (c + i == TXA_HEIGHT-1){
+					txaStatus.append(" - [" + (jobs.size()-i) + "more ]");
+				}
+				i++;
 			}
-			i++;
 		}
 	}
 	
@@ -760,7 +775,6 @@ public class Ssys3 {
 				return false;
 			}
 			if(checkImports){
-				long tim = System.currentTimeMillis();
 				boolean success = true;
 				File checkfi = new File(idx + ".check");
 				File checkOut = sec.encryptSpecialFile(save, checkfi, false);
@@ -782,9 +796,6 @@ public class Ssys3 {
 					}
 					return false;
 				}
-				else{
-					System.out.println("Import: checked " + fi.getName() + " in " + (System.currentTimeMillis()-tim) + "ms");
-				}
 				
 			}
 			if(!fi.delete()){
@@ -805,10 +816,19 @@ public class Ssys3 {
 				if(chose != null){
 					cur = chose;
 					updateStatus();
+					long time = System.currentTimeMillis();
+					String op = "export";
+					String targ = null;
+					boolean success = false;
 					if(chose.charAt(0) == IMPORT_FLAG){
 						String[] brk = chose.split(",", 4);//4 parts to an import string
-						if(edtImport(new File(brk[1]), brk[2], brk[3])){
+						File imp = new File(brk[1]);
+						targ = imp.getName();
+						if(edtImport(imp, brk[2], brk[3])){
 							//import successful
+							success = true;
+							if(checkImports) op = "import & check";
+							else op = "import (fast)";
 							store.fireTableDataChanged();
 						}
 						else{
@@ -818,8 +838,10 @@ public class Ssys3 {
 					else{
 						String[] brk = chose.split(",", 3);//3 parts to an export string
 						File pla = new File(brk[2]);
+						targ = pla.getName();
 						if(edtExport(new File(brk[1]), pla)){
 							//export succeeded
+							success = true;
 							//System.out.println(pla.getParentFile().getAbsolutePath() + ", " + tempLoc.getAbsolutePath() + ", " + pla.getParentFile().equals(tempLoc));
 							try{
 								if(pla.getParentFile().getCanonicalPath().equals(tempLoc.getCanonicalPath()))secureUse(pla);
@@ -832,6 +854,7 @@ public class Ssys3 {
 							//export failed
 						}
 					}
+					if(success) System.out.println("Completed " + op + " in " + (System.currentTimeMillis()-time) + "ms - " + targ);
 					cur = null;
 					updateStatus();
 				}

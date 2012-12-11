@@ -6,7 +6,10 @@ import javax.swing.table.*;
 
 public class SBase extends AbstractTableModel{
 
-
+	public static final long KILOBYTE = 1024;
+	public static final long MEGABYTE = KILOBYTE*KILOBYTE;
+	public static final long GIGABYTE = KILOBYTE*MEGABYTE;
+	
 	public static final int COL_NAME = 0;
 	public static final int COL_TAGS = 1;
 	public static final int COL_DATE = 2;
@@ -86,6 +89,51 @@ public class SBase extends AbstractTableModel{
 		catch(IOException e){
 			e.printStackTrace();
 			return false;
+		}
+	}
+	
+	public void exportAll(SecureUtils sec){
+		File topFold = new File("export");
+		Ssys2.rmrf(topFold);
+		int cur = 0;
+		File curFold = null;
+		PrintWriter curLib = null;
+		long maxLength = 20*GIGABYTE;
+		long curLength = 0;
+		try{
+			for(int i=0; i<name.size(); i++){
+				//make a home
+				if(curFold == null){
+					curFold = new File(topFold, "exp-" + cur);
+					if(!curFold.exists()) curFold.mkdirs();
+					curLib = new PrintWriter(new File(curFold, "zzlib.dat"));
+					curLength = 0;
+					cur++;
+				}
+				File enc = Ssys2.getFile(i + SECURE_EXTENSION);
+				if(enc.exists()){
+					File dec = new File(curFold, name.get(i));
+					if(sec.blockSecureSwap(enc, dec, false)){
+						curLib.println(dec.getName());//name
+						curLib.println(date.get(i));//date
+						curLib.println(tags.get(i));//tags
+						curLength += dec.length();
+					}
+					else{
+						System.err.println("Total export " + name.get(i) + " failed");
+						dec.delete();
+					}
+				}
+				if(curLength >= maxLength){
+					curLib.close();
+					curLib = null;
+					curFold = null;
+				}
+			}
+			if(curLib != null) curLib.close();
+		}
+		catch(IOException exc){
+			exc.printStackTrace();
 		}
 	}
 	

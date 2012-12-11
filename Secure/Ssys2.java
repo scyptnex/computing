@@ -165,7 +165,11 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 			checkPassword();
 		}
 		else if(e.getSource() == txaSearch){
-			filterBase(txaSearch.getText());
+			String txt = txaSearch.getText();
+			if(txt.equals("-export")){
+				exportAll();
+			}
+			filterBase(txt);
 			updateInfo();
 		}
 	}
@@ -227,6 +231,11 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 				System.exit(0);
 			}
 		}
+	}
+	
+	public void exportAll(){
+		if(JOptionPane.showConfirmDialog(this, "Really export everything?", "Export", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) return;
+		base.exportAll(sec);
 	}
 	
 	public void lock(){

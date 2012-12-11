@@ -1,4 +1,5 @@
 import java.util.*;
+import java.text.*;
 import java.io.*;
 import javax.swing.table.*;
 import javax.swing.*;
@@ -115,19 +116,23 @@ public class Storage extends AbstractTableModel{
 		}
 	}
 	
-	public void add(String cname, String pname, String d, Long s, String t, int o){
+	private void unsyncAdd(String cname, String pname, String d, long sizeKB, String t, int o){
+		cypNames.add(cname);
+		plainNames.add(pname);
+		dates.add(d);
+		sizes.add(sizeKB);
+		tags.add(t);
+		storeOrigs.add(o);
+		totSize += sizeKB;
+	}
+	
+	public void add(String cname, String pname, String d, long sizeKB, String t, int o){
 		if(containsEntry(pname)){
 			JOptionPane.showMessageDialog(frm, "Refusing to add duplicate entry " + pname, "Duplicate", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		synchronized(this){
-			cypNames.add(cname);
-			plainNames.add(pname);
-			dates.add(d);
-			sizes.add(s);
-			tags.add(t);
-			storeOrigs.add(o);
-			totSize += s;
+			unsyncAdd(cname, pname, d, sizeKB, t, o);
 		}
 	}
 	
@@ -279,17 +284,19 @@ public class Storage extends AbstractTableModel{
 				String removal = stores.get(sto).getAbsolutePath() + " has lost track of " + losts.size() + " files.\nRemove the following:";
 				for(int i : losts) removal = removal + "\n - " + plainNames.get(i);
 				if(JOptionPane.showConfirmDialog(frm, removal, "Remove lost files", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
-					for(int i : losts) unsyncDelete(i);
+					for(int x=losts.size()-1; x>= 0; x--) unsyncDelete(losts.get(x));
 					madeChange = true;
 				}
 			}
-			//TODO unknowns
 			unknowns.remove(Ssys3.LIBRARY_NAME);
 			for(String fn : unknowns){
 				String decr = sec.encryptString(fn, false);
 				int res = JOptionPane.NO_OPTION;
-				if(decr != null){
-					res = JOptionPane.
+				if(decr != null) res = JOptionPane.showConfirmDialog(frm, "Add the file " + decr + "?\n\n - Cipher: " + fn, "Found file", JOptionPane.YES_NO_OPTION);
+				if(res == JOptionPane.YES_OPTION){
+					File orig = new File(stores.get(sto), fn);
+					unsyncAdd(fn, decr, longDate(orig.lastModified()), orig.length()/Ssys3.KILOBYTE, NEW_TAG, sto);
+				}
 			}
 		}
 		return madeChange;
@@ -386,10 +393,16 @@ public class Storage extends AbstractTableModel{
 		}
 	}
 	
+	public static String dateString(Date d){
+		return new SimpleDateFormat("yyyy-MM-dd").format(d);
+	}
+	
+	public static String longDate(long tstamp){
+		return dateString(new Date(tstamp));
+	}
+	
 	public static String curDate(){
-		String mon = (Calendar.getInstance().get(Calendar.MONTH)+1) + "";
-		String day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "";
-		return Calendar.getInstance().get(Calendar.YEAR) + "-" + (mon.length() == 1 ? "0" + mon : mon) + "-" + (day.length() == 1 ? "0" + day : day);
+		return dateString(new Date());
 	}
 	
 }
