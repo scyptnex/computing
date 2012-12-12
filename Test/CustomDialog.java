@@ -29,9 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-import javax.swing.JOptionPane;
-import javax.swing.JDialog;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.beans.*; //property change stuff
 import java.awt.*;
 import java.awt.event.*;
@@ -41,7 +39,7 @@ class CustomDialog extends JDialog
                    implements ActionListener,
                               PropertyChangeListener {
     private String typedText = null;
-    private JTextField textField;
+    private JPasswordField textField;
     private DialogDemo dd;
 
     private String magicWord;
@@ -60,13 +58,12 @@ class CustomDialog extends JDialog
 
     /** Creates the reusable dialog. */
     public CustomDialog(Frame aFrame, String aWord, DialogDemo parent) {
-        super(aFrame, true);
+        super(aFrame, "quizzzz", true);
         dd = parent;
 
         magicWord = aWord.toUpperCase();
-        setTitle("Quiz");
 
-        textField = new JTextField(10);
+        textField = new JPasswordField(10);
 
         //Create an array of the text and components to be displayed.
         String msgString1 = "What was Dr. SEUSS's real last name?";

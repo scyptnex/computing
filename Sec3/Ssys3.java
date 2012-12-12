@@ -13,6 +13,8 @@ public class Ssys3 {
 	public static final int TXA_WIDTH = 15;
 	public static final int TXA_HEIGHT = 29;
 	
+	public static final int PASSWORD_MIN = 2;
+	
 	public static final char IMPORT_FLAG = 'I';
 	public static final char EXPORT_FLAG = 'X';
 	
@@ -109,6 +111,7 @@ public class Ssys3 {
 			public void windowIconified(WindowEvent evt) {}
 			public void windowOpened(WindowEvent evt) {}
 		});
+		frm.setLocationRelativeTo(null);
 		frm.setVisible(true);
 		
 		//load config
@@ -176,6 +179,7 @@ public class Ssys3 {
 			osslWorks = OpenSSLCommander.test(ossl);
 			if(osslWorks == null) JOptionPane.showMessageDialog(frm, "Command " + ossl + " unsuccessful", "Unsuccessful", JOptionPane.ERROR_MESSAGE);
 		}
+		if(storeLocs.size() < 1) JOptionPane.showMessageDialog(frm, "Please select an initial sotrage location\nIf one already exists, or there are more than one, please select it");
 		while(storeLocs.size() < 1){
 			JFileChooser jfc = new JFileChooser();
 			jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -270,27 +274,25 @@ public class Ssys3 {
 	
 	public char[] askPassword(){
 		char[] password = null;
+		final JDialog dlg = new JDialog(frm, "Password", true);
 		final JPasswordField jpf = new JPasswordField(15);
-		JDialog dlg = new JDialog(frm, "Password");
-		GridBagConstraints gbc = new GridBagConstraints();
-		dlg.setLayout(new GridBagLayout());
-		gbc.gridwidth = 2;
-		dlg.add(new JLabel("Password?:"), gbc);
-		gbc.gridy++;
-		dlg.add(jpf, gbc);
+		final JButton[] btns = {new JButton("Enter"), new JButton("Cancel")};
+		for(int i=0; i<btns.length; i++){
+			btns[i].addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					dlg.setVisible(false);
+				}
+			});
+		}
+		Object[] prts = new Object[]{"Please input a password:",jpf};
+		dlg.setContentPane(new JOptionPane(prts, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, btns, btns[0]));
 		dlg.pack();
-		dlg.setAlwaysOnTop(true);
 		dlg.setLocationRelativeTo(frm);
 		dlg.setVisible(true);
-		/**
-		int result = JOptionPane.showConfirmDialog(frm, jpf, "Password", JOptionPane.DEFAULT_OPTION);
-		if(result == JOptionPane.OK_OPTION){
-			password = jpf.getPassword();
-		}**/
-		String pss = JOptionPane.showInputDialog(frm, "Please type your password:");
-		if(pss != null) password = pss.toCharArray();
-		else{
-			System.err.println("No password given");
+		//now we wait for input
+		password = jpf.getPassword();
+		if(password.length < PASSWORD_MIN){
+			System.err.println("Invalid password, passwords must be " + PASSWORD_MIN + " characters long");
 			System.exit(1);
 		}
 		return password;
@@ -335,7 +337,7 @@ public class Ssys3 {
 	}
 	
 	public void secureUse(File fi){
-		System.out.println("Using " + fi.getAbsolutePath());
+		//System.out.println("Using " + fi.getAbsolutePath());
 		try {
 			Desktop.getDesktop().open(fi);
 		} catch (IOException e) {
@@ -860,13 +862,22 @@ public class Ssys3 {
 				}
 				else{
 					if(needsSave && idx == 0){
-						System.out.println("Automatically saving");
-						try {
-							store.saveAll(tempLoc);
-						} catch (IOException e) {
-							System.err.println("Automatic save failed");
+						boolean alldone = true;
+						for(int i=0; i<numThreads; i++){
+							if(encryptDecryptThreads[i].getCur() != null){
+								alldone = false;
+								break;
+							}
 						}
-						needsSave = false;
+						if(alldone){
+							System.out.println("Automatically saving");
+							try {
+								store.saveAll(tempLoc);
+							} catch (IOException e) {
+								System.err.println("Automatic save failed");
+							}
+							needsSave = false;
+						}
 					}
 					try {
 						Thread.sleep(500);
