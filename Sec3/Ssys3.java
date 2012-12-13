@@ -19,8 +19,10 @@ public class Ssys3 {
 	public static final char EXPORT_FLAG = 'X';
 	
 	public static final String LIBRARY_NAME = "zzlib.dat";
+	public static final String ICON_NAME = "ssys3.ico";
+	public static final String CONFIG_NAME = "ssys3.cfg";
 	
-	public static final File CONF_FILE = new File("ssys3.cfg");
+	public static final File CONF_FILE = new File(CONFIG_NAME);
 	public static final String CONF_SSL = "Open_SSL_Command = ";
 	public static final String CONF_THREAD = "Worker_Thread_Count = ";
 	public static final String CONF_PRIORITY = "Prioritise_Decryption = ";
@@ -111,6 +113,8 @@ public class Ssys3 {
 			public void windowIconified(WindowEvent evt) {}
 			public void windowOpened(WindowEvent evt) {}
 		});
+		ImageIcon ico = new ImageIcon(ICON_NAME);
+		frm.setIconImage(ico.getImage());
 		frm.setLocationRelativeTo(null);
 		frm.setVisible(true);
 		
