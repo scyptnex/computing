@@ -45,6 +45,8 @@ public class TagBase {
 		scry(mainDir, "", newFiles, missingFiles);
 		System.out.println("Found " + newFiles.size() + " files");
 		System.out.println("Lost " + missingFiles.size() + " files");
+		//confirm removal
+		//confirm addition
 	}
 	
 	private void scry(File dir, String curPath, ArrayList<String> newFiles, HashSet<String> missingFiles){
