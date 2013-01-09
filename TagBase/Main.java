@@ -1,5 +1,7 @@
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
 import javax.swing.*;
 
 public class Main {
@@ -9,6 +11,7 @@ public class Main {
 		if(tb == null) exitErr("Failed to load tagbase");
 		else{
 			tb.scry();
+			tb.save();
 			exit();
 		}
 	}
@@ -28,5 +31,17 @@ public class Main {
 	public static void exitErr(String errMsg){
 		System.err.println(errMsg);
 		System.exit(1);
+	}
+	
+	public static String dateString(Date d){
+		return new SimpleDateFormat("yyyy-MM-dd").format(d);
+	}
+	
+	public static String longDate(long tstamp){
+		return dateString(new Date(tstamp));
+	}
+	
+	public static String curDate(){
+		return dateString(new Date());
 	}
 }
