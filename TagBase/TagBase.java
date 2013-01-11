@@ -65,6 +65,26 @@ public class TagBase {
 		tags.set(idx, newTag);
 	}
 	
+	public String loc(int row){
+		return locs.get(row);
+	}
+	public String name(int row){
+		return names.get(row);
+	}
+	public String tag(int row){
+		return tags.get(row);
+	}
+	public String date(int row){
+		return dates.get(row);
+	}
+	public Long size(int row){
+		return sizes.get(row);
+	}
+	
+	public int count(){
+		return locs.size();
+	}
+	
 	public boolean save(){
 		try{
 			PrintWriter pw = new PrintWriter(new File(mainDir, LIST_NAME));
@@ -88,6 +108,7 @@ public class TagBase {
 		HashSet<String> missingFiles = new HashSet<String>();
 		for(String l : locs) missingFiles.add(l);
 		scry(mainDir, "", newFiles, missingFiles);
+		//TODO moving
 		//confirm removal
 		if(missingFiles.size() > 0){
 			String msg = missingFiles.size() + " files were lost:";
@@ -128,12 +149,15 @@ public class TagBase {
 				scry(fi, curPath + dir.getName() + "/", newFiles, missingFiles);
 			}
 			else{
-				String loc = curPath + fi.getName();
-				if(missingFiles.contains(loc)){
-					missingFiles.remove(loc);
-				}
-				else{
-					newFiles.add(loc);
+				if(!fi.getName().equals(LIST_NAME)){
+					String loc = curPath + fi.getName();
+					if(missingFiles.contains(loc)){
+						//TODO change size and (date?)
+						missingFiles.remove(loc);
+					}
+					else{
+						newFiles.add(loc);
+					}
 				}
 			}
 		}

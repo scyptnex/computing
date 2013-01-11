@@ -6,13 +6,13 @@ import javax.swing.*;
 
 public class Main {
 	
+	public static TagBase tb;
+	
 	public static void main(String[] args){
-		TagBase tb = TagBase.getBase(new File("."));
+		tb = TagBase.getBase(args.length < 1 || ! new File(args[0]).isDirectory() ? new File("."): new File(args[0]));
 		if(tb == null) exitErr("Failed to load tagbase");
 		else{
-			tb.scry();
-			tb.save();
-			exit();
+			Gui gui = new Gui(tb);
 		}
 	}
 	
@@ -25,6 +25,7 @@ public class Main {
 	}
 	
 	public static void exit(){
+		tb.save();
 		System.exit(0);
 	}
 	
