@@ -109,6 +109,15 @@ public class TagBase {
 		for(String l : locs) missingFiles.add(l);
 		scry(mainDir, "", newFiles, missingFiles);
 		//TODO moving
+		for(String mss : missingFiles){
+			File fi = new File(mainDir, mss);
+			for(String fnd : newFiles){
+				File chk =  new File(mainDir, fnd);
+				if(fi.getName().equals(chk.getName())){
+					jkthdhgd
+				}
+			}
+		}
 		//confirm removal
 		if(missingFiles.size() > 0){
 			String msg = missingFiles.size() + " files were lost:";
