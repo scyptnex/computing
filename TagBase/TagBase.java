@@ -109,13 +109,19 @@ public class TagBase {
 		for(String l : locs) missingFiles.add(l);
 		scry(mainDir, "", newFiles, missingFiles);
 		//TODO moving
+		ArrayList<String> trueMissing = new ArrayList<String>();
 		for(String mss : missingFiles){
 			File fi = new File(mainDir, mss);
+			File repl = null;
 			for(String fnd : newFiles){
 				File chk =  new File(mainDir, fnd);
 				if(fi.getName().equals(chk.getName())){
-					jkthdhgd
+					repl = chk;
 				}
+			}
+			if(repl == null) trueMissing.add(mss);
+			else{
+				
 			}
 		}
 		//confirm removal
