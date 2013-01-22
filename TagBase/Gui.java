@@ -17,6 +17,8 @@ public class Gui extends JFrame{
 	public static final int SEARCH_HEIGHT = 4;
 	public static final int SEARCH_WIDTH = 15;
 	
+	public static final double SIZE_UNIT = 1024;
+	
 	private final Container c;
 	private final JTable tblItems;
 	private final JTextArea txaSearch;
@@ -26,13 +28,13 @@ public class Gui extends JFrame{
 	private final Tabulator tableModel;
 	private final TableRowSorter<Tabulator> tableSorter;
 	
-	private final TagBase tb;
+	private final TagBaseII tb;
 	
 	public static void main(String[] args){
 		Main.main(args);
 	}
 	
-	public Gui(TagBase base){
+	public Gui(TagBaseII base){
 		super("Tag Base");
 		tb = base;
 		
@@ -60,8 +62,12 @@ public class Gui extends JFrame{
 				}
 				if(e.getClickCount() > 1 || e.getButton() == MouseEvent.BUTTON3){
 					int idx = tblItems.convertRowIndexToModel(tblItems.getSelectedRow());
-					System.out.println("Do something with item " + idx);
-					File fi = new File(tb.mainDir, tb.loc(idx));
+					//System.out.println("Do something with item " + idx);
+					File fi = new File(tb.mainDir, tb.path(idx));
+					if(!fi.exists()){
+						System.err.println("Couldnt find " + fi.getName() + ", try rescanning");
+						return;
+					}
 					try {
 						Desktop.getDesktop().open(fi);
 					} catch (IOException e1) {
@@ -160,13 +166,13 @@ public class Gui extends JFrame{
 				return tb.date(row);
 			}
 			default :{
-				return tb.size(row);
+				return Main.twoDecimal(tb.size(row)/SIZE_UNIT);
 			}
 			}
 		}
 		
 		public Class<?> getColumnClass(int c) {
-			if(c == COL_SIZE) return Long.class;
+			if(c == COL_SIZE) return Double.class;
 			return String.class;
 		}
 
@@ -200,14 +206,19 @@ public class Gui extends JFrame{
 		
 		boolean names = false;
 		boolean bads = false;
+		boolean hiddens = false;
 		boolean exclusive = true;
 		if(ft.contains("-n")){
 			names = true;
 			ft = ft.substring(0, ft.indexOf("-n")) + ft.substring(ft.indexOf("-n") + 2);
 		}
-		if(ft.contains("-z")){
+		if(ft.contains("-zz")){
 			bads = true;
-			ft = ft.substring(0, ft.indexOf("-z")) + ft.substring(ft.indexOf("-z") + 2);
+			ft = ft.substring(0, ft.indexOf("-zz")) + ft.substring(ft.indexOf("-zz") + 3);
+		}
+		if(ft.contains("-zh")){
+			hiddens = true;
+			ft = ft.substring(0, ft.indexOf("-zh")) + ft.substring(ft.indexOf("-zh") + 3);
 		}
 		if(ft.contains("-x")){
 			exclusive = false;
@@ -232,16 +243,22 @@ public class Gui extends JFrame{
 		}
 		
 		RowFilter<Tabulator, Object> badFilter = RowFilter.regexFilter(".*zz.*", COL_TAGS);
-		if(!bads) badFilter = RowFilter.notFilter(badFilter);
+		if(!bads)badFilter = RowFilter.notFilter(badFilter);
 		
-		RowFilter<Tabulator, Object> omniFilter = badFilter;
+
+		
+
+		ArrayList<RowFilter<Tabulator, Object>> tmpFilters = new ArrayList<RowFilter<Tabulator, Object>>();
 		if(termFilters.size() != 0){
-			ArrayList<RowFilter<Tabulator, Object>> tmpFilters = new ArrayList<RowFilter<Tabulator, Object>>();
 			RowFilter<Tabulator, Object> orFilter = (exclusive ? RowFilter.andFilter(termFilters) : RowFilter.orFilter(termFilters));
 			tmpFilters.add(orFilter);
-			tmpFilters.add(badFilter);
-			omniFilter = RowFilter.andFilter(tmpFilters);
 		}
+		tmpFilters.add(badFilter);
+		if(!hiddens){
+			RowFilter<Tabulator, Object> hiddenFilter = RowFilter.regexFilter(".*zh.*", COL_TAGS);
+			tmpFilters.add(RowFilter.notFilter(hiddenFilter));
+		}
+		RowFilter<Tabulator, Object> omniFilter = RowFilter.andFilter(tmpFilters);;
 		
 		tableSorter.setRowFilter(omniFilter);
 	}
