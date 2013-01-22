@@ -47,6 +47,7 @@ public class Gui extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				tb.scry();
 				tableModel.fireTableDataChanged();
+				showInfo();
 			}
 		});
 		
@@ -74,6 +75,7 @@ public class Gui extends JFrame{
 						System.err.println("Failed to open");
 					}
 				}
+				showInfo();
 			}
 			public void mouseEntered(MouseEvent arg0) {}
 			public void mouseExited(MouseEvent arg0) {}
@@ -122,6 +124,7 @@ public class Gui extends JFrame{
 			public void windowOpened(WindowEvent evt) {}
 		});
 		
+		showInfo();
 		this.setVisible(true);
 	}
 	
@@ -189,6 +192,13 @@ public class Gui extends JFrame{
 			}
 		}
 		
+	}
+	
+	public void showInfo(){
+		txaStatus.setText("");
+		txaStatus.append("lol");
+		txaStatus.append("lol");
+		sdklhbvfd
 	}
 	
 	public void filterBase(String ft){
