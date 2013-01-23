@@ -7,6 +7,7 @@ public class TagBaseII {
 	public static void main(String[] args){Main.main(args);};
 	
 	public static final String LIST_NAME = "zzList.txt";
+	public static final String IMPORT_FILENAME = "zzlib.dat";
 	public static final int MAX_PROMPT_LINES = 20;
 	
 	public static final String NEW_TAG = "new";
@@ -24,6 +25,7 @@ public class TagBaseII {
 	private final HashMap<String, String> paths;
 	
 	public static TagBaseII getBase(File mainDir){
+		//System.out.println(mainDir.getAbsolutePath());
 		File list = new File(mainDir, LIST_NAME);
 		if(!list.exists()){
 			if(Main.confirmPrompt("Directory " + mainDir.getAbsolutePath() + " is not a TagBase directory.\n\nMake it one?")){
@@ -118,7 +120,7 @@ public class TagBaseII {
 			end++;
 			div = div*1024;
 		}
-		return Main.twoDecimal(totalSize/div) + " " + ends;
+		return Main.twoDecimal(totalSize/div) + " " + ends[end];
 	}
 	public void retag(int idx, String tag){
 		retag(names.get(idx), tag);
@@ -174,7 +176,7 @@ public class TagBaseII {
 		if(knownNames.size() > 0){
 			String msg = knownNames.size() + " files were lost:";
 			if(knownNames.size() < MAX_PROMPT_LINES) for(String lst : knownNames) msg = msg + "\n - " + lst;
-			msg = msg + "\n\nDelete them?";
+			msg = msg + "\n\nRemove them?";
 			if(Main.confirmPrompt(msg)){
 				indexes.clear();
 				for(String lost : knownNames){
@@ -200,7 +202,7 @@ public class TagBaseII {
 				}
 			}
 		}
-		else if(knownNames.size() <= 0) Main.informPrompt("Scan found nothing");
+		else if(knownNames.size() <= 0) Main.informPrompt("Scan completed\nNo new or missing files\nFiles which were moved have been reaquired");
 	}
 	private void addNew(String newPath){
 		File fi = new File(mainDir, newPath);
@@ -223,10 +225,28 @@ public class TagBaseII {
 		sizes.put(nm, fi.length());
 		paths.put(nm, newPath);
 	}
+	private void fullImport(File dir){
+		File impf = new File(dir, IMPORT_FILENAME);
+		try{
+			Scanner sca = new Scanner (impf);
+			sca.close();
+			dflovbdi
+			impf.delete();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			Main.informPrompt("Something went horribly wrong while importing");
+		}
+	}
 	private void recurFileTree(ArrayList<String> newPaths, Set<String> knownNames, String curPath, File curDir){
-		for(File fi : curDir.listFiles()){
+		//when this folder is from an export
+		if(new File(curDir, IMPORT_FILENAME).exists()){
+			fullImport(curDir);
+		}
+		//otherwise
+		else for(File fi : curDir.listFiles()){
 			if(fi.isDirectory()){
-				recurFileTree(newPaths, knownNames, curPath + fi.getName() + "/", fi);
+				if(!fi.getName().startsWith(".Trash")) recurFileTree(newPaths, knownNames, curPath + fi.getName() + "/", fi);
 			}
 			else{
 				String name = fi.getName();
@@ -247,5 +267,4 @@ public class TagBaseII {
 			}
 		}
 	}
-	
 }

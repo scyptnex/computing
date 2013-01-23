@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 
+import javax.swing.JOptionPane;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 
@@ -93,7 +94,11 @@ public class SBase extends AbstractTableModel{
 	}
 	
 	public void exportAll(SecureUtils sec){
-		File topFold = new File("export");
+		int start = Integer.parseInt(JOptionPane.showInputDialog("Starting where? (0 for everything)"));
+		int end = Integer.parseInt(JOptionPane.showInputDialog("Ending where? (-1 for everything)"))+1;
+		if(end <= start) end = name.size();
+		end = Math.min(end, name.size());
+		File topFold = new File("export " + start + " - " + (end-1));
 		Ssys2.rmrf(topFold);
 		int cur = 0;
 		File curFold = null;
@@ -101,7 +106,7 @@ public class SBase extends AbstractTableModel{
 		long maxLength = 20*GIGABYTE;
 		long curLength = 0;
 		try{
-			for(int i=0; i<name.size(); i++){
+			for(int i=start; i<name.size(); i++){
 				//make a home
 				if(curFold == null){
 					curFold = new File(topFold, "exp-" + cur);
@@ -117,7 +122,9 @@ public class SBase extends AbstractTableModel{
 						curLib.println(dec.getName());//name
 						curLib.println(date.get(i));//date
 						curLib.println(tags.get(i));//tags
+						curLib.flush();
 						curLength += dec.length();
+						System.out.println(i + " - " + name.get(i) + "\tgoes to\t" + curFold);
 					}
 					else{
 						System.err.println("Total export " + name.get(i) + " failed");

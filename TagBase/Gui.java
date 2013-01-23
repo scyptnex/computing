@@ -96,6 +96,7 @@ public class Gui extends JFrame{
 		});
 		txaStatus = new JTextArea();
 		txaStatus.setEditable(false);
+		txaStatus.setLineWrap(true);
 		txaStatus.setBorder(BorderFactory.createTitledBorder("Status"));
 		
 		JPanel pnlEast = new JPanel(new BorderLayout());
@@ -195,10 +196,17 @@ public class Gui extends JFrame{
 	}
 	
 	public void showInfo(){
-		txaStatus.setText("");
-		txaStatus.append("lol");
-		txaStatus.append("lol");
-		sdklhbvfd
+		txaStatus.setText("Count:\t" + tb.count() + "\nSize:\t" + tb.getTotalSize() + "\n");
+		if(tblItems.getSelectedRow() != -1){
+			int idx = tblItems.convertRowIndexToModel(tblItems.getSelectedRow());
+			txaStatus.append("\nSelected(" + idx + ")");
+			txaStatus.append("\n - " + tb.name(idx));
+			txaStatus.append("\n - " + tb.tag(idx));
+			txaStatus.append("\n - " + tb.date(idx));
+			txaStatus.append("\n - " + tb.size(idx));
+			txaStatus.append("\n - " + tb.path(idx));
+			
+		}
 	}
 	
 	public void filterBase(String ft){
