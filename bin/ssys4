@@ -20,8 +20,11 @@ then
 	sleep 1
 fi
 
-echo "Press enter to continue"
-read varline
+nautilus $HOME/Private
+cd $HOME/computing/TagBase
+java Main $HOME/Private
+echo "Sleeping for a bit"
+sleep 5
 
 ecryptfs-umount-private
 while [ ! $? -eq 0 ]

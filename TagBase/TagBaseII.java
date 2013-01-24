@@ -225,13 +225,19 @@ public class TagBaseII {
 		sizes.put(nm, fi.length());
 		paths.put(nm, newPath);
 	}
-	private void fullImport(File dir){
+	private void fullImport(File dir, String path){
 		File impf = new File(dir, IMPORT_FILENAME);
 		try{
 			Scanner sca = new Scanner (impf);
+			while(sca.hasNextLine()){
+				String nm = sca.nextLine();
+				File chk = new File(mainDir, path + nm);
+				if(chk.exists()){
+					addDetailed(path + nm, sca.nextLine(), sca.nextLine());
+				}
+			}
 			sca.close();
-			dflovbdi
-			impf.delete();
+			if(!impf.delete()) System.err.println("Delete import file manually: " + impf.getAbsolutePath());
 		}
 		catch(IOException e){
 			e.printStackTrace();
@@ -241,7 +247,7 @@ public class TagBaseII {
 	private void recurFileTree(ArrayList<String> newPaths, Set<String> knownNames, String curPath, File curDir){
 		//when this folder is from an export
 		if(new File(curDir, IMPORT_FILENAME).exists()){
-			fullImport(curDir);
+			if(Main.confirmPrompt("Fully import the directory:\n - " + curDir.getAbsolutePath())) fullImport(curDir, curPath);
 		}
 		//otherwise
 		else for(File fi : curDir.listFiles()){

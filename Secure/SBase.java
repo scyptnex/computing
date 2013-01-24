@@ -100,41 +100,24 @@ public class SBase extends AbstractTableModel{
 		end = Math.min(end, name.size());
 		File topFold = new File("export " + start + " - " + (end-1));
 		Ssys2.rmrf(topFold);
-		int cur = 0;
-		File curFold = null;
-		PrintWriter curLib = null;
-		long maxLength = 20*GIGABYTE;
-		long curLength = 0;
+		if(!topFold.exists()) topFold.mkdirs();
 		try{
+			PrintWriter curLib = new PrintWriter(new File(topFold, "zzlib.dat"));
 			for(int i=start; i<name.size(); i++){
-				//make a home
-				if(curFold == null){
-					curFold = new File(topFold, "exp-" + cur);
-					if(!curFold.exists()) curFold.mkdirs();
-					curLib = new PrintWriter(new File(curFold, "zzlib.dat"));
-					curLength = 0;
-					cur++;
-				}
 				File enc = Ssys2.getFile(i + SECURE_EXTENSION);
 				if(enc.exists()){
-					File dec = new File(curFold, name.get(i));
+					File dec = new File(topFold, name.get(i));
 					if(sec.blockSecureSwap(enc, dec, false)){
 						curLib.println(dec.getName());//name
 						curLib.println(date.get(i));//date
 						curLib.println(tags.get(i));//tags
 						curLib.flush();
-						curLength += dec.length();
-						System.out.println(i + " - " + name.get(i) + "\tgoes to\t" + curFold);
+						System.out.println(i + " - " + name.get(i) + "\tgoes to\t" + topFold.getName());
 					}
 					else{
 						System.err.println("Total export " + name.get(i) + " failed");
 						dec.delete();
 					}
-				}
-				if(curLength >= maxLength){
-					curLib.close();
-					curLib = null;
-					curFold = null;
 				}
 			}
 			if(curLib != null) curLib.close();
