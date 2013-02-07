@@ -1,3 +1,4 @@
+import java.awt.Desktop;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -7,6 +8,8 @@ import javax.swing.*;
 
 public class Main {
 	
+	public static final String[] endings = {"avi", "mpg", "wmv", "mkv", "flv", "mp4"};
+	
 	public static TagBaseII tb;
 	public static Gui gui;
 	
@@ -15,6 +18,21 @@ public class Main {
 		if(tb == null) exitErr("Failed to load tagbase");
 		else{
 			gui = new Gui(tb);
+		}
+	}
+	
+	public static void use(File fi) throws IOException{
+		boolean ismovie = false;
+		for(String s : endings){
+			if(fi.getName().endsWith(s)) ismovie = true;
+		}
+		if(ismovie){
+			System.out.println("Movie file");
+			String[] cmd = new String[]{"vlc", fi.getAbsolutePath()};
+			Process p = Runtime.getRuntime().exec(cmd);
+		}
+		else{
+			Desktop.getDesktop().open(fi);
 		}
 	}
 	

@@ -70,7 +70,7 @@ public class Gui extends JFrame{
 						return;
 					}
 					try {
-						Desktop.getDesktop().open(fi);
+						Main.use(fi);
 					} catch (IOException e1) {
 						System.err.println("Failed to open");
 					}
