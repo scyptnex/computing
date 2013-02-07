@@ -27,7 +27,6 @@ public class Main {
 			if(fi.getName().endsWith(s)) ismovie = true;
 		}
 		if(ismovie){
-			System.out.println("Movie file");
 			String[] cmd = new String[]{"vlc", fi.getAbsolutePath()};
 			Process p = Runtime.getRuntime().exec(cmd);
 		}
