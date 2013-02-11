@@ -112,6 +112,10 @@ public class TagBaseII {
 	public int count(){
 		return names.size();
 	}
+	public void displayTags(){
+		HashMap<String, Integer> counts = new HashMap<String, Integer>();
+		for(String nm : names) for(String tag:tags.get(nm).split(regex))
+	}
 	public String getTotalSize(){
 		String[] ends = {"B", "KB", "MB", "GB", "TB"};
 		int end = 0;
