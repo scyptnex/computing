@@ -114,7 +114,28 @@ public class TagBaseII {
 	}
 	public void displayTags(){
 		HashMap<String, Integer> counts = new HashMap<String, Integer>();
-		for(String nm : names) for(String tag:tags.get(nm).split(regex))
+		for(String nm : names) for(String tag:tags.get(nm).split(" ")){
+			if(counts.containsKey(tag)){
+				counts.put(tag, counts.get(tag)+1);
+			}
+			else{
+				counts.put(tag, 1);
+			}
+		}
+		String[] tgs = new String[counts.size()];
+		int[] amts = new int[counts.size()];
+		int count = 0;
+		for(String s : counts.keySet()){
+			tgs[count] = s;
+			amts[count] = counts.get(s);
+			count++;
+		}
+		sortBy(tgs, amts);
+		String message = "Tag Count:";
+		for(int i=0; i<tgs.length; i++){
+			message = message + "\n  " + tgs[i] + ", " + amts[i];
+		}
+		Main.informPrompt(message);
 	}
 	public String getTotalSize(){
 		String[] ends = {"B", "KB", "MB", "GB", "TB"};
@@ -273,6 +294,22 @@ public class TagBaseII {
 					else{
 						newPaths.add(loc);
 					}
+				}
+			}
+		}
+	}
+	
+	public static <T> void sortBy(T[] vals, int[] sorts){
+		//bubble sort, cos im lazy
+		for(int end=sorts.length; end > 1; end--){
+			for(int start=1; start<end; start++){
+				if(sorts[start] < sorts[start-1]){
+					int ts = sorts[start];
+					T tv = vals[start];
+					sorts[start] = sorts[start-1];
+					vals[start] = vals[start-1];
+					sorts[start-1] = ts;
+					vals[start-1] = tv;
 				}
 			}
 		}

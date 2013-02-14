@@ -90,6 +90,9 @@ public class Gui extends JFrame{
 			}
 			public void keyReleased(KeyEvent arg0) {
 				filterBase(txaSearch.getText());
+				if(txaSearch.getText().equalsIgnoreCase("-tags")){
+					tb.displayTags();
+				}
 			}
 			public void keyTyped(KeyEvent arg0) {
 			}
