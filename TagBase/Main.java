@@ -8,7 +8,7 @@ import javax.swing.*;
 
 public class Main {
 	
-	public static final String[] endings = {"avi", "mpg", "wmv", "mkv", "flv", "mp4"};
+	public static final String[] endings = {"avi", "mpg", "wmv", "mkv", "flv", "mp4", "mp3"};
 	
 	public static TagBaseII tb;
 	public static Gui gui;
