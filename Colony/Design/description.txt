@@ -1,0 +1,7 @@
+Instance
+this is the game logic and event simulator.
+- local, provides fine grained information to interface, i.e. GUI has an ACTUAL INSTANCE of this object to ask game information of
+- Networked, Also provides fine grained information, coarse grained network info handled behind scenes
+
+Interface
+Graphical user interface and control section
