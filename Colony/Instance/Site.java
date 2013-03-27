@@ -5,6 +5,19 @@ import javax.imageio.*;
 
 public class Site {
 	
+	
+	/*
+	 * MASKS
+	 */
+	public static final int GRID_UNKNOWN = 0x80000000;
+	public static final int GRID_HIDDEN = 0x40000000;
+	//public static final int GRID_ = 0x20000000; Flooded, open breathable, hazardous, lava? acid?
+	//public static final int GRID_ = 0x10000000;
+	//public static final int GRID_ = 0x80000000;
+	//public static final int GRID_ = 0x40000000;
+	//public static final int GRID_ = 0x20000000;
+	//public static final int GRID_ = 0x10000000;
+	
 	public static final int COARSE_WIDTH = 16;
 	public static final int COARSE_HEIGHT = 16;
 

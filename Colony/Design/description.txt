@@ -4,4 +4,26 @@ this is the game logic and event simulator.
 - Networked, Also provides fine grained information, coarse grained network info handled behind scenes
 
 Interface
-Graphical user interface and control section
+- Graphical user interface and control section
+
+Liquids & Gases
+- Temperature (x cold, v cold, cold, warm, hot, v hot, x hot, N/A)
+- -300 - -50, -50 - 0, 0 - 10, 10 - 40, 40 - 120, 120 - 250, 250-5000 
+- gaseous physics (osmosis), liquids mix/react instantly
+
+Machine lines
+- Machinery blocks connected together
+- Refrigeration/heating, electricity, actuation(power), computation?
+- Machines may have range limitations (heat vent within 10 units of heating cell
+
+Blocks
+- Reserve 2 bits for orientation
+
+Thermal unit
+- Powered machine produces "coldness" or hotness"
+- Upgrades produce different ammounts of coldness/hotness
+- Connect machines to perform temperature functions
+- - Complex heating unit produces 30 hotness, cooking oven requires 10 hotness
+- - 3 Simple cooling unit produces 5 coldness, atmospheric condenser needs 12 coldness  
+- Thermal conduit extends range of thermal unit where each conduit makes subsequent machines take more hot/coldness
+- Atmospheric conditions allow machines to function, i.e. vhot room counts as 7 hotness
