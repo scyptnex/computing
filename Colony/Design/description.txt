@@ -9,7 +9,7 @@ Interface
 Layers:
 - Base: block types, machines, contents
 - Liquids and Gases: potentially both, temperatures, hazardous things, poisons
-- Active: People, creatures, vehicles
+- Active: People, creatures, vehicles, items
 
 Liquids & Gases
 - Temperature (x cold, v cold, cold, warm, hot, v hot, x hot, N/A)
