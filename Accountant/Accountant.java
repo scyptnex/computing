@@ -4,6 +4,7 @@ import java.io.*;
 
 public class Accountant {
 	
+	public static final long MILLIS_PER_DAY = 1000*60*60*24;
 	public static final String FILE_STORE = "bills.txt";
 	public static final String BACKUP_STORE = "billsOld.txt";
 	
@@ -54,13 +55,43 @@ public class Accountant {
 				sort();
 			}
 			else if(command.startsWith("v")){//eValuate
-				//TODO this
+				evaluate();
 			}
 			else{//add
 				getRecord();
 			}
 		}
 		save(cur, form);
+	}
+	
+	private long time(){
+		return time(dateify(""));
+	}
+	private long time(String date){
+		int yr = Integer.parseInt(date.substring(0, date.indexOf("-")));
+		int mo = Integer.parseInt(date.substring(date.indexOf("-") + 1, date.lastIndexOf("-")));
+		int da = Integer.parseInt(date.substring(date.lastIndexOf("-")+1));
+		Calendar c = Calendar.getInstance();
+		c.set(yr, mo, da);
+		return c.getTimeInMillis();
+	}
+	
+	private void evaluate(){
+		long curmil = time();
+		long totDays = 0;
+		int weekTotal = 0;
+		double total = 0;
+		int idx = 0;
+		for(String d : dates){
+			long dmil = time(d);
+			long daysSince = (curmil-dmil)/MILLIS_PER_DAY;
+			totDays = Math.max(totDays, daysSince);
+			total += ammounts.get(idx);
+			if(daysSince < 7) weekTotal += ammounts.get(idx);
+			idx++;
+		}
+		System.out.println("Week spending:\t" + weekTotal);
+		System.out.println("Long average:\t" + (total/totDays)*7.0);
 	}
 	
 	private void list(int amt){
