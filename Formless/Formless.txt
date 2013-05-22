@@ -1,0 +1,38 @@
+== CHOICES ==
+interacting with the world
+- manipulate it
+- adapt to it
+- reason with it
+
+combat
+- brawling
+- team combat
+- tactical
+
+Interaction
+- Leading
+- Following
+- cooperating
+- demanding
+- soloing
+
+Thinking
+- Reflecting
+- Assessing
+- Acting
+- Guessing
+- remembering
+
+Motivation
+- Truth (drive for answers, love of knowledge)
+- Life (Finding self, Travelling together)
+- Calling (Pulled forward, Pushed outwards)
+
+== FACTIONS ==
+language
+Opportunities
+
+Topaz
+Emerald
+Sapphire
+Amethyst
