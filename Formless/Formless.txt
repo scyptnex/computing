@@ -1,3 +1,5 @@
+Conversation is a platforming minigame - opportunities accessed by the formless.
+
 == CHOICES ==
 interacting with the world
 - manipulate it
@@ -27,6 +29,12 @@ Motivation
 - Truth (drive for answers, love of knowledge)
 - Life (Finding self, Travelling together)
 - Calling (Pulled forward, Pushed outwards)
+
+Speech
+- Kind words
+- Deep words
+- Short words
+- Harsh words
 
 == FACTIONS ==
 language
