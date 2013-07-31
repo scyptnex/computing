@@ -5,11 +5,7 @@ PRODUCTION_DIR = build
 DEVELOPMENT_CFLAGS = -g -G -deviceemu
 DEVELOPMENT_DIR = debug
 
-ifeq ($(shell hostname | grep -q '^ucpu' && echo yes || echo no), yes)
 	CUDA_DIR = /local/usr/cuda2.3
-else 
-	CUDA_DIR = /opt/cuda
-endif
 
 NVCC = $(CUDA_DIR)/bin/nvcc
 NVCC_CFLAGS = -I$(CUDA_DIR)/include --compiler-options -W
