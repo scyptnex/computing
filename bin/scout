@@ -1,0 +1,8 @@
+#! /bin/bash
+
+echo -RIqefzIHgEIIpzl
+
+dlurl=https://hestia.feralhosting.com/hellas/deluge/
+
+firefox -new-tab $dlurl 2>/dev/null >/dev/null 
+

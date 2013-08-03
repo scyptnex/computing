@@ -1,0 +1,10 @@
+#! /bin/bash
+
+stg=$HOME/.hellasstage
+
+if [ -f $stg ]
+then
+	user=--ftp-user=hellas
+	passwd=--ftp-passwd=x5J1oJE5hp2puOVo
+	aria2c -x8 -k2M $user $passwd -i $stg
+fi
