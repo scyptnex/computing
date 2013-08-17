@@ -1,0 +1,34 @@
+#! /bin/bash
+
+default=$HOME/hellas
+fileloc=$HOME/.hellas
+tmp=$HOME/.hellastmp
+stg=$HOME/.hellasstage
+keywd="^Date scried:"
+
+for arg in $@
+do
+        run=$run$arg".*"
+done
+
+grep -v "$keywd" $fileloc | grep -i "$run" > $tmp
+
+rm -f $stg
+touch $stg
+cat $tmp | while read tmpline
+do
+	echo $tmpline
+	echo ftp://hestia.feralhosting.com/private/deluge/data/$tmpline >> $stg
+	savedir=
+	if [[ "$tmpline" == *"/"* ]]
+	then
+		savedir=`echo $tmpline | sed 's/\/[^/]*$//g'`
+	fi
+	savedir=$default/$savedir
+	echo "    dir=$savedir" >> $stg
+done
+echo ==================
+grep "$keywd" $fileloc
+wc $tmp | sed 's/[^0-9]*//' | sed 's/[ \t].*/ files found/'
+echo ==================
+rm $tmp
