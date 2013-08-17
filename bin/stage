@@ -6,12 +6,19 @@ tmp=$HOME/.hellastmp
 stg=$HOME/.hellasstage
 keywd="^Date scried:"
 
-for arg in $@
-do
-        run=$run$arg".*"
-done
-
-grep -v "$keywd" $fileloc | grep -i "$run" > $tmp
+if [ "$1" == "-x" ]; then
+	shift
+	rm -f $tmp
+	for arg in $@; do
+		grep -v "$keywd" $fileloc | grep -i "$arg" >> $tmp
+	done
+else
+	for arg in $@
+	do
+	        run=$run$arg".*"
+	done
+	grep -v "$keywd" $fileloc | grep -i "$run" > $tmp
+fi
 
 rm -f $stg
 touch $stg

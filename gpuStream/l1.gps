@@ -1,0 +1,20 @@
+__device__ void source(int* i1, int* i2, int* i3, unsigned icount, unsigned sscount){
+	*i1 = icount;
+	*i2 = sscount;
+	*i3 = sscount;
+}
+
+__device__ void duplicate(int* num, int* ver1, int* ver2){
+	*ver1 = *num;
+	*ver2 = *num;
+}
+
+__device__ void 
+
+source -> (input1, input2, input3)
+duplicate (input1) -> (split1a, split1b)
+filter (input2, split1a) -> (filtera)
+filter (input3, split1b) -> (filterb)
+rrjoin (filtera, filterb) -> (somestream)
+grpavg (somestream, somestream[1], somestream[2]) -> (avg)
+print (avg)

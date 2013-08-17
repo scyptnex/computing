@@ -1,0 +1,18 @@
+#CUDA
+__device__ void source(int* i1, unsigned icount, unsigned sscount){
+	*i1 = icount*10 + (sscount & 1);
+}
+
+__device__ void print (int* in, int* out, unsigned outpos1){
+	out[outpos1] = *in;
+}
+
+#SDF
+source -> (input1)
+print (input1) -> [return]
+
+#CUDA
+
+int main(int argc, char* argv){
+	
+}
