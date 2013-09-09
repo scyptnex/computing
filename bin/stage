@@ -9,8 +9,10 @@ keywd="^Date scried:"
 if [ "$1" == "-x" ]; then
 	shift
 	rm -f $tmp
-	for arg in $@; do
-		grep -v "$keywd" $fileloc | grep -i "$arg" >> $tmp
+	while [ "x$1" != "x" ]; do
+		grep -v "$keywd" $fileloc | grep -i "$1" >> $tmp
+		#echo $1
+		shift
 	done
 else
 	for arg in $@
