@@ -4,4 +4,4 @@ scryfile=$HOME/.hellas
 
 echo -n "Date scried: " > $scryfile
 date >> $scryfile
-ssh hellas@hestia.feralhosting.com -t "find private/deluge/data/ -type f" | sed 's/private\/deluge\/data\///' >> $scryfile
+ssh hellas@hestia.feralhosting.com -t "find private/transmission/data/ -type f" | sed 's/private\/transmission\/data\///' >> $scryfile

@@ -27,7 +27,7 @@ touch $stg
 cat $tmp | while read tmpline
 do
 	echo $tmpline
-	echo ftp://hestia.feralhosting.com/private/deluge/data/$tmpline >> $stg
+	echo ftp://hestia.feralhosting.com/private/transmission/data/$tmpline >> $stg
 	savedir=
 	if [[ "$tmpline" == *"/"* ]]
 	then
