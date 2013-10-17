@@ -1,7 +1,13 @@
-#! /bin/sh
+#! /bin/bash
 
 scryfile=$HOME/.hellas
 
+ENGINE="deluge"
+if [ "$1x" == "-tx" ]; then
+	ENGINE="transmission"
+	shift
+fi
+
 echo -n "Date scried: " > $scryfile
 date >> $scryfile
-ssh hellas@hestia.feralhosting.com -t "find private/transmission/data/ -type f" | sed 's/private\/transmission\/data\///' >> $scryfile
+ssh hellas@hestia.feralhosting.com -t "find private/$ENGINE/data/ -type f" | sed "s/private\/$ENGINE\/data\///" >> $scryfile

@@ -6,6 +6,12 @@ tmp=$HOME/.hellastmp
 stg=$HOME/.hellasstage
 keywd="^Date scried:"
 
+ENGINE="deluge"
+if [ "$1" == "-t" ]; then
+	ENGINE="transmission"
+	shift
+fi
+
 if [ "$1" == "-x" ]; then
 	shift
 	rm -f $tmp
@@ -27,7 +33,7 @@ touch $stg
 cat $tmp | while read tmpline
 do
 	echo $tmpline
-	echo ftp://hestia.feralhosting.com/private/transmission/data/$tmpline >> $stg
+	echo ftp://hestia.feralhosting.com/private/$ENGINE/data/$tmpline >> $stg
 	savedir=
 	if [[ "$tmpline" == *"/"* ]]
 	then
