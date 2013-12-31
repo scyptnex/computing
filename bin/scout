@@ -1,8 +1,14 @@
 #! /bin/bash
 
-echo -RIqefzIHgEIIpzl
-
 dlurl=https://hestia.feralhosting.com/hellas/deluge/
+if [ "$1" == "-t" ]; then
+	dlurl=http://hestia.feralhosting.com/hellas/transmission/
+	echo hellas
+	echo kaEPdpbB3ylAec9M
+else
+	echo -RIqefzIHgEIIpzl
+fi
+
 
 firefox -new-tab $dlurl 2>/dev/null >/dev/null 
 
