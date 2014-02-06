@@ -3,7 +3,7 @@ import java.math.BigInteger;
 
 public class RIncr {
 	
-	public static final int RANGE = 100;
+	public static final int RANGE = 17;
 	
 	public static void main(String[] args){
 		new RIncr();
