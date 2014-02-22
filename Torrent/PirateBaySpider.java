@@ -1,9 +1,7 @@
 import java.io.*;
 import java.net.URL;
 
-import scyp.net.WGet;
-import scyp.net.WGet.WPage;
-import scyp.net.WUtil;
+import scyp.net.*;
 
 public class PirateBaySpider {
 
@@ -12,9 +10,7 @@ public class PirateBaySpider {
 	public static void main(String[] args) throws IOException{
 		PirateBaySpider pbs = new PirateBaySpider("black sails s01e04");
 		System.out.println(pbs.getSearchPage(1));
-		WPage pbPage = WGet.livePage(pbs.getSearchPage(0));
-		System.out.println(pbPage.isSecure() + ", " + pbPage.isSecure);
-		for(String s : pbPage){
+		for(String s : Unstream.toLineIterable(WUtil.streamURL(pbs.getSearchPage(0), true))){
 			System.out.println(s);
 		}
 		
