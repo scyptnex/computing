@@ -33,7 +33,7 @@ touch $stg
 cat $tmp | while read tmpline
 do
 	echo $tmpline
-	echo ftp://hestia.feralhosting.com/private/$ENGINE/data/$tmpline >> $stg
+	echo ftp://chronos.feralhosting.com/private/$ENGINE/data/$tmpline >> $stg
 	savedir=
 	if [[ "$tmpline" == *"/"* ]]
 	then

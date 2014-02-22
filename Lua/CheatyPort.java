@@ -19,8 +19,9 @@ public class CheatyPort {
 		File svdir = new File(mc, "saves");
 		for(File world : svdir.listFiles()) if(world.isDirectory()){
 			File compDir = new File(world, "computer");
-			if(!compDir.exists()) continue;
+			if(!compDir.exists()) continue;//avoid worlds without computercraft
 			//read the next id
+			System.out.println(world.getName());
 			File lid = new File(compDir, "lastid.txt");
 			int nid = 0;
 			if(lid.exists()){

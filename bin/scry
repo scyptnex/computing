@@ -10,4 +10,4 @@ fi
 
 echo -n "Date scried: " > $scryfile
 date >> $scryfile
-ssh hellas@hestia.feralhosting.com -t "find private/$ENGINE/data/ -type f" | sed "s/private\/$ENGINE\/data\///" >> $scryfile
+ssh hellas@chronos.feralhosting.com -t "find private/$ENGINE/data/ -type f" | sed "s/private\/$ENGINE\/data\///" >> $scryfile
