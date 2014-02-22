@@ -1,5 +1,3 @@
-package scyp.bin;
-
 import java.io.*;
 import java.net.URL;
 
