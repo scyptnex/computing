@@ -7,6 +7,10 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
 public class SimpleXML{
+	
+	public static void main(String[] args) throws Exception{
+		Element lem = readXMLFile(new File("tpb.html"));
+	}
 
 	public static Element readXMLFile(File fi) throws ParserConfigurationException, SAXException, IOException{
 		//convert to URL
