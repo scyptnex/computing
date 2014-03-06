@@ -1,16 +1,8 @@
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.URL;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.xml.sax.SAXException;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import org.jsoup.*;
+import org.jsoup.nodes.*;
 
 import scyp.net.WUtil;
 
@@ -19,31 +11,34 @@ public class PirateBaySpider {
 	public static final String DOMAIN = "https://thepiratebay.se";
 	private String searchString = null;
 
-	public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException{
-		int count = 0;
+	public static void main(String[] args) throws IOException{
 		PirateBaySpider pbs = new PirateBaySpider("bioshock infinite");
-		Document doc = Jsoup.connect(pbs.getSearchPage(0).toString()).get();
-		Elements e = doc.getElementsByTag("tr");
-		for(Element elem : e){
-			if(!elem.hasClass("header")){
-				System.out.println(new Result(elem).desc);
-			}
+		Document doc = pbs.getSearchPage(0);
+		ArrayList<Result> rslts = Result.grabResultsFromDocument(doc);
+		for(Result r : rslts){
+			System.out.println(String.format("%6d - %s", r.seeders, r.desc));
 		}
 		System.out.println(doc.title());
-		System.out.println(e.size());
-		BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tst.html"), "UTF-8"));
-		htmlWriter.write(doc.toString());
-		htmlWriter.close();
-		System.out.println(count);
-
+		System.out.println(rslts.size());
 	}
 
 	public PirateBaySpider(String search){
 		searchString = search;
 	}
 
-	public URL getSearchPage(int pageIndex){
-		return WUtil.urlNoThrow(DOMAIN + "/search/" + WUtil.urlEncode(searchString) + "/" + pageIndex + "/7/0");
+	public Document getSearchPage(int pageIndex) throws IOException{
+		URL pageUrl = WUtil.urlNoThrow(DOMAIN + "/search/" + WUtil.urlEncode(searchString) + "/" + pageIndex + "/7/0");
+		return Jsoup.connect(pageUrl.toString()).get();
+	}
+	
+	public static void dumpPage(File output, Document page){
+		try {
+			BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output)));
+			htmlWriter.write(page.toString());
+			htmlWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

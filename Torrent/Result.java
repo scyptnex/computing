@@ -1,6 +1,6 @@
+import java.util.*;
 import org.jsoup.nodes.*;
 import org.jsoup.select.*;
-
 
 public class Result {
 	
@@ -24,6 +24,16 @@ public class Result {
 		Elements subDatas = subs.get(1).getElementsByTag("a");
 		pageStem = subDatas.get(0).attr("href");
 		magnet = subs.get(1).getElementsByAttributeValueContaining("href", "magnet:?xt=").get(0).attr("href");
+	}
+	
+	public static ArrayList<Result> grabResultsFromDocument(Document rsltPage){
+		ArrayList<Result> ret = new ArrayList<Result>();
+		for(Element elem : rsltPage.getElementsByTag("tr")){
+			if(!elem.hasClass("header")){
+				ret.add(new Result(elem));
+			}
+		}
+		return ret;
 	}
 	
 }
