@@ -1,12 +1,12 @@
 #! /bin/bash
 
 dlurl=https://chronos.feralhosting.com/hellas/deluge/
-if [ "$1" == "-t" ]; then
+if [ "$1" == "-d" ]; then
+	echo 4KTQeUCWyVWi7Rq_
+else
 	dlurl=http://chronos.feralhosting.com/hellas/transmission/
 	echo hellas
 	echo 50D8o11eBiYIsUsc
-else
-	echo 4KTQeUCWyVWi7Rq_
 fi
 
 

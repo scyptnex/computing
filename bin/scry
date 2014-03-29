@@ -2,9 +2,9 @@
 
 scryfile=$HOME/.hellas
 
-ENGINE="deluge"
-if [ "$1x" == "-tx" ]; then
-	ENGINE="transmission"
+ENGINE="transmission"
+if [ "$1x" == "-dx" ]; then
+	ENGINE="deluge"
 	shift
 fi
 

@@ -6,9 +6,9 @@ tmp=$HOME/.hellastmp
 stg=$HOME/.hellasstage
 keywd="^Date scried:"
 
-ENGINE="deluge"
-if [ "$1" == "-t" ]; then
-	ENGINE="transmission"
+ENGINE="transmission"
+if [ "$1" == "-d" ]; then
+	ENGINE="deluge"
 	shift
 fi
 
