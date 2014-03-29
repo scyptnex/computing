@@ -1,0 +1,45 @@
+#!/usr/bin/env python 
+
+#import dirutils
+import os
+import sys
+import zipfile
+
+def allDirs(parent):
+	prnt, dirs, fils = next(os.walk(parent))
+	return [truePath(prnt, dr) for dr in dirs]
+
+def allFiles(parent):
+	prnt, dirs, fils = next(os.walk(parent))
+	return [truePath(prnt, fl) for fl in fils]
+
+def truePath(parent, sub):
+	return os.path.abspath(os.path.join(parent, sub))
+
+def _fileNameChoice_(f):
+	(dpath, fil) = os.path.split(f)
+	(path, di) = os.path.split(dpath)
+	filChoice = str(fil).replace(" ", ".")
+	dirChoice = str(di).replace(" ", ".") + filChoice[filChoice.rfind("."):]
+	return filChoice if len(filChoice) > len(dirChoice) else dirChoice
+
+def flattenDir(direct):
+	files = allFiles(direct)
+	if(len(files) == 0):
+		os.rmdir(direct)
+	elif(len(files) == 1):
+		os.rename(files[0], os.path.join(os.path.split(direct)[0], _fileNameChoice_(files[0])))
+		os.rmdir(direct)
+	else:
+		pass
+
+if __name__ == "__main__":
+	for dr in allDirs("."):
+		flattenDir(dr)
+#	parent, directories, c = next(os.walk("."))
+#	for dir in [truePath(parent, dr) for dr in directories]:
+#		print(dir)
+	#for root, dirs, files in os.walk("."):
+	#	print("---", root)
+#		print("+++", dirs)
+#		print(")))", files)
