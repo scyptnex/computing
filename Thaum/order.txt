@@ -1,0 +1,23 @@
+milk
+slime
+swift potion
+feather
+enderpearl
+egg
+weak potion
+poison potion
+slowness potion
+ghast tear
+invis potion
+pork
+ender chest
+paper
+zombie
+pick
+gold
+shovel
+Crafting table
+cobweb
+leather
+arrow
+hoe
