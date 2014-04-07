@@ -4,7 +4,7 @@ import java.util.*;
 public class ThaumGraph {
 	
 	public static void main(String[] args) throws Exception{
-		new ThaumGraph(new File("aspects"));
+		new ThaumGraph(new File("aspects")).dump();
 	}
 	
 	public final HashMap<String, Aspect> aspects;
@@ -18,7 +18,7 @@ public class ThaumGraph {
 			Scanner sca = new Scanner(aspectFile);
 			while(sca.hasNextLine()){
 				String[] asp = sca.nextLine().split(" ");
-				if(aspects.containsKey(asp[0])){
+				if(aspects.containsKey(asp[0]) || asp[0].equals("tempus")){
 					continue;
 				}
 				Aspect add = null;
@@ -42,7 +42,18 @@ public class ThaumGraph {
 			sca.close();
 			iter++;
 		}
-		this.dump();
+	}
+	
+	public Set<String> getAllAspects(){
+		return aspects.keySet();
+	}
+	
+	public ArrayList<String> getNeighbours(String aspect){
+		Aspect asp = aspects.get(aspect);
+		ArrayList<String> ret = new ArrayList<String>();
+		for(Aspect f : asp.from) ret.add(f.name);
+		for(Aspect t : asp.to) ret.add(t.name);
+		return ret;
 	}
 	
 	public void dump(){
