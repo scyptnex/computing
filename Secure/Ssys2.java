@@ -355,6 +355,22 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 			baseSorter.setRowFilter(tmpFilter);
 			return;
 		}
+		else if(ft.matches("-r.* [0-9][0-9]*")){
+			int num = Integer.parseInt(ft.substring(ft.lastIndexOf(" ")+1));
+			Set<Integer> selects = new HashSet<Integer>();
+			while(selects.size() < num){
+				selects.add((int)Math.floor(Math.random()*base.count()));
+			}
+			System.out.println(selects.toString());
+			ArrayList<RowFilter<SBase, Object>> randomFilters = new ArrayList<RowFilter<SBase, Object>>();
+			for(int i : selects){
+				RowFilter<SBase, Object> temp = RowFilter.regexFilter(base.name.get(i), SBase.COL_NAME);
+				randomFilters.add(temp);
+			}
+			RowFilter<SBase, Object> exactFilter = RowFilter.orFilter(randomFilters);
+			baseSorter.setRowFilter(exactFilter);
+			return;
+		}
 		
 		boolean names = false;
 		boolean bads = false;

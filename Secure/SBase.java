@@ -133,8 +133,15 @@ public class SBase extends AbstractTableModel{
 		try {
 			String comm = "cmd /c \"start " + oname + "\"";
 			Process p = Runtime.getRuntime().exec(comm);
+			return;
 		} catch (IOException e) {
 			System.err.println("Couldnt use");
+		}
+		//maybe we're on unix?
+		try{
+			Process p = Runtime.getRuntime().exec(new String[]{"vlc", Ssys2.tempFold.getName() + "/" + fi.getName()});
+		} catch(IOException e){
+			System.err.println("Really couldnt use");
 		}
 	}
 	
