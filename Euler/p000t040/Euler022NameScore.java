@@ -10,7 +10,7 @@ public class Euler022NameScore {
 		File fi = new File("22.in");
 		Scanner sca = new Scanner(fi);
 		sca.useDelimiter(",");
-		ArrayList<String> nms = new ArrayList<>();
+		ArrayList<String> nms = new ArrayList<String>();
 		while(sca.hasNext()){
 			nms.add(sca.next().replaceAll("\"", ""));
 		}

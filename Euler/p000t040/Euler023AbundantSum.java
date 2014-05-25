@@ -5,7 +5,7 @@ import java.util.HashSet;
 public class Euler023AbundantSum {
 
 	public static void main(String[] args) {
-		HashSet<Long> abundants = new HashSet<>();
+		HashSet<Long> abundants = new HashSet<Long>();
 		for (int i = 0; i < 28123; i++) {
 			if (Euler021AmicableSum.sumd(i) > i) {
 				abundants.add((long) i);

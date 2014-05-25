@@ -6,7 +6,7 @@ import java.util.Collections;
 public class Euler024LexoPerm {
 
 	public static void main(String[] args) {
-		ArrayList<String> perms = new ArrayList<>();
+		ArrayList<String> perms = new ArrayList<String>();
 		permute("", perms, "0123456789");
 		System.out.println(perms.size());
 		Collections.sort(perms);

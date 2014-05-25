@@ -18,8 +18,8 @@ public class Euler026BigRecurrence {
 	}
 	
 	public static String deciRepeat(long numer, long divis){
-		ArrayList<Long> numers = new ArrayList<>();
-		ArrayList<Long> decis = new ArrayList<>();
+		ArrayList<Long> numers = new ArrayList<Long>();
+		ArrayList<Long> decis = new ArrayList<Long>();
 		numers.add(numer);
 		decis.add(numer/divis);
 		numer = numer%divis;
