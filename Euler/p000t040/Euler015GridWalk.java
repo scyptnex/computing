@@ -14,7 +14,7 @@ public class Euler015GridWalk {
 		if(memo[wid][hei] == 0){
 			if(wid > 0) memo[wid][hei] += paths(wid-1, hei);
 			if(hei > 0) memo[wid][hei] += paths(wid, hei-1);
-			System.out.println(wid + ", " + hei + " = " + memo[wid][hei]);
+			//System.out.println(wid + ", " + hei + " = " + memo[wid][hei]);
 		}
 		return memo[wid][hei];
 	}
