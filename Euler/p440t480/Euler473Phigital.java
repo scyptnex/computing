@@ -2,6 +2,7 @@ package p440t480;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -26,78 +27,117 @@ public static final int bitrange = 100;
 			expos[k] = Phixp.fromExponent(k);
 			System.out.println(expos[k] + ", " + expos[k].estimate());
 		}
-		System.out.println(new Phrac(new Phixp(BigInteger.valueOf(4), BigInteger.valueOf(6)), new Phixp(BigInteger.valueOf(3), BigInteger.valueOf(3))).solu());
-		System.out.println(Phrac.palind(0));
-		System.out.println(Phrac.palind(1).solu());
-		System.out.println(Phrac.palind(2).solu());
-		System.out.println(Phrac.palind(3));
-		System.out.println(Phrac.palind(2).add(Phrac.palind(5)).solu());
-		System.out.println(Phrac.palind(3).add(Phrac.palind(0)));
+		// System.out.println(new Phrac(new Phixp(BigInteger.valueOf(4),
+		// BigInteger.valueOf(6)), new Phixp(BigInteger.valueOf(3),
+		// BigInteger.valueOf(3))).solu());
+		// System.out.println(Phrac.palind(0));
+		// System.out.println(Phrac.palind(1).solu());
+		// System.out.println(Phrac.palind(2).solu());
+		// System.out.println(Phrac.palind(3));
+		// System.exit(0);
+		// System.out.println(Phrac.palind(2).add(Phrac.palind(5)).solu());
+		// System.out.println(Phrac.palind(3).add(Phrac.palind(0)));
 		/*
 		 * Stage 1
 		 * Collect all the 'base' palindromes
 		 * Palindromes whose integral value is not the sum of two previously known palindromes
 		 */
-		int cur = 0;
-		BigInteger max = BigInteger.TEN.pow(3);
-		HashSet<Integer> taken = new HashSet<Integer>();
-		HashMap<Integer, Phrac> open = new HashMap<Integer, Phrac>();
+		int cur = 1;
+		BigInteger max = BigInteger.TEN.pow(10);
+		ArrayList<Phrac> available = new ArrayList<Phrac>();
+		available.add(null);//'zero' is always unaavailable because of the non-consecutive rule
+		//HashSet<Integer> taken = new HashSet<Integer>();
+		//HashMap<Integer, Phrac> open = new HashMap<Integer, Phrac>();
 		ArrayList<BigInteger> intys = new ArrayList<BigInteger>();
+		ArrayList<ArrayList<Integer>> lineages = new ArrayList<ArrayList<Integer>>();
 		while(true){
+			boolean compl = false;
 			Phrac pal = Phrac.palind(cur);
-			//System.out.println(cur + ", " + pal);
 			if(pal.estimate().compareTo(max) > 0){
 				break;
 			}
 			if(pal.solu() == null){
 				//first try permutations of all the subparts
-				ArrayList<Integer> soln = permuteLowers(pal, open);
-				System.out.println(cur);
+				ArrayList<Integer> lowers = permuteLowers(pal, available, 0);
 				//then act on it
-				if(soln == null){
-					open.put(cur, pal);
-				} else{
-					taken.add(cur);
-					for(Integer i : soln){
-						taken.add(i);
-						pal = pal.add(open.remove(i));
+				if(lowers != null){
+					available.add(null);
+					for(int i : lowers){
+						pal = pal.add(available.get(i));
+						available.set(i, null);
 					}
+					lowers.add(cur);
+					lineages.add(lowers);
 					intys.add(pal.solu());
+					compl = true;
 				}
+				else{
+					available.add(pal);
+				}
+				
 			} else {
-				taken.add(cur);
+				available.add(null);
 				intys.add(pal.solu());
+				ArrayList<Integer> temp = new ArrayList<Integer>();
+				temp.add(cur);
+				lineages.add(temp);
+				compl = true;
+			}
+			if(compl){
+				int newIdx = intys.size()-1;
+				for(int i=0; i<newIdx; i++){
+					ArrayList<Integer> testLineage = new ArrayList<Integer>();
+					testLineage.addAll(lineages.get(newIdx));
+					testLineage.addAll(lineages.get(i));
+					Collections.sort(testLineage);
+					boolean isValid = true;
+					for(int l=1; l<testLineage.size(); l++){
+						if(testLineage.get(l) == testLineage.get(l-1)+1){
+							isValid = false;
+							break;
+						} else if(testLineage.get(l) == testLineage.get(l-1)){
+							isValid = false;
+							break;
+						}
+					}
+					if(isValid){
+						intys.add(intys.get(newIdx).add(intys.get(i)));
+						lineages.add(testLineage);
+					}
+				}
 			}
 			cur++;
 		}
 		System.out.println(intys);
+		BigInteger tot = BigInteger.ONE;
+		for(int i =0; i<intys.size(); i++){
+			tot = tot.add(intys.get(i));
+			System.out.println(intys.get(i) + " - " + lineages.get(i));
+		}
+		System.out.println(tot);
+			
 		/*
 		 * Stage 2, add all the integrals
 		 */
-		ArrayList<BigInteger> allPals = new ArrayList<BigInteger>();
-		for(int i=0; i<intys.size(); i++){
-			allPals.add(intys.get(i));
-			for(int j=0; j<i; j++){
-				allPals.add(intys.get(i).add(intys.get(j)));
-			}
-		}
-		BigInteger sum = BigInteger.ONE;
-		for(BigInteger bi : allPals){
-			if(bi.compareTo(max) <= 0){
-				sum = sum.add(bi);
-			}
-		}
-		System.out.println(allPals);
-		System.out.println(sum);
 	}
 	
-	public static ArrayList<Integer> permuteLowers(Phrac greatest, HashMap<Integer, Phrac> lowers){
-		ArrayList<Integer> intys = new ArrayList<Integer>(lowers.keySet());
-		ArrayList<Phrac> phracs = new ArrayList<Phrac>();
-		for(int i : intys){
-			phracs.add(lowers.get(i));
+	public static ArrayList<Integer> permuteLowers(Phrac greatest, ArrayList<Phrac> lowers, int choice){
+		if(greatest.solu() != null){
+			return new ArrayList<Integer>();
 		}
-		return permuteLowers(greatest, intys, phracs, 0);
+		else if(choice >= lowers.size()){
+			return null;
+		} else{
+			ArrayList<Integer> without = permuteLowers(greatest, lowers, choice+1);
+			if(without != null || lowers.get(choice) == null){//when we must not include this lower, better hope a solution was found without it
+				return without;
+			}
+			ArrayList<Integer> with = permuteLowers(greatest.add(lowers.get(choice)), lowers, choice+2);//no doubles
+			if(with != null){
+				with.add(choice);
+			}
+			return with;
+		}
 	}
 	
 	public static ArrayList<Integer> permuteLowers(Phrac greatest, ArrayList<Integer> intys, ArrayList<Phrac> phracs, int idx){
