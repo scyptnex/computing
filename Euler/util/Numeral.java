@@ -6,8 +6,7 @@ import java.util.Set;
 
 public class Numeral {
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		System.out.println(gcd(18, 30));
 	}
 	
 	public static Set<Long> divisors(long l){
@@ -19,6 +18,45 @@ public class Numeral {
 			}
 		}
 		return ret;
+	}
+	
+	public static long gcd(long a, long b){
+		if(b == 0) return a;
+		return gcd(b, a%b);
+	}
+	
+	public static class Fraction{
+		public final long numerator;
+		public final long denominator;
+		public Fraction(long n, long d){
+			if(d < 0) throw new RuntimeException("Divide by zero");
+			boolean neg = false;
+			if(d < 0){
+				n *= -1;
+				d *= -1;
+			}
+			if(n < 0){
+				neg = true;
+				n *= -1;
+			}
+			long gcd = gcd(n, d);
+			numerator = (n/gcd)*(neg ? -1 : 1);
+			denominator = d/gcd;
+		}
+		public String toString(){
+			return numerator + (denominator == 1 ? "" : "/" + denominator);
+		}
+		public boolean equals(Object obj){
+			if(obj instanceof Fraction){
+				Fraction other = (Fraction) obj;
+				return other.numerator == this.numerator && other.denominator == this.denominator;
+			}
+			return false;
+		}
+		
+		public Fraction multiply(Fraction other){
+			return new Fraction(this.numerator*other.numerator, this.denominator*other.denominator);
+		}
 	}
 
 }
