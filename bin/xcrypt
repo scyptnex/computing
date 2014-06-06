@@ -1,0 +1,33 @@
+#! /bin/bash
+
+if [[ ! -r $1 ]]; then
+	echo "Error, could not find file $1" 1>&2
+	exit 1
+fi
+
+read -p "Password: " -s pass
+
+LENGTH_PLAIN=$((`stat -c %s $1` * 8))
+#replace leading 0 with 1
+NAME_HASH=`echo $1 | sha256sum | sed 's/[^0-9a-f].*//' | sed 's/^0/1/'`
+echo $NAME_HASH
+echo "generating cipher stream of length $LENGTH_PLAIN"
+LENGTH_CIPHER=0
+while (( $LENGTH_CIPHER < $LENGTH_PLAIN)); do
+	LENGTH_CIPHER=$(($LENGTH_CIPHER + 256))
+done
+
+python -c "
+import base64
+import array
+import struct
+import sys
+len=0
+count=1
+while (len < $LENGTH_CIPHER):
+    bhash=base64.b16decode(\"$NAME_HASH\", True)
+    sys.stdout.write(''.join(chr(ord(a) ^ ord(b)) for a,b in zip(bhash[:8],struct.pack(\"L\",count))) + bhash[8:])
+    len += 256
+    count += 1" > $1.stream
+openssl enc -aes-256-ecb -k $pass -nosalt -in $1.stream -out $1.cipher
+
