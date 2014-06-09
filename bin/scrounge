@@ -1,0 +1,22 @@
+#! /bin/bash
+
+scryfile=$HOME/.hellas
+
+ENGINE="transmission"
+if [ "$1x" == "-dx" ]; then
+	ENGINE="deluge"
+	shift
+fi
+
+#echo -n "Date scried: " > $scryfile
+#date >> $scryfile
+#ssh hellas@chronos.feralhosting.com -t "find private/$ENGINE/data/ -type f" | sed "s/private\/$ENGINE\/data\///" >> $scryfile
+
+LINE=go
+while [ "$LINE" != "stop" ]; do
+	clear
+	echo
+	echo "Print a line:"
+	read LINE_TEMP
+	LINE=$LINE_TEMP
+done

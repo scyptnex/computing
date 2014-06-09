@@ -12,11 +12,18 @@ public class PirateBaySpider {
 	private String searchString = null;
 
 	public static void main(String[] args) throws IOException{
-		PirateBaySpider pbs = new PirateBaySpider("bioshock infinite");
+		String str = "";
+		for(String s : args){
+			str = str + " " + s;
+		}
+		str = str.trim();
+		if(str.length() < 0) str = "continuum s01e04";
+		PirateBaySpider pbs = new PirateBaySpider(str);
 		Document doc = pbs.getSearchPage(0);
 		ArrayList<Result> rslts = Result.grabResultsFromDocument(doc);
 		for(Result r : rslts){
 			System.out.println(String.format("%6d - %s", r.seeders, r.desc));
+			System.out.println("        " + r.magnet);
 		}
 		System.out.println(doc.title());
 		System.out.println(rslts.size());
