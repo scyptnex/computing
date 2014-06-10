@@ -28,6 +28,7 @@ tty_ent=$($ECHO | Get_odx)                      # Enter key
 tty_kent=$(tput kent 2>&1 | Get_odx)
 tty_bs=$($ECHO_N "\b" | Get_odx)                # Backspace key
 tty_kbs=$(tput kbs 2>&1 | Get_odx)
+tty_spa=$($ECHO_N " " | Get_odx)
 
 # Some terminals (e.g. PuTTY) send the wrong code for certain arrow keys
 if [ "$tty_cuu1" = "033 133 101" -o "$tty_kcuu1" = "033 133 101" ]; then
@@ -41,25 +42,18 @@ stty intr '' susp ''
 
 trap "stty $tty_save; exit"  INT HUP TERM
 
-count=0
-while :; do
-    [ $count -eq 10 ] && break
-    count=$((count+1))
-
-    keypress=$(dd bs=10 count=1 2> /dev/null | Get_odx)
-
-    $ECHO_N "keypress=\"$keypress\""
-
-    case "$keypress" in
-        "$tty_ent"|"$tty_kent") $ECHO " -- ENTER";;
-        "$tty_bs"|"$tty_kbs") $ECHO " -- BACKSPACE";;
-        "$tty_cuu1"|"$tty_kcuu1") $ECHO " -- KEY_UP";;
-        "$tty_cud1"|"$tty_kcud1"|"$tty_cudx") $ECHO " -- KEY_DOWN";;
-        "$tty_cub1"|"$tty_kcub1"|"$tty_cubx") $ECHO " -- KEY_LEFT";;
-        "$tty_cuf1"|"$tty_kcuf1"|"$tty_cufx") $ECHO " -- KEY_RIGHT";;
-        *) $ECHO;;
-    esac
-done
+keypress=$(dd bs=10 count=1 2> /dev/null | Get_odx)
+$ECHO_N "keypress=\"$keypress\""
+case "$keypress" in
+    "$tty_ent"|"$tty_kent") $ECHO " -- ENTER";;
+    "$tty_bs"|"$tty_kbs") $ECHO " -- BACKSPACE";;
+    "$tty_cuu1"|"$tty_kcuu1") $ECHO " -- KEY_UP";;
+    "$tty_cud1"|"$tty_kcud1"|"$tty_cudx") $ECHO " -- KEY_DOWN";;
+    "$tty_cub1"|"$tty_kcub1"|"$tty_cubx") $ECHO " -- KEY_LEFT";;
+    "$tty_cuf1"|"$tty_kcuf1"|"$tty_cufx") $ECHO " -- KEY_RIGHT";;
+    "$tty_spa") $ECHO " -- SPACE";;
+    *) $ECHO;;
+esac
 
 stty $tty_save
 
