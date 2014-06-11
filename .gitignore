@@ -8,6 +8,7 @@
 # Eclipse files #
 .classpath
 .project
+.cproject
 .settings
 .metadata
 .pydevproject

@@ -49,7 +49,7 @@ int main(void)
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+    window = glfwCreateWindow(1920, 1080, "Simple example", glfwGetPrimaryMonitor(), NULL);
     if (!window)
     {
         glfwTerminate();
@@ -77,7 +77,7 @@ int main(void)
         glMatrixMode(GL_MODELVIEW);
 
         glLoadIdentity();
-        glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
+        glRotatef((float) glfwGetTime() * 10.f, 0.f, 0.f, 1.f);
 
         glBegin(GL_TRIANGLES);
         glColor3f(1.f, 0.f, 0.f);
