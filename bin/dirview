@@ -1,0 +1,59 @@
+#! /usr/bin/env python3
+from subprocess import call
+import os
+import re
+
+#-----------------------------------------------------------------------------
+# Useful functions for interacting with the terminal
+def clearScreen():
+    call(["clear"])
+
+def command(cmd):
+    return os.popen(cmd).read()
+
+def commandArr(cmd):
+    return os.popen(cmd).readlines()
+
+ESC_RED = command("tput setf 4")
+ESC_GREEN = command("tput setf 2")
+ESC_YELLOW = command("tput setf 6")
+ESC_BLUE = command("tput setf 3")
+ESC_BOLD = command("tput bold")
+ESC_NONE = command("tput sgr0")
+TRM_HEIGHT = int(command("tput lines").strip())
+TRM_WIDTH = int(command("tput cols").strip())
+
+#-----------------------------------------------------------------------------
+# Display the screen
+def displayScreen(top, old, cur, viewPort, sideLong, fullList):
+    clearScreen()
+    print("Folder Chooser | %sTake%s - Leave - %sMove%s" % (ESC_GREEN, ESC_NONE, ESC_RED, ESC_NONE))
+    print("               | %s%4d%s   %s%5d%s   %s%4d%s" % (ESC_BOLD+ESC_GREEN, 5, ESC_NONE, ESC_BOLD, 324, ESC_NONE, ESC_BOLD+ESC_RED, 7, ESC_NONE))
+    
+
+#-----------------------------------------------------------------------------
+# Sort the full list of items
+direct="/home/scyptnex/computing/"
+fullList=sorted([ line[len(direct):-1] for line in commandArr("find %s -type f | grep -v \"/\.\"" % direct) ], key=str.lower)
+
+# The sideLong array
+# Used to track the state of items
+SIDE_LEAVE = 0
+SIDE_DL = 1
+SIDE_RM = 2
+sideLong=[ SIDE_LEAVE for i in range(0, len(fullList))]
+
+# Viewing variables
+top=0
+old=0
+cur=0
+viewport=[]
+going=True
+while(going):
+    displayScreen(top, old, cur, viewport, sideLong, fullList)
+    keyPressed = command("key.sh")
+    if(re.match(".*BACKSPACE.*", keyPressed)):
+        exit(1)
+    if(re.match(".*ENTER.*", keyPressed)):
+        going = False
+
