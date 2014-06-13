@@ -1,0 +1,197 @@
+#! /usr/bin/env python3
+from subprocess import call
+import sys
+import os
+import re
+
+#-----------------------------------------------------------------------------
+# Useful functions for interacting with the terminal
+def clearScreen():
+    call(["clear"])
+
+def command(cmd):
+    return os.popen(cmd).read()
+
+def commandArr(cmd):
+    return os.popen(cmd).readlines()
+
+ESC_RED = command("tput setf 4")
+ESC_GREEN = command("tput setf 2")
+ESC_YELLOW = command("tput setf 6")
+ESC_BLUE = command("tput setf 3")
+ESC_BOLD = command("tput bold")
+ESC_HILIGHT = command("tput setb 7")
+ESC_NONE = command("tput sgr0")
+TRM_HEIGHT = int(command("tput lines").strip())
+TRM_WIDTH = int(command("tput cols").strip())
+
+ESCAPE=[command("tput setf %d" % i) for i in [2, 4, 3, 5, 1, 0]]
+ESCAPE = [""] + ESCAPE
+
+#-----------------------------------------------------------------------------
+# Class to store the directory structure
+STATE_COUNT = len(ESCAPE)
+
+def splitColour(split):
+    ret = ESC_NONE
+    for i in range(0, len(split)):
+        ret = "%s%s%d " % (ret, ESCAPE[i], split[i])
+    return ret.strip() + ESC_NONE
+
+class UNode:
+    """Node in a directory Tree."""
+
+    def __init__(self, nm, par=0):
+        self.name = nm
+        self.contents = []
+        self.state = 0
+        self.shown = False
+        self.parent = par
+
+    def __str__(self):
+        if(len(self.contents) > 0):
+            return "[" + self.name + " %d]" % len(self.contents)
+        else:
+            return self.name
+
+    def rootAdd(self, otherPath):
+        idx = otherPath.find("/")
+        if(idx == -1):
+            self.contents.append(UNode(otherPath, self))
+        else:
+            dirPart = otherPath[0:idx]
+            restPart = otherPath[idx+1:]
+            dirIdx = -1
+            for i in range(0,len(self.contents)):
+                if(self.contents[i].name == dirPart):
+                    dirIdx = i
+                    break
+            if(dirIdx == -1):
+                dirIdx = len(self.contents)
+                self.contents.append(UNode(dirPart, self))
+            self.contents[dirIdx].rootAdd(restPart)
+
+    def countRecursive(self):
+        if(len(self.contents) == 0):
+            return [1 if(i == self.state) else 0 for i in range(0, STATE_COUNT)] # fuck you python
+        else:
+            ret = [0 for i in range(0, STATE_COUNT)]
+            for sub in self.contents:
+                sCount = sub.countRecursive()
+                ret = [ret[i]+sCount[i] for i in range(0, STATE_COUNT)] # map(lambda a, b : a+b, ret, sub.countRecursive())
+            return ret
+
+    def cycle(self, forwards=True):
+        self.state = self.state + (1 if forwards else -1)
+        if(self.state >= STATE_COUNT):
+            self.state = 0
+        if(self.state < 0):
+            self.state = STATE_COUNT-1
+        for sub in self.contents:
+            sub.force(self.state)
+
+    def force(self, state):
+        self.state = state
+        for sub in self.contents:
+            sub.force(state)
+
+    def writeSelves(self, outputs, cur=""):
+        if(len(self.contents) == 0):
+            if(self.state != 0):
+                outputs[self.state-1].write(cur + self.name + "\n") # subtract one because the ignore state is 0
+        else:
+            for sub in self.contents:
+                sub.writeSelves(outputs, cur + self.name + "/")
+
+    def selfString(self):
+        if(len(self.contents) == 0):
+            return "%s%s%s" % (ESCAPE[self.state], self.name, ESC_NONE)
+        else:
+            ret="%s[%s]%s" % (ESC_YELLOW, self.name, ESC_NONE)
+            if(not self.shown):
+                ret = ret + " " + splitColour(self.countRecursive())
+            return ret
+
+    def populate(self, indent=0):
+        ret1 = [(indent*"|  ") + self.selfString()]
+        ret2 = [self]
+        if(len(self.contents) > 0 and self.shown):
+            for sub in self.contents:
+                (s_str, s_nod) = sub.populate(indent+1)
+                ret1 = ret1 + s_str
+                ret2 = ret2 + s_nod
+        return (ret1, ret2)
+
+    def dump(self, indent=0):
+        print("%s%s" % (indent*"  ", self))
+        for sub in self.contents:
+            sub.dump(indent+1)
+
+#-----------------------------------------------------------------------------
+# Prepare the treeview
+# direct="/home/scyptnex/computing/"
+# fullList=sorted([ line[len(direct):-1] for line in commandArr("find %s -type f | grep -v \"/\.\"" % direct) ], key=str.lower)
+
+if(len(sys.argv) != 3):
+    print("Usage: treepartition <input> <state-count>")
+    exit(1)
+
+root = UNode(".")
+STATE_COUNT = int(sys.argv[2]) + 1
+fin = open(sys.argv[1], "r")
+for fi in sorted(fin.readlines(), key=str.lower):
+    root.rootAdd(fi.strip())
+fin.close()
+root.shown = True
+
+# Viewing variables
+top=0
+cur=0
+going=True
+while(going):
+    # Display the screen
+    clearScreen()
+    print("Chooser")
+    print("...") if(top != 0) else print()
+    (items, nodes) = root.populate()
+    endIdx = min(len(items), top + TRM_HEIGHT - 4)
+    for i in range(top, endIdx):
+        if(i == cur):
+            print(ESC_HILIGHT, end="")
+        print(items[i] + ESC_NONE)
+    print() if(endIdx == len(items)) else print("...")
+    # Recieve key inputs
+    keyPressed = command("key.sh")
+    if(re.match(".*BACKSPACE.*", keyPressed)):
+        exit(1)
+    if(re.match(".*ENTER.*", keyPressed)):
+        going = False
+    if(re.match(".*SPACE.*", keyPressed)):
+        nodes[cur].cycle()
+    if(re.match(".*KEY_UP.*", keyPressed)):
+        cur = cur - 1
+    if(re.match(".*KEY_DOWN.*", keyPressed)):
+        cur = cur + 1
+    if(re.match(".*KEY_LEFT.*", keyPressed)):
+        if((len(nodes[cur].contents) == 0 and nodes[cur].parent) or (len(nodes[cur].contents) > 0 and not nodes[cur].shown)):
+            nodes[cur].parent.shown = False
+            cur = nodes.index(nodes[cur].parent)
+        else:
+            nodes[cur].shown = False
+    if(re.match(".*KEY_RIGHT.*", keyPressed)):
+        if(nodes[cur].shown or len(nodes[cur].contents) == 0):
+            nodes[cur].cycle()
+        else:
+            nodes[cur].shown = True
+    # Maintain state of the viewport
+    cur = max(min(cur, len(items)-1), 0)
+    if(cur < top):
+        top = cur
+    elif(cur >= top + TRM_HEIGHT - 4):
+        top = top + 1
+
+# Write the result sets to file
+outputs = [open("%s.%d" % (sys.argv[1], i), "w") for i in range(1, STATE_COUNT)]
+root.writeSelves(outputs)
+for fil in outputs:
+    fil.close()
