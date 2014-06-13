@@ -151,7 +151,7 @@ going=True
 while(going):
     # Display the screen
     clearScreen()
-    print("Chooser")
+    print("Chooser %s" % splitColour(root.countRecursive()))
     print("...") if(top != 0) else print()
     (items, nodes) = root.populate()
     endIdx = min(len(items), top + TRM_HEIGHT - 4)

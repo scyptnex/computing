@@ -1,0 +1,37 @@
+#! /bin/bash
+
+function remote_move(){
+    echo Moving remote files from $REMOTE_SOURCE to $REMOTE_STORE
+    ssh hellas@chronos.feralhosting.com 'while read LINE; do mkdir -p "'$REMOTE_STORE/'`dirname "$LINE"`"; mv "'$REMOTE_SOURCE/'$LINE" "'$REMOTE_STORE/'$LINE"; done; find '$REMOTE_SOURCE' -type d -empty -delete' < $1
+}
+
+TMP_ALL=$HOME/.hellas
+
+REMOTE_STORE="nic_old"
+REMOTE_SOURCE="private/transmission/data/"
+PARTITIONS=2
+if [ "$1x" == "-dx" ]; then
+	REMOTE_SOURCE="private/deluge/data/"
+	shift
+elif [ "$1x" == "-rx" ]; then
+    REMOTE_SOURCE=$REMOTE_STORE
+    PARTITIONS=1
+    shift
+fi
+
+
+TMP_REMOTE_SOURCE=`echo $REMOTE_SOURCE | sed 's/\//\\\\\//g'`
+ssh hellas@chronos.feralhosting.com -t "find $REMOTE_SOURCE -type f" | sed "s/^$TMP_REMOTE_SOURCE//" > $TMP_ALL
+treepartition $TMP_ALL $PARTITIONS
+if [ $? != 0 ]; then
+    echo "No changes made"
+    exit 1
+fi
+
+#=========================
+# Step 1, move the partition 2 files out
+if [ $PARTITIONS != 1 ]; then
+    remote_move $TMP_ALL.2
+fi
+
+rm -f $TMP_ALL*
