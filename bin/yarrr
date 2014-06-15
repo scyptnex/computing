@@ -1,13 +1,22 @@
 #! /bin/bash
 
+SERVER_MAIN="chronos.feralhosting.com"
+SERVER="hellas@$SERVER_MAIN"
+
 function remote_move(){
+    if [ `cat $1 | wc -l` == 0 ]; then
+        echo No remote files to move
+        return
+    fi
     echo Moving remote files from $REMOTE_SOURCE to $REMOTE_STORE
-    ssh hellas@chronos.feralhosting.com 'while read LINE; do mkdir -p "'$REMOTE_STORE/'`dirname "$LINE"`"; mv "'$REMOTE_SOURCE/'$LINE" "'$REMOTE_STORE/'$LINE"; done; find '$REMOTE_SOURCE' -type d -empty -delete' < $1
+    ssh $SERVER 'while read LINE; do mkdir -p "'$REMOTE_STORE/'`dirname "$LINE"`"; mv "'$REMOTE_SOURCE/'$LINE" "'$REMOTE_STORE/'$LINE"; done; find '$REMOTE_SOURCE' -type d -empty -delete' < $1
 }
 
 TMP_ALL=$HOME/.hellas
+TMP_PWD=$HOME/.hellas_last_pwd
 
-REMOTE_STORE="nic_old"
+LOCAL_STORE=$HOME/hellas
+REMOTE_STORE="nic_old/"
 REMOTE_SOURCE="private/transmission/data/"
 PARTITIONS=2
 if [ "$1x" == "-dx" ]; then
@@ -21,7 +30,7 @@ fi
 
 
 TMP_REMOTE_SOURCE=`echo $REMOTE_SOURCE | sed 's/\//\\\\\//g'`
-ssh hellas@chronos.feralhosting.com -t "find $REMOTE_SOURCE -type f" | sed "s/^$TMP_REMOTE_SOURCE//" > $TMP_ALL
+ssh $SERVER "find $REMOTE_SOURCE -type f" | sed "s/^$TMP_REMOTE_SOURCE//" > $TMP_ALL
 treepartition $TMP_ALL $PARTITIONS
 if [ $? != 0 ]; then
     echo "No changes made"
@@ -34,4 +43,26 @@ if [ $PARTITIONS != 1 ]; then
     remote_move $TMP_ALL.2
 fi
 
-rm -f $TMP_ALL*
+#=========================
+# Step 2, Archive and encrypt the files we want
+TMP_SHASUM=$TMP_ALL.shasum
+TEMPORARY_PASS=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+echo $TEMPORARY_PASS > $TMP_PWD
+echo "Storing temp pass \"$TEMPORARY_PASS\" in $TMP_PWD"
+sed "s/^\.\//\"$TMP_REMOTE_SOURCE/" < $TMP_ALL.1 | sed 's/$/"/' | ssh $SERVER "xargs tar -c --to-stdout | openssl enc -aes-256-cbc -out $REMOTE_STORE/.current.enc -k $TEMPORARY_PASS; sha256sum $REMOTE_STORE/.current.enc" | tee $TMP_SHASUM
+
+aria2c -x8 -k2M --ftp-user=hellas --ftp-passwd=rvlkBWpzrXHM7V2t "ftp://$SERVER_MAIN/$REMOTE_STORE/.current.enc" -d $LOCAL_STORE
+(cd $LOCAL_STORE; openssl enc -aes-256-cbc -d -in .current.enc -k $TEMPORARY_PASS | tar -xf -; mv ${REMOTE_SOURCE}/* .; find . -type d -empty -delete)
+
+#========================
+# Cleanup
+SHA_REMOTE=`cat $TMP_SHASUM | sed 's/[^0-9a-f].*//'`
+SHA_LOCAL=`sha256sum $LOCAL_STORE/.current.enc | sed 's/[^0-9a-f].*//'`
+if [ $SHA_REMOTE = $SHA_LOCAL ]; then
+    remote_move $TMP_ALL.1
+else
+    echo "ABORT: Mismatched sha sums"
+    echo $SHA_REMOTE remote
+    echo $SHA_LOCAL local
+fi
+rm -f $TMP_ALL* $LOCAL_STORE/.current.enc
