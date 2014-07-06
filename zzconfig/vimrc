@@ -1,11 +1,25 @@
 " This is my vimrc
 
 "====================
+" FORMATTING
+"====================
+set smarttab
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set ai " Auto Indent
+set si " Smart Indent
+
+"====================
 " UI
 "====================
 
 "syntax highlighting
 syntax enable
+
+"searching
+set hlsearch
+set incsearch
 
 "colour scheme
 colorscheme desert
@@ -13,3 +27,8 @@ set background=dark
 
 "line numbers
 set number
+
+"backspace
+set backspace=eol,start,indent
+set whichwrap+=<,>,h,l
+
