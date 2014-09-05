@@ -9,14 +9,14 @@ sleep_until(){
 while [ 1 -eq 1 ] ; do
 	echo "awaiting modification"
 	sleep_until
-	make
+	make $@
 	if [ $? -eq 0 ]; then
 		echo "Success"
 	else
 		echo "================="
 		echo "|     ERROR     |"
 		echo "================="
-		make -t
+		make -t $@
 	fi
 done
 
