@@ -14,6 +14,11 @@ set si " Smart Indent
 " UI
 "====================
 
+"leader and convenience shortcuts
+let mapleader = ","
+nmap <leader>w :w!<cr>
+nmap <leader>q :q<cr>
+
 "syntax highlighting
 syntax enable
 
@@ -25,10 +30,22 @@ set incsearch
 colorscheme desert
 set background=dark
 
+"command area
+set cmdheight=2
+
 "line numbers
 set number
 
 "backspace
 set backspace=eol,start,indent
 set whichwrap+=<,>,h,l
+
+"menu
+set wildmenu
+set wildignore=*.o,*~,*.pyc
+if has("win16") || has("win32")
+    set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
+else
+    set wildignore+=.git\*,.hg\*,.svn\*
+endif
 
