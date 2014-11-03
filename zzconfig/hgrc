@@ -1,5 +1,6 @@
 [ui]
 username="Scyptnex <Tzeidn 14>"
+merge=internal:prompt
 
 [extensions]
 graphlog=
