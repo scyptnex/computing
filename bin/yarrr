@@ -15,7 +15,7 @@ function remote_move(){
 TMP_ALL=$HOME/.hellas
 TMP_PWD=$HOME/.hellas_last_pwd
 
-LOCAL_STORE=$HOME/hellas
+LOCAL_STORE=/media/scyptnex/Tzain/Users/Administrator/Desktop/hellas
 REMOTE_STORE="nic_old/"
 REMOTE_SOURCE="private/transmission/data/"
 PARTITIONS=2
