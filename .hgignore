@@ -5,3 +5,4 @@ syntax: glob
 .classpath
 .settings
 .project
+libtcod-1.5.2
