@@ -5,4 +5,5 @@ syntax: glob
 .classpath
 .settings
 .project
+.cproject
 libtcod-1.5.2
