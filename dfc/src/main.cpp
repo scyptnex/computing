@@ -1,4 +1,5 @@
 #include "libtcod.hpp"
+
 int main() {
     int playerx=40,playery=25;
     TCODConsole::initRoot(80,50,"libtcod C++ tutorial",false);
@@ -18,4 +19,3 @@ int main() {
     }
     return 0;
 }
-
