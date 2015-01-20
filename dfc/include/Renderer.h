@@ -13,8 +13,8 @@
 class RendererEvent{
 public:
 	RendererEvent(std::string ty, std::string da) : type(ty), data(da) {}
-	const std::string const type;
-	const std::string const data;
+	const std::string type;
+	const std::string data;
 };
 
 class Renderer{
@@ -26,3 +26,4 @@ public:
 
 
 #endif /* RENDERER_H_ */
+

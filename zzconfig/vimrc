@@ -14,11 +14,6 @@ set si " Smart Indent
 " UI
 "====================
 
-"leader and convenience shortcuts
-let mapleader = ","
-nmap <leader>w :w!<cr>
-nmap <leader>q :q<cr>
-
 "syntax highlighting
 syntax enable
 
@@ -48,4 +43,44 @@ if has("win16") || has("win32")
 else
     set wildignore+=.git\*,.hg\*,.svn\*
 endif
+
+"====================
+" VUNDLE
+"====================
+
+set nocompatible
+filetype off
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'gmarik/Vundle.vim'
+Plugin 'vtreeexplorer'
+Plugin 'Valloric/YouCompleteMe'
+call vundle#end() " All of your Plugins must be added before this line
+filetype plugin indent on
+"filetype plugin on
+let g:ycm_filetype_whitelist = { 'cpp':1, 'c':1 }
+let g:ycm_enable_diagnostic_signs = 0
+let g:ycm_autoclose_preview_window_after_insertion = 1
+let g:ycm_extra_conf_globlist = ['./*','../*','../../*','!*']
+
+"====================
+" VTREEEXPLORER
+"====================
+
+let treeExplVertical=1
+let treeExplWinSize=40
+
+"====================
+" KEYMAPS
+"====================
+
+let mapleader = ","
+nnoremap <leader>w :w!<cr>
+nnoremap <leader>q :q<cr>
+
+"ycm completion
+nnoremap <leader>f :YcmCompleter GoTo<CR>
+"vtree
+nnoremap <leader>v :VSTreeExplore<CR>
+
 

@@ -1,4 +1,4 @@
-TARGETS=main
+TARGETS=main codTest
 SRC_DIR=src
 BIN_DIR=bin
 BUILD_DIR=build

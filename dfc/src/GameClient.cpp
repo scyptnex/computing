@@ -9,7 +9,6 @@
 
 GameClient::GameClient() {
 	// TODO Auto-generated constructor stub
-
 }
 
 GameClient::~GameClient() {
