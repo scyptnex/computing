@@ -61,7 +61,7 @@ public class CheatyPort {
 	public static void findAllLuas(File dir, ArrayList<File> luas){
 		for(File fi : dir.listFiles()){
 			if(fi.isDirectory()) findAllLuas(fi, luas);
-			else if(fi.getName().endsWith(LUA_EXT)) luas.add(fi);
+			else if(fi.getName().endsWith(LUA_EXT) || fi.getName().equals("startup")) luas.add(fi);
 		}
 	}
 

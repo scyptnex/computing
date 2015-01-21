@@ -29,6 +29,7 @@ end
 
 -- clears a tree by digging to the top, spiraling the leaves, then digging down the trunk, finally replacing the sappling
 function unTree()
+	if turtle.forward() then return end
 	goF()
 	turtle.digDown()
 	local rise = 0
@@ -69,10 +70,38 @@ function unTree()
 	end
 end
 
-for t=1,7 do
-	unTree()
-	for d=1,4 do
-		goF()
-	end
+local tArgs = {...}
+local trees = 8
+if tArgs[1] then trees = tonumber(tArgs[1]) end
+if turtle.getFuelLevel() < trees*60 then
+	print("Out of fuel")
+	exit();
 end
-unTree()
+
+function selectSlotWith(name)
+	for slot=1,16 do
+		local inv = turtle.getItemDetail(slot)
+		if inv and (inv.name == name) then
+			turtle.select(slot)
+			return true
+		end
+	end
+	return false
+end
+
+for i=1,2 do
+	for t=1,trees do
+		unTree()
+		if not turtle.detectDown() and selectSlotWith("minecraft:sapling") then
+			turtle.placeDown()
+		end
+		if t ~= trees then
+			for d=1,4 do
+				goF()
+			end
+		end
+	end
+	goF()
+	turtle.turnRight()
+	turtle.turnRight()
+end

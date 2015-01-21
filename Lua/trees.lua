@@ -5,8 +5,8 @@ TYPE_OAK = 3
 TYPE_SPR = 4
 TREE_NAMES = {"Birch", "Jungle", "Oak", "Spruce"}
 
-TREES_FAR = 4
-TREES_RIGHT = 4
+TREES_FAR = 5
+TREES_RIGHT = 5
 TREE_SPACE = 5
 TREE_MAX_HEIGHT = 10
 NUM_TREES = TREES_FAR * TREES_RIGHT
@@ -64,6 +64,10 @@ end
 
 --returns the selected tree
 function getTreeType()
+	return 1
+end
+
+function notGetTreeType()
 	print("Select a tree")
 	for idx = 1, table.getn(TREE_NAMES) do
 		print(idx .. " " .. TREE_NAMES[idx])
@@ -89,10 +93,10 @@ function doTree(replantSappling)
 		for lwr = 1, rise do
 			goD()
 		end
-		if replantSappling then
-			turtle.select(1)
-			turtle.placeDown()
-		end
+	end
+	if replantSappling and not turtle.detectDown() then
+		turtle.select(1)
+		turtle.placeDown()
 	end
 end
 
@@ -188,17 +192,30 @@ function rebase()
 	goF()
 	goF()
 	for idx = 1, 16 do
-		turtle.select(idx)
-		turtle.dropUp()
+		dat = turtle.getItemDetail(idx)
+		if dat and dat.name == "minecraft:log" then
+			turtle.select(idx)
+			turtle.dropUp()
+		end
 	end
 	turtle.turnLeft()
 	goF()
 	goF()
 	turtle.turnLeft()
+	for idx = 1, 16 do
+		dat = turtle.getItemDetail(idx)
+		if dat then
+			turtle.select(idx)
+			turtle.dropDown()
+		end
+	end
 end
 
 --------------------------------------------------
-
+--                   | Station  From perspective, turtle faces me
+--           S S S   | C . W
+--   ^       |       | T . .
+-- < T - - - +       | S S .
 if hasEmptyInventory() then
 	selectedTree = getTreeType()
 	if refuelUntil(FUEL_REQ) then
