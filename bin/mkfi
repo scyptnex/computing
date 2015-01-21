@@ -1,0 +1,63 @@
+#! /usr/bin/env python
+
+"""mkfi - Making basic files for fun and profit!.
+
+usage:
+    mkfi [-m "message", -a "author"] <file>
+    mkfi [-h,--help]
+
+Creates a file, and intelligently adds initial comment block and 
+surrounding data depending on the file type."""
+import sys
+import getopt
+import os
+
+def writeCommentBlock(fileName, author, message, commentBlock, width):
+    print "this is the comment block %s" % str(commentBlock)
+
+def writeFile(dirPath, fileName, message, author):
+    block={ "c" : ("/* ", "", "", " * ", "", " */", "", ""),
+            "sh": ("#-", "-", "-#", "# ", " #", "#-", "-", "-#")}
+    print "creating %s" % os.path.join(dirPath, fileName)
+
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hm:a:", ["help"])
+    except getopt.error, msg:
+        print msg
+        print "for help use --help"
+        sys.exit(2)
+
+    optMessage = ""
+    optAuthor = "Nic H."
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            print __doc__
+            sys.exit(0)
+        elif o in ("-m"):
+            optMessage = a
+        elif o in ("-a"):
+            optAuthor = a
+
+    if(len(args) != 1):
+        print "Please provide a filename"
+        print __doc__
+        sys.exit(1)
+
+    if(os.path.exists(args[0])):
+        print "%s already exists" % (args[0])
+        sys.exit(1)
+    else:
+        dirPath=os.path.dirname(args[0])
+        if(not dirPath):
+            dirPath="."
+        if(os.path.isdir(dirPath)):
+            writeFile(dirPath, os.path.basename(args[0]), optMessage, optAuthor)
+        else:
+            print "Non-existant directory %s" % dirPath
+            sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+
