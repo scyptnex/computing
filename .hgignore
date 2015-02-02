@@ -8,3 +8,5 @@ syntax: glob
 .project
 .cproject
 libtcod-1.5.2
+*build/deps/*
+*build/objs/*
