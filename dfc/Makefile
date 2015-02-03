@@ -3,12 +3,12 @@ SRC_DIR=src
 BIN_DIR=bin
 BUILD_DIR=build
 INCLUDES=-Iinclude -Iinclude/libtcod -Llib
-LIBS=-ltcod -ltcodxx
+LIBS=-ltcod -ltcodxx -pthread
 
 DEP_DIR=$(BUILD_DIR)/deps
 OBJ_DIR=$(BUILD_DIR)/objs
 
-CXXFLAGS=$(INCLUDES) -Wl,-rpath=. -Wall
+CXXFLAGS=$(INCLUDES)  -Wl,--no-as-needed -Wl,-rpath=. -Wall -std=c++11
 SRCS=$(wildcard $(SRC_DIR)/*.cpp)
 OBJS=$(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 DEPS=$(patsubst $(SRC_DIR)/%.cpp,$(DEP_DIR)/%.P,$(SRCS))
@@ -30,7 +30,7 @@ $(BIN_DIR)/%: $(OBJ_DIR)/%.o $(OBJ_NONMAINS)
 
 $(OBJ_DIR)%.o : $(SRC_DIR)/%.cpp
 	@[ -d $(DEP_DIR) ] || mkdir -p $(DEP_DIR) $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -MMD -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -MMD -c -o $@ $< $(LIBS)
 	@cp $(OBJ_DIR)/$*.d $(DEP_DIR)/$*.P; sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' -e 's/$$/ :/' < $(OBJ_DIR)/$*.d >> $(DEP_DIR)/$*.P; rm -f $(OBJ_DIR)$*.d
 
 clean:

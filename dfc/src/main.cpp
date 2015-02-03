@@ -1,13 +1,12 @@
 
-#include "GameComponent.h"
+#include "DFCServer.h"
 
 #include <iostream>
 
 using namespace std;
 
 int main() {
-    cout << "Hello world" << endl;
-    dfc::GameComponent gc = dfc::GameComponent(0, "something", 12345);
-    cout << "gc " << gc.getName() << endl;
+    DFCServer server;
+    server.run(0);
     return 0;
 }
