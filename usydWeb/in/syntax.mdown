@@ -1,0 +1,194 @@
+Syntax
+======
+
+This document details the syntax of Markdown.
+It is an exercise in me learning what that syntax is.
+
+------------------------------------
+
+# Heading 1
+
+    Heading 1
+    =========
+
+    Heading 1
+    =
+
+    #Heading 1
+
+    # Heading 1 #
+
+## Heading 2
+
+    Heading 2
+    ---------
+
+    Heading 2
+    -
+
+    ## Heading 2
+
+    ##Heading 2##
+
+### Heading 3...
+
+    ### Heading 3
+
+    ###Heading 3###
+
+------------
+
+Cras a egestas sapien. Phasellus at ex dui. Donec congue nisi ex, id eleifend tortor mattis id. Praesent vitae ex at odio commodo volutpat. Pellentesque at elit placerat, fermentum nunc sed, luctus odio. Fusce hendrerit, libero vel ornare mattis, lacus lacus finibus tellus, ac vulputate felis dui ut nunc. Praesent pulvinar semper justo, non tempus libero hendrerit gravida. Etiam sit amet ullamcorper nunc, vel tempor purus. Vivamus posuere dui magna. Pellentesque facilisis, lectus lobortis gravida eleifend, massa ligula accumsan nisl, vel interdum ex odio vitae odio. Fusce consequat velit mauris, vel porta enim dapibus a.
+
+Nam ullamcorper velit sed lectus venenatis, porta bibendum velit sodales. Curabitur accumsan lectus vitae ex tincidunt condimentum. Phasellus volutpat at arcu nec mollis. Proin consequat dolor vitae augue porttitor facilisis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec neque orci, venenatis sit amet dapibus nec, gravida ut augue. Praesent tempor blandit pharetra. Nullam scelerisque suscipit eros sit amet consectetur.
+
+Nunc ac pulvinar mi. Morbi tristique sit amet velit nec sagittis. Vestibulum non finibus orci, sed dignissim elit. Vivamus sit amet tincidunt velit, at egestas metus. Nulla facilisi. Fusce quis efficitur nisi. Sed dui lectus, euismod sit amet tempus at, mollis at lectus. Aliquam pulvinar purus eget neque suscipit elementum. Etiam ornare lacinia ligula nec luctus. Mauris mollis placerat faucibus.
+
+Praesent in lorem ut ante aliquam imperdiet scelerisque eu ante. Duis odio quam, faucibus ut tempor sit amet, pellentesque in sem. Proin rutrum justo eu pellentesque accumsan. Proin in tellus dolor. Nam luctus enim arcu, at eleifend neque viverra at. Curabitur at cursus tortor. Pellentesque eleifend nunc rutrum vestibulum facilisis. Aenean sollicitudin, est ut eleifend scelerisque, metus erat varius augue, ac volutpat lectus elit dictum elit. Ut facilisis, lacus vitae vulputate ornare, est sapien rutrum risus, eu sollicitudin risus sapien eget nibh. Quisque vel dignissim sem. Nulla ut pulvinar dolor. Pellentesque vitae velit risus. Nam non ipsum at massa tincidunt cursus laoreet in mi.
+
+Vivamus elementum dapibus tortor, vitae lobortis risus blandit ut. Praesent porttitor metus massa, vel blandit ipsum pellentesque et. Nunc rutrum ante in rutrum mattis. Integer eget ligula dui. Integer vehicula rhoncus mauris eget porta. Aliquam cursus ipsum nec tristique volutpat. Quisque vitae viverra justo. Suspendisse sit amet tellus in dui faucibus sollicitudin at eget erat. Vestibulum hendrerit orci nec ipsum laoreet, nec condimentum sapien ultrices. Nullam malesuada nisl ac ex lobortis, quis interdum ex cursus. 
+
+------------------
+
+* lists
+- Are
++ cool
+
+* Indented
+    * lists
+    * aswell
++ are
+    + double
+        - super
+    + awesome
+
+normal text for now
+
+1. a
+    3. its easy
+        7. one two
+        7. three
+    3. as
+2. b
+2. c
+
+Lists are not auto code though
+
+    * list
+        * sublist
+    + other
+    - list
+        + syntax
+
+    1. numbered
+    1. lists
+        2. work
+            3. great
+        99. if
+    99. you
+    1. know
+
+--------------------
+
+*Emphasis*
+
+    *Emphasis*
+    _Emphasis_
+
+**Super emphasis**
+
+    even **more**
+    __EMPHASIS!!__
+
+Code `` blocks::`are`.cool()`` right?
+
+    a `code()` block
+    More ``Code::block`` blocks
+    even `` `this`.is()`` a code
+
+------------------
+
+> Block quoted text
+> More text
+
+> block quoted
+paragraph
+>
+> > Recursive block quotes
+More recursive
+>
+> non-Recursive
+
+    > Block quoted
+    paragraph
+    >
+    > > recursive
+    >
+    > normal
+
+Code block text made by indenting things at least 4 spaces (or one tab).
+
+-------------------------
+
+Escape characters:
+
+\\ \` \{ \} \* \_ \[ \] \( \) \# \+ \- \. \!
+
+    \\ \` \{ \} \* \_ \[ \] \( \) \# \+ \- \. \!
+
+---------------------------
+
+Horizontal lines:
+
+    ---
+    ***
+    -------------
+    **************
+    * * * *
+    - - - - -
+
+-------------------------
+
+<http://www.google.com.au>
+
+[Named link](http://www.google.com.au)
+
+[Local link](./fileNotFound.html)
+
+This [Local link](fileNotFoundAgain.html) has no destination.
+
+This link has [custom alt](blahblah "Not blah blah!") text
+
+Download [link](test.txt) works?
+
+    <http://www.google.com.au>
+    [Named link](http://www.google.com.au)
+    [Local link](./fileNotFound.html)
+    [Local link](fileNotFound.html "still not found")
+
+Reference [style][ref1] links also [work] [ref2].
+
+Also [implicit][] links work
+
+[ref1]: http://www.bom.gov.au (Bureau of Meteorology)
+[ref2]: http://www.youtube.com
+[ImPliCIt]: http://www.example.com (non-case-sensitive implicit link)
+
+    [link Name][link_Ref]
+    [link Name] [link_Ref]
+    [implicit name][]
+    ...
+    [link_Ref]: http://url.com
+    [link_Ref]: http://url.com (Some alt-text)
+    [IMpliCIT namE]: http://www.example.com
+
+
+-------------------------------------
+
+Image
+
+![Alt text](http://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Goode_homolosine_projection_SW.jpg/1920px-Goode_homolosine_projection_SW.jpg "wierd text")
+
+an ![inline](Chess.png) image
+
+    ![alt text](http://image.url "title")
