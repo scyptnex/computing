@@ -28,7 +28,7 @@ public class CheatyPort {
 			if(lid.exists()){
 				try {
 					Scanner sca = new Scanner(lid);
-					nid = sca.nextInt() + 1;
+					nid = sca.nextInt() + 10;
 					sca.close();
 				} catch (FileNotFoundException e) {
 				}
@@ -39,14 +39,13 @@ public class CheatyPort {
 				if(!nd.exists()) nd.mkdir();
 			}
 			for(File cmp : compDir.listFiles()) if(cmp.isDirectory()){
-				System.out.println(" - " + cmp.getAbsolutePath());
-				copyOver(cmp, luas);
+				copyOver(cmp, luas, false);
 			}
 		}
 	}
 
-	public static void copyOver(File comp, ArrayList<File> luas){
-		for(File fi : comp.listFiles()) rmrf(fi);
+	public static void copyOver(File comp, ArrayList<File> luas, boolean clean){
+		if(clean) for(File fi : comp.listFiles()) rmrf(fi);
 		for(File lua : luas){
 			File to = new File(comp, lua.getName());
 			try{
@@ -82,7 +81,12 @@ public class CheatyPort {
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
 		if(!destFile.exists()) {
 			destFile.createNewFile();
+		} else {
+			if (sourceFile.lastModified() <= destFile.lastModified()){
+				return;
+			}
 		}
+		System.out.println(destFile.getPath());
 
 		FileChannel source = null;
 		FileChannel destination = null;
