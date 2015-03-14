@@ -44,7 +44,7 @@ public class AutoPort {
 				long fiModTime = lFi.lastModified();
 				for(File cDir : computerDirs){
 					String key = lFi.getPath() + ":" + cDir.getPath();
-					File targ = new File(cDir, lFi.getPath().substring((sourceDir + File.separator).length()));
+					File targ = new File(cDir, lFi.getPath().substring((sourceDir + File.separator).length(), lFi.getPath().length()-4));
 					if(!knownModTimes.containsKey(key) || knownModTimes.get(key) < fiModTime || !targ.exists()){
 						knownModTimes.put(key, tryPort(lFi, targ));
 					}

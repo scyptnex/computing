@@ -1,7 +1,3 @@
 
-if(arg[1]) then
-    require(arg[1])
-end
-
--- test comment
-
+os.loadAPI("libs/tree")
+tree.birch(true, true)
