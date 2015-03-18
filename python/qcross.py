@@ -21,12 +21,39 @@ Options:
 import sys
 import getopt
 
+"""
+/-\
+| |
+\_/
+
+\ /
+ X 
+/ \
+"""
+
+def subRepl(sub, pos, source):
+    return source[:pos] + sub + source[pos+len(sub):]
+
+def printClassic(row, col, nought, brd):
+    prt = ["/-\\", "| |", "\\-/"] if nought else ["\\ /", " X ", "/ \\"]
+    brd[4*row + 0] = subRepl(prt[0], 3+9*col, brd[4*row + 0])
+    brd[4*row + 1] = subRepl(prt[1], 3+9*col, brd[4*row + 1])
+    brd[4*row + 2] = subRepl(prt[2], 3+9*col, brd[4*row + 2])
+
+def printQuantum(row, col, nought, idx, brd):
+    prt = "o" if nought else "x"
+    brd[4*row + idx//3] = subRepl(prt + str(idx), 9*col + 3*(idx%3), brd[4*row + idx//3])
+
 def printBoard():
-    for i in xrange(0,11):
-        if (i % 4 == 3):
-            print ("-"*8 + "+")*2 + "-"*8
-        else:
-            print (" "*8 + "|")*2
+    brd = [ ("-"*8 + "+")*2 + "-"*8 if (i%4 == 3) else (" "*8 + "|")*2 + " "*8 for i in xrange(0,11)]
+    for line in brd: print line
+    printClassic(0, 0, True, brd)
+    printClassic(0, 2, False, brd)
+    printQuantum(1, 1, False, 3, brd)
+    printQuantum(1, 1, True, 2, brd)
+    print
+    for line in brd: print line
+
 
 def qcross():
     try:
