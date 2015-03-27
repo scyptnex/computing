@@ -193,7 +193,7 @@ class Board:
         """Incrementally add the newly classicalised pieces, checking for a victor along the way"""
         for idx in xrange(0,9):
             for r,c in itertools.product(xrange(0,3), repeat=2):
-                if self.state[r][c].find(str(idx)) != -1:
+                if self.state[r][c].find(str(idx)) != -1 and self.state[r][c][0] in ("O", "X"):
                     self.state[r][c] = self.state[r][c][0]
                     self.classicVictors = self._getVictors()
                     if self.classicVictors and not self.quantumVictors:
