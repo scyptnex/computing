@@ -19,7 +19,21 @@ The fun way to tic-tac and toe
 
 Options:
     -h --help        Print help message
-    -m --moves <arg> Make <arg> moves before play"""
+    -m --moves <arg> Make <arg> moves before play
+
+How to play:
+Play or observe quantum noughts-and-crosses pieces into the board.  The
+squares are named:
+    q w e
+    a s d
+    z x c
+Onscreen prompts are displayed, telling you who is doing what.
+When a cycle of quantum pieces is placed, the opposing player must observe
+which superposition is collapsed, the 'Classical Winner' is determined by
+having a line of three collapsed pieces in any direction.
+In the event that one chain of observations causes multiple winners, the player
+who placed their pieces earlier is declared the 'Quantum Winner'.
+"""
 
 import sys
 import getopt
@@ -94,7 +108,7 @@ class Board:
         if self.moveIsCollapse:
             r1, c1, r2, c2 = self._getCollapseMoves()
             if not (r,c) in ((r1, c1), (r2, c2)):
-                errorPrint("Collapsing move must be in the opponent's previous square: (%d, %d) or (%d, %d)" % (r1, c1, r2, c2))
+                errorPrint("Observing move must be in the opponent's previous square: (%d, %d) or (%d, %d)" % (r1, c1, r2, c2))
                 return
             self._observe(self.moveIdx-1, r, c)
             self._finaliseClassic()
@@ -114,6 +128,16 @@ class Board:
                 if self._hasCycle():
                     self.moveIsCollapse = True
         self.moveHistory += square
+
+    def getMoveMessage(self):
+        """Returns a string which instructs the player(s) on what to do next"""
+        curPlayer = "O" if self.moveIdx%2 == 0 else "X"
+        if self.moveIsCollapse:
+            return curPlayer + ", observe your opponent's %s%d move" % ("x" if self.moveIdx%2 == 0 else "o", self.moveIdx-1)
+        elif self.moveIsFirst:
+            return curPlayer + ", Make your first %s%d half-move" % ("o" if self.moveIdx%2 == 0 else "x", self.moveIdx)
+        else:
+            return curPlayer + ", Make your second %s%d half-move" % ("o" if self.moveIdx%2 == 0 else "x", self.moveIdx)
 
     def prettyPrint(self):
         """Pretty print the board to stdout"""
@@ -238,6 +262,7 @@ def qcross():
         board.prettyPrint()
         if board.classicVictors:
             break
+        print board.getMoveMessage()
         mov = sys.stdin.readline()
         print
         if mov:
