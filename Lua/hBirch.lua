@@ -1,3 +1,5 @@
+os.loadAPI("libs/tree")
+
 --goes forward, digging if necessary
 function goF()
 	while not turtle.forward() do
@@ -30,44 +32,8 @@ end
 -- clears a tree by digging to the top, spiraling the leaves, then digging down the trunk, finally replacing the sappling
 function unTree()
 	if turtle.forward() then return end
+	tree.birch(false, true)
 	goF()
-	turtle.digDown()
-	local rise = 0
-	while turtle.detectUp() do
-		goU()
-		rise = rise + 1
-	end
-	rise = rise-2
-	goD()
-	goD()
-	unLeaf()
-	turtle.turnRight()
-	unLeaf()
-	turtle.turnRight()
-	unLeaf()
-	unLeaf()
-	turtle.turnRight()
-	unLeaf()
-	unLeaf()
-	turtle.turnRight()
-	for i=1,2 do
-		for j=1,3 do unLeaf() end
-		turtle.turnRight()
-	end
-	for i=1,3 do
-		for j=1,4 do unLeaf() end
-		turtle.turnRight()
-	end
-	goF()
-	goF()
-	turtle.turnRight()
-	goF()
-	goF()
-	turtle.turnRight()
-	turtle.turnRight()
-	for lwr = 1, rise do
-		goD()
-	end
 end
 
 local tArgs = {...}
