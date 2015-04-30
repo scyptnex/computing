@@ -15,7 +15,7 @@ The fun way to tic-tac and toe
 
 /-\     \ /
 | |  &   X
-\_/     / \ 
+\-/     / \ 
 
 Options:
     -h --help        Print help message
