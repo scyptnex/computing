@@ -25,4 +25,6 @@ Your mileage may vary.
 
 * [Markdown Syntax](syntax.html)
 * [PGP Key]()
+* [CFL-R](cfl/)
+* [Jens, Transitive Closure](jens/)
 

@@ -31,6 +31,7 @@ function generate(){
             local TARG=`echo ${D}${FIL} | sed 's/mdown$/html/'`
             rm -f $TARG
             perl $(dirname $0 )/Markdown.pl $PAT > $TARG
+            chmod a+r $TARG
         fi
     done
 }
