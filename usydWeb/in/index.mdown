@@ -1,0 +1,28 @@
+# Welcome #
+
+You have reached the personal website of Nicholas Hollingum.
+
+Aren't you a clever one.
+
+## Research ##
+
+I am a PHD student at the [University of Sydney](https://sydney.edu.au), studying Context-free Language Reachability.
+My Professor is Dr Bernhard Scholz.
+We are interested in developing practical and scalable frameworks for solving CFL-R, specifically as a Points-To analysis (aka Alias Analysis, Flows-to Analysis) vehicle.
+CFL-R is a useful and concise formalism which is able to capture many of the intricacies of interprocedural program anlyses without the overheads associated with a fully-fledged Datalog evaluation.
+
+## Thoughts ##
+
+My personal blog is the one-stop-shop for questionably-interesting and poorly-explained musings.
+
+## Food ##
+
+In the spirit of utilising that which is freely given, this website also is a compendium of recipes which i have compiled over the years.
+All food here is guaranteed to taste good in competant hands.
+Your mileage may vary.
+
+### Some Useful Links ###
+
+* [Markdown Syntax](syntax.html)
+* [PGP Key]()
+
