@@ -1,0 +1,15 @@
+# Giga-Scale Exhaustive Points-To Analysis for Java in Under a Minute #
+
+### Progress ###
+
+Currenty *unpublished*, please check back later :)
+
+### Collaborators ###
+
+* Jens Deitrich (Massey Univ.)
+* Nicholas Hollingum
+* Bernhard Scholz (Oracle inc.)
+
+### Links ###
+
+* [Project files](../../jens)
