@@ -18,6 +18,7 @@ import getopt
 import re
 import stat
 import subprocess
+from shutil import copyfile
 
 MARKDOWN_MATCHER = re.compile("\.mdown$");
 PRIVELAGE_DIRS = stat.S_IRWXU | stat.S_IXGRP | stat.S_IXOTH
@@ -25,6 +26,8 @@ PRIVELAGE_FILS = stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH
 HOME_NAME = "home"
 HTML_SRC = "./in"
 HTML_DST = os.path.expanduser("~") + "/lib/html"
+HTML_END = "html"
+CSS_SRC = "style.css"
 
 class htmlPretty:
     def __init__(self, fi, tab):
@@ -43,7 +46,7 @@ class htmlPretty:
         self.f.close()
 
 def htmlName(inp, outDir):
-    return os.path.join(outDir, os.path.split(inp)[1][:-5] + "html")
+    return os.path.join(outDir, os.path.split(inp)[1][:-5] + HTML_END)
 
 def pageName(inp):
     path, name = os.path.split(inp)
@@ -55,26 +58,69 @@ def pageName(inp):
             ret = str(os.path.split(path)[-1])
     else:
         ret = name[:-6]
-    return str(ret[0:1]).upper() + str(ret[1:])
+    return str(ret)
 
 def _getNav(curDir):
     ret = {}
     for entry in os.listdir(curDir):
         fil = os.path.join(curDir, entry)
         if MARKDOWN_MATCHER.search(fil):
-            ret[pageName(fil)] = "index.html"
+            ret[entry] = str(fil)[:-5] + HTML_END
         elif os.path.isdir(fil):
-            ret[pageName(os.path.join(fil, "index.mdown"))] = _getNav(fil)
+            ret[entry] = _getNav(fil)
     return ret
 
 def getNav():
     return {HOME_NAME : _getNav(HTML_SRC)}
 
+def sunderPath(path):
+    """Return a reverse list of all the path entries"""
+    ret = []
+    while True:
+        h, t = os.path.split(path)
+        if t:
+            ret.append(t)
+        if not h:
+            break
+        path = h
+    return ret
+
+def findRelativePath(fromP, toP):
+    f = sunderPath(fromP)
+    t = sunderPath(toP)
+    while len(f) > 0 and len(t) > 0 and f[-1] == t[-1]:
+        f.pop()
+        t.pop()
+    if not f and not t:
+        return None
+    ret = ""
+    while t:
+        ret = os.path.join(ret, t.pop())
+    for i in xrange(1, len(f)):
+        ret = os.path.join("..", ret)
+    return ret
+
 def writeNav(pretty, nav, pagePath):
     pretty.write("<ul>")
     for lin in sorted(nav.keys()):
-        pretty.write("<li>%s</li>" % lin)
-        if not isinstance(nav[lin], str):
+        if lin == "index.mdown":
+            pass
+        elif isinstance(nav[lin], str):
+            targ = findRelativePath(pagePath, nav[lin])
+            name = pageName(lin)
+            if targ:
+                pretty.write("<li><a href=\"%s\">%s</a></li>" % (targ, name))
+            else:
+                pretty.write("<li class=\"current\"><a href=\"\">%s</a></li>" % name)
+        else:
+            if nav[lin].has_key("index.mdown"):
+                targ = findRelativePath(pagePath, nav[lin]["index.mdown"])
+                if targ:
+                    pretty.write("<li><a href=\"%s\">%s</a></li>" % (targ, lin))
+                else:
+                    pretty.write("<li class=\"current\"><a href=\"\">%s</a></li>" % lin)
+            else:
+                pretty.write("<li>%s</li>" % lin)
             writeNav(pretty, nav[lin], pagePath)
     pretty.write("</ul>")
 
@@ -86,16 +132,18 @@ def makeHtml(inp, outDir):
     page.write("<html>")
     page.write("<head>")
     page.write("<title>%s</title>" % pageName(inp))
+    page.write("<link rel=\"stylesheet\" href=\"%s\" />" % findRelativePath(inp, os.path.join(HTML_SRC, CSS_SRC)))
     page.write("</head>")
     page.write("<body>")
-    #nav
-    page.write("<div class=\"nav\">")
-    writeNav(page, getNav(), inp)
-    page.write("</div>")
     #content
     page.write("<div class=\"content\">")
     proc = subprocess.Popen(["./Markdown.pl", str(inp)], stdout=subprocess.PIPE, close_fds=True)
     page.writeAll(proc.stdout.readlines())
+    page.write("</div>")
+    #nav
+    page.write("")
+    page.write("<div class=\"nav\">")
+    writeNav(page, getNav(), inp[:-5] + HTML_END)
     page.write("</div>")
     #finals
     page.write("</body>")
@@ -140,6 +188,7 @@ def deploy():
         sys.exit(4)
     else:
         generate(HTML_SRC, HTML_DST)
+        copyfile(CSS_SRC, os.path.join(HTML_DST, CSS_SRC))
 
 if __name__ == "__main__":
     deploy()
