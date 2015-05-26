@@ -21,8 +21,8 @@ import subprocess
 from shutil import copyfile
 
 MARKDOWN_MATCHER = re.compile("\.mdown$");
-PRIVELAGE_DIRS = stat.S_IRWXU | stat.S_IXGRP | stat.S_IXOTH
-PRIVELAGE_FILS = stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH
+PRIVELAGE_DIRS = 0711 #stat.S_IRWXU | stat.S_IXGRP | stat.S_IXOTH
+PRIVELAGE_FILS = 0744 #stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH
 HOME_NAME = "home"
 HTML_SRC = "./in"
 HTML_DST = os.path.expanduser("~") + "/lib/html"
@@ -153,7 +153,8 @@ def makeHtml(inp, outDir):
 
 def makeDirSmart(path):
     if(not os.path.isdir(path)):
-        os.makedirs(path, mode=PRIVELAGE_DIRS)
+        os.makedirs(path)
+        os.chmod(path, PRIVELAGE_DIRS)
 
 def generate(src, dst):
     for entry in os.listdir(src):
