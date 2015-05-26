@@ -149,6 +149,7 @@ def makeHtml(inp, outDir):
     page.write("</body>")
     page.write("</html>")
     page.close()
+    os.chmod(outp, PRIVELAGE_FILS);
 
 def makeDirSmart(path):
     if(not os.path.isdir(path)):
@@ -188,7 +189,9 @@ def deploy():
         sys.exit(4)
     else:
         generate(HTML_SRC, HTML_DST)
-        copyfile(CSS_SRC, os.path.join(HTML_DST, CSS_SRC))
+        css = os.path.join(HTML_DST, CSS_SRC)
+        copyfile(CSS_SRC, css)
+        os.chmod(css, PRIVELAGE_FILS);
 
 if __name__ == "__main__":
     deploy()
