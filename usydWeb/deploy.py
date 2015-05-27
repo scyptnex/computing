@@ -27,7 +27,7 @@ HOME_NAME = "home"
 HTML_SRC = "./in"
 HTML_DST = os.path.expanduser("~") + "/lib/html"
 HTML_END = "html"
-CSS_SRC = "style.css"
+CSS_SRC = "bootstrapmod.css"
 
 class htmlPretty:
     def __init__(self, fi, tab):
@@ -101,7 +101,7 @@ def findRelativePath(fromP, toP):
     return ret
 
 def writeNav(pretty, nav, pagePath):
-    pretty.write("<ul>")
+    pretty.write("<ul class=\"nav nav-list\">")
     for lin in sorted(nav.keys()):
         if lin == "index.mdown":
             pass
@@ -111,14 +111,16 @@ def writeNav(pretty, nav, pagePath):
             if targ:
                 pretty.write("<li><a href=\"%s\">%s</a></li>" % (targ, name))
             else:
-                pretty.write("<li class=\"current\"><a href=\"\">%s</a></li>" % name)
+                pretty.write("<li class=\"active\"><a href=\"\">%s</a></li>" % name)
         else:
             if nav[lin].has_key("index.mdown"):
+                if lin == HOME_NAME:
+                    pretty.write("<li class=\"nav-header\">Navigation</li>")
                 targ = findRelativePath(pagePath, nav[lin]["index.mdown"])
                 if targ:
                     pretty.write("<li><a href=\"%s\">%s</a></li>" % (targ, lin))
                 else:
-                    pretty.write("<li class=\"current\"><a href=\"\">%s</a></li>" % lin)
+                    pretty.write("<li class=\"active\"><a href=\"\">%s</a></li>" % lin)
             else:
                 pretty.write("<li>%s</li>" % lin)
             writeNav(pretty, nav[lin], pagePath)
@@ -132,20 +134,28 @@ def makeHtml(inp, outDir):
     page.write("<html>")
     page.write("<head>")
     page.write("<title>%s</title>" % pageName(inp))
+    page.write("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
     page.write("<link rel=\"stylesheet\" href=\"%s\" />" % findRelativePath(inp, os.path.join(HTML_SRC, CSS_SRC)))
     page.write("</head>")
     page.write("<body>")
-    #content
-    page.write("<div class=\"content\">")
-    proc = subprocess.Popen(["./Markdown.pl", str(inp)], stdout=subprocess.PIPE, close_fds=True)
-    page.writeAll(proc.stdout.readlines())
-    page.write("</div>")
+    page.write("<div class=\"container-fluid\">")
+    page.write("<div class=\"row-fluid\">")
     #nav
     page.write("")
-    page.write("<div class=\"nav\">")
+    page.write("<div class=\"span2 offset1\">")
+    page.write("<span class=\"h1\">&nbsp;</span> <!-- Hack to put whitespace above the nav -->")
+    page.write("<div class=\"well sidebar-nav\">")
     writeNav(page, getNav(), inp[:-5] + HTML_END)
-    page.write("</div>")
+    page.write("</div>") # well sidebar-nav
+    page.write("</div>") # span2 offset1
+    #content
+    page.write("<div class=\"span6\">")
+    proc = subprocess.Popen(["./Markdown.pl", str(inp)], stdout=subprocess.PIPE, close_fds=True)
+    page.writeAll(proc.stdout.readlines())
+    page.write("</div>") # span6
     #finals
+    page.write("</div>") # row-fluid
+    page.write("</div>") # container-fluid
     page.write("</body>")
     page.write("</html>")
     page.close()
