@@ -1,0 +1,96 @@
+
+Gigascale Points-to Analysis Artifact Evaluation
+================================================
+
+This guide explains how to setup the evaluation framework for the Gigascale
+points-to analysis. The guide is divided into two sections:
+
+ * **Getting Started.** Describes the exact procedure to acquire, test, and
+   execute the framework.
+ * **Step-by-step.** Describes the process used in our evaluation, and how
+   future researchers may replicate our results.
+
+Getting Started
+---------------
+
+Note that artifact reviewers will be provided with a virtual machine with
+initial steps already completed.  If you have a virtual machine image,
+please skip to step *Test the framework*
+
+ 0. *Install dependencies.* The framework is designed to run on Ubuntu-like
+    environments, and is tested on `Lubuntu-15.04-desktop`. The framework is
+    written in Java and must have `javac` `java` and `ant`, as well as basic
+    utilities `tar`, `sed`, `python`, etc.
+
+        > sudo apt-get install default-jdk
+        > sudo apt-get install ant
+
+    The datalog engine [Logicblox](http://www.logicblox.com/) (version 3.9)
+    was compared in our evaluation.  This software is commercially
+    available, or an academic license can be sought.
+
+ 1. *Acquire the framework.* Download the components of the framework to
+    your testing computer:
+
+    [TBD](nowhere) [md5sum: TBD]
+
+    Then extract it using `tar`
+
+        > tar -xjvf gigascale-1.x.tar.bz
+
+ 2. *Test the framework.* Begin with a simple run which prints statistical
+    information about one of the benchmarks:
+    
+        > cd gigascale-1.x
+        > ./Table1-2.sh -i datasets/dacapo9/sunflow/
+
+    This will compile the framework, and execute a statistical analysis
+    script `nz.ac.massey.gp2.pointsto.benchmarks.MeasureAll`. The script
+    logs output data (printed to screen), and the `Table1-2.sh` script
+    captures the output and formats it in a csv file, and prints it to the
+    screen.
+
+    Next we must test that the memory and runtime performance experiments
+    are working. Define the location of the Logicblox installation (if you
+    have it):
+
+        > cd <logicblox directory>
+        > ls bin/
+          ...
+          bloxbatch
+          ...
+        > export LOGICBLOX_HOME=`pwd`
+
+    If you do not have Logicblox, please exclude logicblox evaluation from
+    all future executions with the `-l` flag. Now run the framework:
+
+        > cd gigascale-1.x
+        > ./Table3.sh -i datasets/dacapo9/sunflow/
+
+    This may take several minutes. If it succeeds, a table will be displayed
+    containing runtime and memory-usage statistics for WL, DP, LB and TC
+    points-to analyses of the sunflow benchmark.
+
+        benchmark WL-time WL-mem DP-time DP-mem LB-time ...
+        sunflow   0.93    121    1.04    143    2.10
+
+ 4. *Run the complete framework.* Execute all experiments on the DaCapo 2009
+    benchmarks by executing the `./run` script: 
+
+        > cd gigascale-1.x
+        > ./run -i datasets/dacapo9/
+
+    This will execute the experimental evaluation on all benchmarks except
+    OpenJDK.  We exclude OpenJDK from complete analysis as it takes too
+    long, though we encourage you to verify the 'less than a minute' claim
+    with:
+
+        > ./run -wdli datasets/openjdk/
+
+    Which performs statistical analysis, bridge comparison, refinement
+    comparison, and solving via TC on the OpenJDK benchmark.
+
+Step-by-step
+------------
+
+Foo.
