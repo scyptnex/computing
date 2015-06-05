@@ -23,7 +23,7 @@ Note that artifact reviewers will be provided with a virtual machine with initia
 
  1. *Acquire the framework.* Download the components of the framework to your testing computer:
 
-    [gigascale-1.4.tar.bz](https://drive.google.com/uc?id=0B_mPWKbbkfRnYl9zUWtCQTV0d28&export=download) [md5sum: 71ae6559aae8de2f74c9c74a3d75ca22]
+    [gigascale-1.6.tar.bz](https://drive.google.com/uc?id=0B_mPWKbbkfRnWW42enp4elZaUEE&export=download) [md5sum: a9afc78d7ca6e617f6e1254242fdeb11]
 
     Then extract it using `tar`
 
