@@ -27,7 +27,8 @@ HOME_NAME = "home"
 HTML_SRC = "./in"
 HTML_DST = os.path.expanduser("~") + "/lib/html"
 HTML_END = "html"
-CSS_SRC = "bootstrapmod.css"
+CSS_SRC = "bootstrap.min.css"
+JS_SRC = "bootstrap.min.js"
 
 class htmlPretty:
     def __init__(self, fi, tab):
@@ -101,7 +102,7 @@ def findRelativePath(fromP, toP):
     return ret
 
 def writeNav(pretty, nav, pagePath):
-    pretty.write("<ul class=\"nav nav-list\">")
+    pretty.write("<ul class=\"nav nav-pills nav-stacked\">")
     for lin in sorted(nav.keys()):
         if lin == "index.mdown":
             pass
@@ -111,7 +112,7 @@ def writeNav(pretty, nav, pagePath):
             if targ:
                 pretty.write("<li><a href=\"%s\">%s</a></li>" % (targ, name))
             else:
-                pretty.write("<li class=\"active\"><a href=\"\">%s</a></li>" % name)
+                pretty.write("<li class=\"active\"><a href=\"#\">%s</a></li>" % name)
         else:
             if nav[lin].has_key("index.mdown"):
                 if lin == HOME_NAME:
@@ -120,10 +121,12 @@ def writeNav(pretty, nav, pagePath):
                 if targ:
                     pretty.write("<li><a href=\"%s\">%s</a></li>" % (targ, lin))
                 else:
-                    pretty.write("<li class=\"active\"><a href=\"\">%s</a></li>" % lin)
+                    pretty.write("<li class=\"active\"><a href=\"#\">%s</a></li>" % lin)
             else:
-                pretty.write("<li>%s</li>" % lin)
+                pretty.write("<li class=\"disabled\"><a href=\"#\">%s</a></li>" % lin)
+            pretty.write("<div style=\"padding-left:10px;\">")
             writeNav(pretty, nav[lin], pagePath)
+            pretty.write("</div>")
     pretty.write("</ul>")
 
 def makeHtml(inp, outDir):
@@ -138,24 +141,24 @@ def makeHtml(inp, outDir):
     page.write("<link rel=\"stylesheet\" href=\"%s\" />" % findRelativePath(inp, os.path.join(HTML_SRC, CSS_SRC)))
     page.write("</head>")
     page.write("<body>")
-    page.write("<div class=\"container-fluid\">")
-    page.write("<div class=\"row-fluid\">")
+    page.write("<div class=\"container\">")
+    page.write("<div class=\"row\">")
     #nav
     page.write("")
-    page.write("<div class=\"span2 offset1\">")
+    page.write("<div class=\"col-md-3\">")
     page.write("<span class=\"h1\">&nbsp;</span> <!-- Hack to put whitespace above the nav -->")
-    page.write("<div class=\"well sidebar-nav\">")
     writeNav(page, getNav(), inp[:-5] + HTML_END)
-    page.write("</div>") # well sidebar-nav
-    page.write("</div>") # span2 offset1
+    page.write("</div>") # nav
     #content
-    page.write("<div class=\"span6\">")
+    page.write("<div class=\"col-md-9\">")
     proc = subprocess.Popen(["./Markdown.pl", str(inp)], stdout=subprocess.PIPE, close_fds=True)
     page.writeAll(proc.stdout.readlines())
-    page.write("</div>") # span6
+    page.write("</div>") # content
     #finals
-    page.write("</div>") # row-fluid
-    page.write("</div>") # container-fluid
+    page.write("</div>") # row
+    page.write("</div>") # container
+    page.write("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>")
+    page.write("<script src=\"%s\"></script>" % findRelativePath(inp, os.path.join(HTML_SRC, JS_SRC)))
     page.write("</body>")
     page.write("</html>")
     page.close()
@@ -203,6 +206,9 @@ def deploy():
         css = os.path.join(HTML_DST, CSS_SRC)
         copyfile(CSS_SRC, css)
         os.chmod(css, PRIVELAGE_FILS);
+        jss = os.path.join(HTML_DST, JS_SRC)
+        copyfile(JS_SRC, jss)
+        os.chmod(jss, PRIVELAGE_FILS);
 
 if __name__ == "__main__":
     deploy()

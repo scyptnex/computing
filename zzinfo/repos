@@ -1,0 +1,5 @@
+computing  git@github.com:scyptnex/computing.git                 git
+general    ssh://hg@bitbucket.org/scyptnex/general               hg
+jens-cfl   ssh://hg@bitbucket.org/jensdietrich/cfl-reachability  hg
+uni        https://svn.it.usyd.edu.au/svn/nhol8058               svn
+
