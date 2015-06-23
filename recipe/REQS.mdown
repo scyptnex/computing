@@ -1,0 +1,54 @@
+# RECIPES #
+
+## Contents ##
+
+  * Title
+      * Version
+  * Ingredients
+  * Method
+  * Meta
+      * Source - Inventor
+      * Cooking time
+      * Course
+      * Ethnicity
+      * GF/Veg/Lact/Kosher/Halal/Paleo <- procedural?
+          * Filters - ingredient list makes a filter
+      * Accompaniments
+  * Comments
+  * Variations/modifications
+      * "Your friend ... has tweaked this recipe"
+  * Pictures
+      * procedural pictures
+      * Videos? <- youtube/vimeo
+
+## Privelages ##
+
+  * Fancier
+      * Comment on recipes
+      * Make private modifications
+      * Upload private photos
+      * Share modifications/photos with friends
+      * Vote
+  * Enthusiast
+      * Make new recipes
+      * Make public modifications
+      * Public photos - publicise photos uploaded by friends - Plagarism?
+  * Artisan
+      * Propose Elections
+  * Admin
+      * Moderate
+
+## Elections ##
+
+  * Best (cuisine/pairing/version/trick/filter)
+      * Fan Favourite - (First-past-post)
+      * Crowd Pleaser - (Preferential)
+      * Hands-down winner - (Both)
+  * Providers (restaurants that serve ...)
+
+## Revenue ##
+
+  * Ingredient adds
+  * Restaurant adds
+  * User-payed priveleges (buying rank)
+
