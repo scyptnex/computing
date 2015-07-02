@@ -78,9 +78,10 @@ let treeExplWinSize=40
 let mapleader = ","
 nnoremap <leader>w :w!<cr>
 nnoremap <leader>q :q<cr>
+nnoremap <leader>f :set filetype?<cr>
 
 "ycm completion
-nnoremap <leader>f :YcmCompleter GoTo<CR>
+nnoremap <leader>d :YcmCompleter GoTo<CR>
 "vtree
 nnoremap <leader>v :VSTreeExplore<CR>
 
