@@ -10,3 +10,5 @@ syntax: glob
 libtcod-1.5.2
 *build/deps/*
 *build/objs/*
+.idea/*
+*.iml
