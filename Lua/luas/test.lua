@@ -1,3 +1,3 @@
 
-os.loadAPI("libs/tree")
-tree.birch(true, true)
+os.loadAPI("misc/chicken")
+chicken.emptyChest()
