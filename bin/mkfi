@@ -184,9 +184,7 @@ def writeFile(dirPath, fileName, message, author, extension):
         fp("\\end{document}", f)
     else:
         fp("function usage(){", f)
-        fp("    echo %s" % humanName, f)
-        fp("    echo", f)
-        fp("    echo - Usage information", f)
+        fp("    grep \"^#.*#$\" $0", f)
         fp("}", f)
         fp("", f)
         fp("while getopts \"h\" opt; do", f)

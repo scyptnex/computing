@@ -14,9 +14,15 @@
 .pydevproject
 __pycache__
 
+# Intelli J files #
+.idea/*
+out/*
+*.iml
+
 # Package Files #
 *.war
 *.ear
 
 # Misc #
 Oracle/*.facts
+Lua/saves
