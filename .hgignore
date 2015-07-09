@@ -12,3 +12,4 @@ libtcod-1.5.2
 *build/objs/*
 .idea/*
 *.iml
+out/production/*
