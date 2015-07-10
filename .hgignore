@@ -1,17 +1,28 @@
 syntax: glob
+
+# Build files
 *.class
 *.pyc
 *~
+build/
+
+# Eclipse
 .metadata*
 .classpath
 .settings
 .project
 .cproject
-libtcod-1.5.2
+
+# IntelliJ
 *build/deps/*
 *build/objs/*
 .idea/*
 *.iml
 out/production/*
+
+# Gradle
 .gradle/
-build/
+
+# Misc
+libtcod-1.5.2
+*.sqlite3
