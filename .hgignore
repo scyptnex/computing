@@ -13,3 +13,5 @@ libtcod-1.5.2
 .idea/*
 *.iml
 out/production/*
+.gradle/
+build/
