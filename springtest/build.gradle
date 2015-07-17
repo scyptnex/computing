@@ -1,22 +1,22 @@
 buildscript {
-        repositories {
-                    mavenCentral()
-                        }
-                            dependencies {
-                                        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.5.RELEASE")
-                                            }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.5.RELEASE")
+    }
 }
 
 apply plugin: 'java'
 apply plugin: 'spring-boot'
 
 jar {
-        baseName = 'gs-rest-service'
-            version =  '0.1.0'
+    baseName = 'gs-rest-service'
+    version =  '0.1.0'
 }
 
 repositories {
-        mavenCentral()
+    mavenCentral()
 }
 
 sourceCompatibility = 1.7
@@ -29,6 +29,14 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-        gradleVersion = '2.5'
+    gradleVersion = '2.5'
 }
 
+task rofl << {
+    def componentIds = configurations.compile.incoming
+            .resolutionResult.allDependencies.collect { it.selected.id }
+    println componentIds
+    configurations.compile.incoming.resolutionResult.allDependencies.each { dep ->
+        println dep.getFrom().getId()
+    }
+}

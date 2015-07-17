@@ -18,3 +18,8 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.5'
 }
+
+task rofl << {
+    System.out.println("wtf");
+    System.out.println(this.class.toString());
+}
