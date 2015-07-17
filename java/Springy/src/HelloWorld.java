@@ -11,4 +11,8 @@ public class HelloWorld {
     public void getMessage() {
         System.out.println("Your Message : " + message);
     }
+
+    public void byebye(){
+        System.out.println("byeeeee");
+    }
 }

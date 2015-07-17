@@ -2,7 +2,6 @@ package blob;
 
 import java.util.Scanner;
 
-@Component
 public class Main {
 
     public static void main(String[] args){

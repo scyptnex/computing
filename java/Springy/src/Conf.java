@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class Conf {
 
-    @Bean
+    @Bean(destroyMethod = "byebye")
     public HelloWorld hw(){
         HelloWorld ret = new HelloWorld();
         ret.setMessage("hi");

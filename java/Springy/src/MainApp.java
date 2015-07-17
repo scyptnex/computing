@@ -15,5 +15,6 @@ public class MainApp {
 
         // Let us raise a stop event.
         context.stop();
+        context.registerShutdownHook();
     }
 }
