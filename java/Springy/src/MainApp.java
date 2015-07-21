@@ -6,6 +6,7 @@ public class MainApp {
         AnnotationConfigApplicationContext context =
                 new AnnotationConfigApplicationContext(Conf.class);
         context.register(Flomp.class);
+        //context.scan("");
 
         // Let us raise a start event.
         context.start();
@@ -16,6 +17,9 @@ public class MainApp {
 
         obj.getMessage();
         fl.getHelloWorld().getMessage();
+
+        Flomp fl2 = context.getBean(Flomp.class);
+        fl2.getHelloWorld().getMessage();
 
         // Let us raise a stop event.
         context.stop();
