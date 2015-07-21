@@ -1,5 +1,6 @@
 package util;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 public class Permutation {
@@ -8,8 +9,19 @@ public class Permutation {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		System.out.println(countChoices(5, 3));
+	}
 
+	public static BigInteger factorial(int f){
+		BigInteger ret = BigInteger.ONE;
+		for(int i=1; i<=f; i++){
+			ret = ret.multiply(BigInteger.valueOf(i));
+		}
+		return ret;
+	}
+
+	public static BigInteger countChoices(int n, int r){
+		return factorial(n).divide(factorial(r).multiply(factorial(n-r)));
 	}
 	
 	public static <T> void permuteMinimal(ArrayList<T> draw, Permutatio<T> perm){

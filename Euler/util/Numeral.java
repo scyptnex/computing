@@ -8,6 +8,15 @@ public class Numeral {
 	public static void main(String[] args) {
 		System.out.println(gcd(18, 30));
 	}
+
+	public static int digitsInNumber(long num){
+		int cur = 0;
+		while(num > 0){
+			num /= 10;
+			cur++;
+		}
+		return cur;
+	}
 	
 	public static Set<Long> divisors(long l){
 		Set<Long> ret = new HashSet<Long>();
