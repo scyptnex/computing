@@ -1,5 +1,6 @@
 package util;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,25 +36,29 @@ public class Numeral {
 	}
 	
 	public static class Fraction{
-		public final long numerator;
-		public final long denominator;
+		public final BigInteger numerator;
+		public final BigInteger denominator;
 		public Fraction(long n, long d){
-			if(d < 0) throw new RuntimeException("Divide by zero");
-			boolean neg = false;
-			if(d < 0){
-				n *= -1;
-				d *= -1;
-			}
-			if(n < 0){
-				neg = true;
-				n *= -1;
-			}
-			long gcd = gcd(n, d);
-			numerator = (n/gcd)*(neg ? -1 : 1);
-			denominator = d/gcd;
+            this(BigInteger.valueOf(n), BigInteger.valueOf(d));
 		}
+        public Fraction(BigInteger n, BigInteger d){
+            if(d.equals(BigInteger.ZERO)) throw new RuntimeException("Divide by zero");
+            boolean neg = false;
+            if(d.compareTo(BigInteger.ZERO) < 0){
+                n = n.negate();
+                d = d.negate();
+            }
+            if(n.compareTo(BigInteger.ZERO) < 0){
+                neg = true;
+                n = n.negate();
+            }
+            BigInteger gcd = n.gcd(d);
+            numerator = n.divide(gcd);
+            if(neg) n.negate();
+            denominator = d.divide(gcd);
+        }
 		public String toString(){
-			return numerator + (denominator == 1 ? "" : "/" + denominator);
+			return numerator.toString() + (denominator.equals(BigInteger.ONE) ? "" : "/" + denominator.toString());
 		}
 		public boolean equals(Object obj){
 			if(obj instanceof Fraction){
@@ -64,8 +69,12 @@ public class Numeral {
 		}
 		
 		public Fraction multiply(Fraction other){
-			return new Fraction(this.numerator*other.numerator, this.denominator*other.denominator);
+			return new Fraction(this.numerator.multiply(other.numerator), this.denominator.multiply(other.denominator));
 		}
+
+		public Fraction add(Fraction other){
+            return new Fraction(this.numerator.multiply(other.denominator).add(other.numerator.multiply(this.denominator)), this.denominator.multiply(other.denominator));
+        }
 	}
 
 }
