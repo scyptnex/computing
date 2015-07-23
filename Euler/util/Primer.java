@@ -38,6 +38,20 @@ public class Primer {
 			return !sieve.get((i-3)/2);
 		}
 
+        /**
+         * @param cur the current prime
+         * @return a prime > cur
+         */
+        public int nextPrime(int cur){
+            if(cur < 2) return 2;
+            cur = (cur+1) | 1;//make cur an odd number
+            while(cur < max_size){
+                if(isPrime(cur)) return cur;
+                cur+=2;
+            }
+            return -1;
+        }
+
 		@Override
 		public Iterator<Integer> iterator() {
 			return new Iterator<Integer>() {

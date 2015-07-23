@@ -23,7 +23,12 @@ public class Permutation {
 	public static BigInteger countChoices(int n, int r){
 		return factorial(n).divide(factorial(r).multiply(factorial(n-r)));
 	}
-	
+
+    /**
+     * @param draw The set of elements to permute
+     * @param perm The callback handler for permutations
+     * @param <T> The type of elements to permute
+     */
 	public static <T> void permuteMinimal(ArrayList<T> draw, Permutatio<T> perm){
 		boolean[] used = new boolean[draw.size()];
 		for(int i=0; i<used.length; i++) used[i] = false;
@@ -45,9 +50,13 @@ public class Permutation {
 		return true;
 	}
 
-	public static interface Permutatio<T>{
-		//return false to cancel the permutations
-		public boolean permutation(ArrayList<T> config);
+
+	public interface Permutatio<T>{
+        /**
+         * @param config The current permutation configuration (including non-choices of the draw)
+         * @return True if you wish to continue the sequence, false otherwise
+         */
+		boolean permutation(ArrayList<T> config);
 	}
 	
 }
