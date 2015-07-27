@@ -11,7 +11,9 @@ public class Euler018TriPath {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ArrayList<String> triS = util.Read.fRead("18.in");
+		String fil = "18.in";
+		if(args.length > 0) fil = args[0];
+		ArrayList<String> triS = util.Read.fRead(fil);
 		tri = new ArrayList<ArrayList<Long>>();
 		for(String s : triS){
 			tri.add(util.Read.listOfNumbers(s));

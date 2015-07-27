@@ -1,42 +1,41 @@
 package p041t080;
 
-import java.math.BigDecimal;
+import util.NumberTheory;
+import util.Numeral;
+
 import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 public class Euler066MinDiophantine {
 
     public static void main(String[] args){
-        Set<Long> unknowns = new HashSet<>();
-        for(long i=2; i<=1000; i++) if(!isSquare(i)) unknowns.add(i);
-        System.out.println(unknowns.size());
-        long i=1;
-        while(unknowns.size()>1){
-            Set<Long> rems = new HashSet<>();
-            for(long l : unknowns){
-                long res = (i*i*l)+1;
-                if(isSquare(res)) rems.add(l);
+        BigInteger max = BigInteger.ZERO;
+        int g = -1;
+        for(int i=2; i<=1000; i++) if(Math.sqrt(i)*Math.floor(Math.sqrt(i))!= (double)i){
+            BigInteger xd = getXDio(i);
+            System.out.println(i + " - " + xd);
+            if(xd.compareTo(max) > 0){
+                max = xd;
+                g = i;
             }
-            if(rems.size() > 0){
-                unknowns.removeAll(rems);
-                System.out.println(i + " - " + unknowns.size());
-            }
-            i++;
         }
+        System.out.println(g);
     }
 
-    public static long minXDio(long coeff){
-        long cur = 1;
-        while(true){
-            if(isSquare(cur*cur*coeff+1)) return (long)Math.floor(Math.sqrt(cur * cur * coeff + 1));
-            cur++;
+    public static BigInteger getXDio(int d){
+        List<Integer> contfrac = NumberTheory.surdCF(d);
+        int r = contfrac.size()-2;
+        Numeral.Fraction fr = r%2 == 0 ? getFrac(0, 1+2*r, contfrac) : getFrac(0, r, contfrac);
+        return fr.numerator;
+    }
+
+    public static Numeral.Fraction getFrac(int targ, int convergent, List<Integer> cfe){
+        int cft = cfe.get(targ < cfe.size() ? targ : 1+(targ - cfe.size())%(cfe.size()-1));
+        Numeral.Fraction ret = new Numeral.Fraction(cft, 1);
+        if(targ != convergent) {
+            Numeral.Fraction sub = getFrac(targ + 1, convergent, cfe);
+            ret =  new Numeral.Fraction(sub.denominator, sub.numerator).add(ret);
         }
+        return ret;
     }
-
-    public static boolean isSquare(long num){
-        long n = (long)Math.floor(Math.sqrt(num));
-        return n*n == num;
-    }
-
 }
