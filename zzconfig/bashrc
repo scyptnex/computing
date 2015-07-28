@@ -15,3 +15,9 @@ fi
  if [ -d $HOME/computing ]; then
     PATH=$PATH:$HOME/computing/bin
 fi
+
+#
+# Aliases
+#
+alias opn="xdg-open"
+
