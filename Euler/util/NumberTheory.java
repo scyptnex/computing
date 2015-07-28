@@ -5,6 +5,17 @@ import java.util.List;
 
 public class NumberTheory {
 
+    private static Primer.Sieve globalSieve = new Primer.Sieve(10);
+    public static int totient(int n){
+        if(globalSieve.max_size <= n) globalSieve = new Primer.Sieve(globalSieve.max_size*2);
+        int ret = n;
+        for(int p : globalSieve){
+            if(p*p >= n) break;
+            if(ret%p == 0) ret = ret - (ret / p);
+        }
+        return ret;
+    }
+
     public static List<Integer> surdCF(int surd){
         //when the continued fraction is 2x the
         ArrayList<RT> lst = new ArrayList<RT>();

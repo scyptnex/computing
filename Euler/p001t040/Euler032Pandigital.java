@@ -1,6 +1,7 @@
 package p001t040;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Euler032Pandigital {
 
@@ -22,7 +23,7 @@ public class Euler032Pandigital {
 		public int rpSum = 0;
 		
 		@Override
-		public boolean permutation(ArrayList<Character> config) {
+		public boolean permutation(List<Character> config) {
 			ArrayList<Character> subl = new ArrayList<Character>();
 			for(char c = '1'; c<= '9'; c++){
 				if(!config.contains(c)) subl.add(c);
@@ -44,7 +45,7 @@ public class Euler032Pandigital {
 			res = rp;
 		}
 		@Override
-		public boolean permutation(ArrayList<Character> config) {
+		public boolean permutation(List<Character> config) {
 			long amt = 0;
 			for(char c : config){
 				amt = amt*10 + c - '0';

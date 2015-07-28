@@ -2,6 +2,7 @@ package util;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Permutation {
 
@@ -29,14 +30,14 @@ public class Permutation {
      * @param perm The callback handler for permutations
      * @param <T> The type of elements to permute
      */
-	public static <T> void permuteMinimal(ArrayList<T> draw, Permutatio<T> perm){
+	public static <T> void permuteMinimal(List<T> draw, Permutatio<T> perm){
 		boolean[] used = new boolean[draw.size()];
 		for(int i=0; i<used.length; i++) used[i] = false;
 		for(int len = 1; len <= draw.size(); len++){
 			if( !permuteMinimalInternal(draw, used, new ArrayList<T>(), len, perm)) return;
 		}
 	}
-	private static <T> boolean permuteMinimalInternal(ArrayList<T> draw, boolean[] used, ArrayList<T> cur, int len, Permutatio<T> perm){
+	private static <T> boolean permuteMinimalInternal(List<T> draw, boolean[] used, ArrayList<T> cur, int len, Permutatio<T> perm){
 		if(cur.size() == len) return perm.permutation(cur);
 		for(int i=0; i<used.length; i++) if(!used[i]){
 			used[i] = true;
@@ -56,7 +57,7 @@ public class Permutation {
          * @param config The current permutation configuration (including non-choices of the draw)
          * @return True if you wish to continue the sequence, false otherwise
          */
-		boolean permutation(ArrayList<T> config);
+		boolean permutation(List<T> config);
 	}
 	
 }

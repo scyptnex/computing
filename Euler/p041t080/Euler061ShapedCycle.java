@@ -3,6 +3,7 @@ package p041t080;
 import util.Permutation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Euler061ShapedCycle implements Permutation.Permutatio<Integer>{
 
@@ -33,7 +34,7 @@ public class Euler061ShapedCycle implements Permutation.Permutatio<Integer>{
     public int size = -1;
 
     @Override
-    public boolean permutation(ArrayList<Integer> config) {
+    public boolean permutation(List<Integer> config) {
 
         if(config.size() != size) return true;
         int[] seqs = new int[size+1];
