@@ -10,6 +10,7 @@ public class Primer {
 		//for testing
 	}
 
+	@Deprecated
 	public static class Sieve implements Iterable<Integer>{
 		private final BitSet sieve;
 		public final int max_size;

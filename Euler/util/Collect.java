@@ -1,12 +1,30 @@
 package util;
 
-import sun.swing.plaf.synth.Paint9Painter;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Collect {
+
+    public static void main(String[] args){
+        Arrays.asList(
+                forLoopStream(0, 10, 1),
+                forLoopStream(0, 10, 2),
+                forLoopStream(0, 10, 3),
+                forLoopStream(0, 0, 3),
+                forLoopStream(5, 0, 3),
+                forLoopStream(-3, -1, 1),
+                forLoopStream(-3, 1, 1),
+                forLoopStream(10, 1, -1),
+                forLoopStream(10, 1, -2),
+                forLoopStream(-3, -10, -1)
+        ).forEach(
+                i -> System.out.println(i.boxed().map(Object::toString).collect(Collectors.joining(",")))
+        );
+    }
 
     public static class Pair<A, B>{
         public final A first;
@@ -18,6 +36,22 @@ public class Collect {
         public String toString(){
             return String.format("<%s,%s>", first.toString(), second.toString());
         }
+    }
+
+    /**
+     * <p>Returns an int-stream modelled after a for loop:</p>
+     * <p>incr > 0 : for(int i=start; i < end; i+=incr)</p>
+     * <p>incr < 0 : for(int i=start; i > end; i+=incr)</p>
+     *
+     * @param start The first integer to return
+     * @param end The integer which, if we reach or pass it, stop returning
+     * @param incr The difference between this int and the next
+     * @return the integer range
+     */
+    public static IntStream forLoopStream(int start, int end, int incr){
+        if(start != 0) return forLoopStream(0, end - start, incr).map(i -> i+start);
+        if(incr < 0) return forLoopStream(0, -end, -incr).map(i -> -i);
+        return IntStream.range(0, end).filter(i -> i%incr == 0);
     }
 
     public static <T extends Comparable<? super T>> List<T> sort(List<T> in){
