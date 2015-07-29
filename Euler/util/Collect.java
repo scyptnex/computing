@@ -1,10 +1,24 @@
 package util;
 
+import sun.swing.plaf.synth.Paint9Painter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Collect {
+
+    public static class Pair<A, B>{
+        public final A first;
+        public final B second;
+        public Pair(A a, B b){
+            first = a;
+            second = b;
+        }
+        public String toString(){
+            return String.format("<%s,%s>", first.toString(), second.toString());
+        }
+    }
 
     public static <T extends Comparable<? super T>> List<T> sort(List<T> in){
         Collections.sort(in);

@@ -5,13 +5,13 @@ import java.util.List;
 
 public class NumberTheory {
 
-    private static Primer.Sieve globalSieve = new Primer.Sieve(10);
     public static int totient(int n){
-        if(globalSieve.max_size <= n) globalSieve = new Primer.Sieve(globalSieve.max_size*2);
+        //fast exit
+        if(PrimeFactory.isPrime(n)) return n-1;
+        //slow main path
         int ret = n;
-        for(int p : globalSieve){
-            if(p*p >= n) break;
-            if(ret%p == 0) ret = ret - (ret / p);
+        for(int i : PrimeFactory.getPrimeDivisors(n)) if(i != 1){
+            ret = ret - (ret/i);
         }
         return ret;
     }

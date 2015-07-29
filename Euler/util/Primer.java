@@ -34,6 +34,7 @@ public class Primer {
         }
 		public boolean isPrime(int i){
             if(i == 2) return true;
+			if(i%2 == 0) return false;
 			if(i > max_size) throw new RuntimeException("Too large");
 			return !sieve.get((i-3)/2);
 		}
