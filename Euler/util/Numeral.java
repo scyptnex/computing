@@ -35,7 +35,7 @@ public class Numeral {
 		return gcd(b, a%b);
 	}
 	
-	public static class Fraction{
+	public static class Fraction implements Comparable<Fraction>{
 		public final BigInteger numerator;
 		public final BigInteger denominator;
 		public Fraction(long n, long d){
@@ -75,6 +75,11 @@ public class Numeral {
 		public Fraction add(Fraction other){
             return new Fraction(this.numerator.multiply(other.denominator).add(other.numerator.multiply(this.denominator)), this.denominator.multiply(other.denominator));
         }
+
+		@Override
+		public int compareTo(Fraction o) {
+			return this.numerator.multiply(o.denominator).compareTo(o.numerator.multiply(this.denominator));
+		}
 	}
 
 }
