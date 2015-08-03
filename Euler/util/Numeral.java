@@ -38,6 +38,9 @@ public class Numeral {
 	public static class Fraction implements Comparable<Fraction>{
 		public final BigInteger numerator;
 		public final BigInteger denominator;
+        public Fraction(long n){
+            this(BigInteger.valueOf(n), BigInteger.ONE);
+        }
 		public Fraction(long n, long d){
             this(BigInteger.valueOf(n), BigInteger.valueOf(d));
 		}
@@ -63,7 +66,7 @@ public class Numeral {
 		public boolean equals(Object obj){
 			if(obj instanceof Fraction){
 				Fraction other = (Fraction) obj;
-				return other.numerator == this.numerator && other.denominator == this.denominator;
+				return other.numerator.equals(this.numerator) && other.denominator.equals(this.denominator);
 			}
 			return false;
 		}
@@ -74,6 +77,10 @@ public class Numeral {
 
 		public Fraction add(Fraction other){
             return new Fraction(this.numerator.multiply(other.denominator).add(other.numerator.multiply(this.denominator)), this.denominator.multiply(other.denominator));
+        }
+
+		public Fraction subtract(Fraction other){
+            return new Fraction(this.numerator.multiply(other.denominator).subtract(other.numerator.multiply(this.denominator)), this.denominator.multiply(other.denominator));
         }
 
 		@Override

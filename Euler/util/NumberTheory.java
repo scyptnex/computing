@@ -1,9 +1,31 @@
 package util;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class NumberTheory {
+
+
+    private static HashMap<Integer, BigInteger> partitionsOfCache = new HashMap<>();
+    public static BigInteger partitionsOf(int n){
+        if(n < 0) return BigInteger.ZERO;
+        if(n == 0) return BigInteger.ONE;
+        if(!partitionsOfCache.containsKey(n)){
+            int k = 1;
+            BigInteger sm = BigInteger.ZERO;
+            while((k*(3*k-1))/2 <= n){
+                BigInteger add = partitionsOf(n - ((k*(3*k-1))/2));
+                if(Math.abs(k-1)%2 == 1) add = add.negate();
+                sm = sm.add(add);
+                if(k > 0) k = -k;
+                else if(k < 0) k = 1-k;
+            }
+            partitionsOfCache.put(n, sm);
+        }
+        return partitionsOfCache.get(n);
+    }
 
     public static int totient(int n){
         //fast exit

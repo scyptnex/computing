@@ -1,9 +1,13 @@
 package util;
 
-/**
- * Created by nic on 22/07/15.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class Stringy {
+
+    public static List<Character> chars(String s){
+        return s.chars().collect(ArrayList::new, (al, i) -> al.add((char)i), (alm, alr) -> alm.addAll(alr));
+    }
 
     public static String reverse(String s){
         StringBuffer ret = new StringBuffer();
