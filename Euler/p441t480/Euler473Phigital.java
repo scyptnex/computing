@@ -1,10 +1,8 @@
-package p440t480;
+package p441t480;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class Euler473Phigital {
 

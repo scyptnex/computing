@@ -29,11 +29,16 @@ public class Read {
 			return null;
 		}
 	}
-	
-	public static ArrayList<Long> listOfNumbers(String lon){
+
+    public static ArrayList<Long> listOfNumbers(String lon){
+        return listOfNumbers(lon, null);
+    }
+
+	public static ArrayList<Long> listOfNumbers(String lon, String delim){
 		ArrayList<Long> ret = new ArrayList<Long>();
 		lon = lon.trim();
 		Scanner sca = new Scanner(lon);
+		if(delim != null) sca.useDelimiter(delim);
 		while(sca.hasNextLong()){
 			ret.add(sca.nextLong());
 		}
