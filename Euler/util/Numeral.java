@@ -1,6 +1,8 @@
 package util;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -56,12 +58,15 @@ public class Numeral {
                 n = n.negate();
             }
             BigInteger gcd = n.gcd(d);
-            numerator = n.divide(gcd);
-            if(neg) n.negate();
+            n = n.divide(gcd);
+			numerator = neg ? n.negate() : n;
             denominator = d.divide(gcd);
         }
 		public String toString(){
 			return numerator.toString() + (denominator.equals(BigInteger.ONE) ? "" : "/" + denominator.toString());
+		}
+		public double doubleApprox(int precision){
+			return new BigDecimal(numerator).divide(new BigDecimal(denominator), precision, RoundingMode.DOWN).doubleValue();
 		}
 		public boolean equals(Object obj){
 			if(obj instanceof Fraction){

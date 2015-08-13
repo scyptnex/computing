@@ -54,6 +54,28 @@ public class Collect {
         return IntStream.range(0, end).filter(i -> i%incr == 0);
     }
 
+    /**
+     * Sorts the input list according to its natural order,
+     * maintaining positional information
+     *
+     * @param in The input list
+     * @param <T> The type of the elements in the input list
+     * @return A list of pairs, where each pair houses the element of the input list and the index that it was originally at
+     */
+    public static <T extends Comparable<? super T>> List<Pair<T, Integer>> dualSort(final List<T> in){
+        return IntStream
+                .range(0, in.size())
+                .mapToObj( i -> new Pair<>(in.get(i), i))
+                .sorted((a, b) -> a.first.compareTo(b.first))
+                .collect(Collectors.toList());
+    }
+
+    public static <T extends Comparable<? super T>, U> List<Pair<T, U>> dualSort(final List<T> main, final List<U> dependant){
+        return dualSort(main).stream()
+                .map((Pair<T, Integer> ip) -> new Pair<T, U>(ip.first, dependant.get(ip.second)))
+                .collect(Collectors.toList());
+    }
+
     public static <T extends Comparable<? super T>> List<T> sort(List<T> in){
         Collections.sort(in);
         return in;
