@@ -33,8 +33,13 @@ public class Collect {
             first = a;
             second = b;
         }
+        @Override
         public String toString(){
             return String.format("<%s,%s>", first.toString(), second.toString());
+        }
+        @Override
+        public int hashCode(){
+            return first.hashCode() ^ second.hashCode() << 1;
         }
     }
 
