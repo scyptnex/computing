@@ -1,6 +1,10 @@
 package util;
 
 import java.util.*;
+import java.util.function.IntSupplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Global static implementation of the prime generator factory
@@ -62,17 +66,45 @@ public class PrimeFactory {
      * @return a set containing all the PRIME numbers (including 1) that divide n integrally.
      */
     public static Set<Integer> getPrimeDivisors(int n){
-        Set<Integer> ret = new HashSet<>();
-        ret.add(1);
-        for(int p : allPrimesInRange(2, 1+(int)Math.floor(Math.sqrt(n)))){
-            if(n == 1) break;
-            while(n%p == 0){
-                n /= p;
-                ret.add(p);
+        return Stream.concat(getPrimeFactors(n).stream().map(p -> p.first), Stream.of(1)).collect(Collectors.toSet());
+    }
+
+    private static ArrayList<Integer> getPrimeFactorsCache = new ArrayList<>();
+    /**
+     * Get the list of prime divisor-power pairs
+     * @param n The number we want the factors of
+     * @return a list of pairs containing <Prime, Power>
+     */
+    public static List<Collect.Pair<Integer, Integer>> getPrimeFactors(final int n){
+        if(isPrime(n)) return Arrays.asList(new Collect.Pair<>(n, 1));
+        List<Collect.Pair<Integer, Integer>> ret = new ArrayList<>();
+        int cur = 0;
+        int rem = n;
+        while(rem != 1){
+            if(cur == getPrimeFactorsCache.size()){
+                if(getPrimeFactorsCache.size() == 0) getPrimeFactorsCache.add(2);
+                else getPrimeFactorsCache.add(getNextHigherPrime(getPrimeFactorsCache.get(getPrimeFactorsCache.size()-1)));
             }
+            int cp = getPrimeFactorsCache.get(cur);
+            if(cp * cp > n) break;
+            int count = 0;
+            while(rem % cp == 0){
+                rem = rem/cp;
+                count++;
+            }
+            if(count >= 1) ret.add(new Collect.Pair<>(cp, count));
+            cur++;
         }
-        ret.add(n);
+        if(rem != 1) ret.add(new Collect.Pair<>(rem, 1));
         return ret;
+    }
+
+    /**
+     * Stream the prime numbers
+     * @return An IntStream containing prime numbers in order
+     */
+    public static IntStream primeStream(){
+        return IntStream.iterate(2, PrimeFactory::getNextHigherPrime);
     }
 
     /**
