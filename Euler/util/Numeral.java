@@ -3,9 +3,11 @@ package util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class Numeral {
 	public static void main(String[] args) {
@@ -93,5 +95,55 @@ public class Numeral {
 			return this.numerator.multiply(o.denominator).compareTo(o.numerator.multiply(this.denominator));
 		}
 	}
+
+    //Roman Numerals
+	private final static TreeMap<Integer, String> romanIToS;
+    private final static List<Integer> romanIOrder;
+	static {
+        romanIToS = new TreeMap<>();
+		romanIToS.put(1000, "M");
+		romanIToS.put(900, "CM");
+		romanIToS.put(500, "D");
+		romanIToS.put(400, "CD");
+		romanIToS.put(100, "C");
+		romanIToS.put(90, "XC");
+		romanIToS.put(50, "L");
+		romanIToS.put(40, "XL");
+		romanIToS.put(10, "X");
+		romanIToS.put(9, "IX");
+		romanIToS.put(5, "V");
+		romanIToS.put(4, "IV");
+		romanIToS.put(1, "I");
+        romanIOrder = romanIToS.keySet().stream().sorted().collect(Collectors.toList());
+	}
+
+    /**
+     * Converts integers to roman numerals
+     * (Highest symbol is M=1000)
+     */
+	public final static String toRoman(int number) {
+		int l =  romanIToS.floorKey(number);
+		if ( number == l ) {
+			return romanIToS.get(number);
+		}
+		return romanIToS.get(l) + toRoman(number-l);
+	}
+
+    /**
+     * Converts roman numerals to integers
+     * (Highest symbol is M=1000)
+     */
+    public static int fromRoman(String s){
+        int ret = 0;
+        for(int rdigit : romanIOrder){
+            String rnumer = romanIToS.get(rdigit);
+            while(s.endsWith(rnumer)){
+                ret += rdigit;
+                s = s.substring(0, s.length()-rnumer.length());
+            }
+        }
+        if(s.length() != 0) throw new RuntimeException("Invalid roman numeral " + s);
+        return ret;
+    }
 
 }
