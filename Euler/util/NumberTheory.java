@@ -38,6 +38,15 @@ public class NumberTheory {
         return ret;
     }
 
+    public static Numeral.Fraction newtonSquareRoot(final long sqn, final int iters){
+        final BigInteger s = BigInteger.valueOf(sqn);
+        Numeral.Fraction ret = new Numeral.Fraction(1);
+        for(int i=0; i<iters; i++){
+            ret = new Numeral.Fraction(s.multiply(ret.denominator.multiply(ret.denominator)).add(ret.numerator.multiply(ret.numerator)), BigInteger.valueOf(2).multiply(ret.numerator).multiply(ret.denominator));
+        }
+        return ret;
+    }
+
     public static List<Integer> surdCF(int surd){
         //when the continued fraction is 2x the
         ArrayList<RT> lst = new ArrayList<RT>();
