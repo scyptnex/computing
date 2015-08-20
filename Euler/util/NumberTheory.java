@@ -1,9 +1,7 @@
 package util;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class NumberTheory {
 
@@ -45,6 +43,33 @@ public class NumberTheory {
             ret = new Numeral.Fraction(s.multiply(ret.denominator.multiply(ret.denominator)).add(ret.numerator.multiply(ret.numerator)), BigInteger.valueOf(2).multiply(ret.numerator).multiply(ret.denominator));
         }
         return ret;
+    }
+
+    /**
+     * Accurately find the square root of a long number
+     * @param res the number we want the square root of
+     * @return the square root of res, or -1 if res is not a perfect square
+     */
+    public static long integralSquareRoot(long res){
+        long h = res & 0xF;
+        if (h > 9) return -1;
+        long guess = 1;
+        long tmp = res;
+        while(tmp > 100){
+            guess *= 10;
+            tmp /= 100;
+        }
+        for(int i=0; i<10; i++){
+            guess = (res + (guess*guess))/(2*guess);
+            if(res == guess*guess) return guess;
+        }
+        for(long g=guess-1; g*g >= res; g--){
+            if(g*g == res) return g;
+        }
+        for(long g=guess+1; g*g<=res; g++){
+            if(g*g == res) return g;
+        }
+        return -1;
     }
 
     public static List<Integer> surdCF(int surd){
