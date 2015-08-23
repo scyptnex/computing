@@ -11,6 +11,8 @@
 .cproject
 .settings
 .metadata
+.recommenders
+.externalToolBuilders
 .pydevproject
 __pycache__
 
