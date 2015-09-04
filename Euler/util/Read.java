@@ -45,7 +45,7 @@ public class Read {
 		return ret;
 	}
 
-	public static Stream<String> streamLines(Class<?> cla) throws IOException{
+	public static File locateInputFile(Class<?> cla) throws IOException{
 		int num = -1;
 		if(cla.getSimpleName().startsWith("Euler") || cla.getSimpleName().startsWith("E")){
 			num = Integer.parseInt(cla.getSimpleName().replaceAll("[^0-9]", ""));
@@ -54,9 +54,13 @@ public class Read {
 		String optA = num + ".in";
 		String optB = "E" + (num < 100 ? "0" : "") + (num < 10 ? "0" : "") + num + ".txt";
 		for(File f : Arrays.asList(new File(optA), new File(optB), new File("Euler/" + optA), new File("Euler/" + optB))) if(f.exists() && !f.isDirectory()){
-			return streamLines(f.getAbsolutePath());
+			return f;
 		}
 		throw new IOException("Could not find a suitable file for " + cla.getSimpleName());
+	}
+
+	public static Stream<String> streamLines(Class<?> cla) throws IOException{
+		return streamLines(locateInputFile(cla).getAbsolutePath());
 	}
 
 	public static Stream<String> streamLines(String fName) throws IOException {
