@@ -39,42 +39,46 @@ public class E098AnagramSquare {
                 .filter(l -> l.size()>1)
                 .flatMap(l -> l.stream().flatMap(a -> l.stream().map(b -> new Collect.Pair<>(a, b)).filter(p -> p.first.compareTo(p.second) < 0)))
                 .collect(Collectors.toList());
-        anagramPairs.clear();
-        anagramPairs.add(new Collect.Pair<>("CARE", "RACE"));
-        anagramPairs.stream().flatMap(E098AnagramSquare::conv).forEach(System.out::println);
-//        int largestDigits=anagramPairs.stream()
-//        		.mapToInt(p -> p.first.length())
-//        		.max().orElse(0);
-//        int smallestDigits=anagramPairs.stream()
-//        		.mapToInt(p -> p.first.length())
-//        		.min().orElse(-1);
-//        anagramPairs.stream().parallel()
-//                .map(p -> new Collect.Pair<>((p.first+p.second).chars().sorted().distinct().mapToObj(i -> "" + (char)i).collect(Collectors.joining()), p))
-//                .forEach(System.out::println);
-//        Map<Integer, Set<Integer>> grps = IntStream.rangeClosed(smallestDigits, largestDigits).collect(() -> new HashMap<Integer, Set<Integer>>(), (m,i)->m.put(i, new HashSet<Integer>()), (a,b) -> a.putAll(b));
+        anagramPairs.stream().flatMap(E098AnagramSquare::conv).sorted((p1, p2)-> p1.second.second - p2.second.second).forEach(System.out::println);
     }
     
     public static HashMap<Integer, Set<Integer>> convCache = new HashMap<>();
-    public static Stream<Collect.Pair<Integer, Integer>> conv(final Collect.Pair<String, String> in){
+    public static Stream<Collect.Pair<Collect.Pair<String, String>, Collect.Pair<Integer, Integer>>> conv(final Collect.Pair<String, String> in){
     	int l = in.first.length();
     	if(!convCache.containsKey(l)){
     		convCache.put(l, IntStream
     				.rangeClosed((int)Math.ceil(Math.sqrt(Math.pow(10, l-1))), (int)Math.floor(Math.sqrt(Math.pow(10, l))))
     				.map(i -> i*i).boxed().collect(Collectors.toSet()));
     	}
-    	return convCache.get(l).stream().parallel()
-    			.map(i -> );
+    	return convCache.get(l).stream()
+    			.map(i -> new Collect.Pair<>(i, digitMap(in.first, in.second, i)))
+    			.filter(p -> p.second != -1 && convCache.get(l).contains(p.second))
+    			.map(p -> new Collect.Pair<>(in, p));
     }
     
-    public static char[] digitMap(String wrd, int num, int len){
-    	char[] ret = {' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
-    	int i=1;
-    	while(num > 0){
-    		int idx = num%10;
-    		char c = wrd.charAt(len-i);
-    		if(ret[idx] == ' ')
-    		num = num/10;
-    		i++;
+    public static int digitMap(String wrd1, String wrd2, int num1){
+    	char[] n1= (num1 + "").toCharArray();
+    	char[] w1 = wrd1.toCharArray();
+    	char[] w2 = wrd2.toCharArray();
+    	char[] n2 = new char[n1.length];
+    	for(char c : wrd2.chars().mapToObj(c -> (char)c).collect(Collectors.toSet())){
+    		char mc = '\0';
+    		//check all in w1 are same
+    		for(int i=0; i<w1.length; i++){
+    			if(c == w1[i]){
+    				if(mc != '\0' && mc != n1[i]) return -1;
+    				mc = n1[i];
+    			}
+    		}
+    		for(int i=0; i<n2.length; i++) if(n2[i] == mc) return -1;
+    		for(int i=0; i<w2.length; i++){
+    			if(c == w2[i]) n2[i] = mc;
+    		}
+    	}
+    	if(n2[0] == '0') return -1;
+    	int ret = 0;
+    	for(int i=0; i<n2.length; i++){
+    		ret = ret*10 + (n2[i]-'0');
     	}
     	return ret;
     }
