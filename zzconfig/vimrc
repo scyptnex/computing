@@ -81,7 +81,8 @@ nnoremap <leader>q :q<cr>
 nnoremap <leader>f :set filetype?<cr>
 
 "ycm completion
-nnoremap <leader>d :YcmCompleter GoTo<CR>
+nnoremap <leader>g :YcmCompleter GoTo<CR>
+nnoremap <leader>d :YcmDiags<CR>
 "vtree
 nnoremap <leader>v :VSTreeExplore<CR>
 
