@@ -23,6 +23,10 @@ out/production/*
 # Gradle
 .gradle/
 
+# Rust
+Cargo.lock
+target/debug
+
 # Misc
 libtcod-1.5.2
 *.sqlite3
