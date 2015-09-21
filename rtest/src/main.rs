@@ -53,5 +53,11 @@ fn main() {
     for h in handles{
         h.join().unwrap();
     }
+    let nms = vec![
+        "bye",
+        "hi",
+        "ola"
+    ];
+    println!("{} has item", nms.contains(&"hi"));
 }
 

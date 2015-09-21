@@ -26,6 +26,7 @@ out/production/*
 # Rust
 Cargo.lock
 target/debug
+target/doc
 
 # Misc
 libtcod-1.5.2
