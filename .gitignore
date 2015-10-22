@@ -21,6 +21,10 @@ __pycache__
 out/*
 *.iml
 
+# Rust/Cargo files #
+Cargo.lock
+**/target/debug/
+
 # Package Files #
 *.war
 *.ear
