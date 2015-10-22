@@ -1,4 +1,4 @@
-TARGETS=main codTest
+TARGETS=main
 SRC_DIR=src
 BIN_DIR=bin
 BUILD_DIR=build
@@ -19,6 +19,10 @@ OBJ_MAINS=$(patsubst %,$(OBJ_DIR)/%.o,$(TARGETS))
 OBJ_NONMAINS=$(filter-out $(OBJ_MAINS), $(OBJS))
 
 all: $(OBJS) $(BINS) $(SYMLINKS)
+
+run: all
+	cp -f terminal.png $(BIN_DIR)
+	(cd $(BIN_DIR); ./$(TARGETS))
 
 $(BIN_DIR)/%.so.1 : lib/%.so
 	@[ -d $(BIN_DIR) ] || mkdir -p $(BIN_DIR)
