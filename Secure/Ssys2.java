@@ -15,10 +15,6 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 	public static final String IN_LOC = "in";
 	public static final String FILE_PASS_CHECK = "zzpcf.dat";
 	
-	public static final File storeFold = new File(STORE_LOC);
-	public static final File tempFold = new File(TEMP_LOC);
-	public static final File inFold = new File(IN_LOC);
-	
 	public static final String IDLE_STATUS = "idle";
 	
 	/*
@@ -38,6 +34,9 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 	/*
 	 * Atts
 	 */
+	public final File storeFold;
+	public final File tempFold;
+	public final File inFold;
 	public boolean locked;
 	public byte[] check;
 	public SecureUtils sec;
@@ -47,13 +46,22 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 	
 	public static void main(String[] args){
 		System.out.println(Thread.MAX_PRIORITY + ", " + Thread.MIN_PRIORITY + ", " + Thread.NORM_PRIORITY);
-		new Ssys2();
+        if(args.length > 0){
+            System.out.println("Secure folder in " + args[0]);
+            new Ssys2(new File(args[0]));
+        }
+		else {
+            new Ssys2(new File("."));
+        }
 	}
 	
-	public Ssys2(){
+	public Ssys2(File baseDir){
 		super("Secure System 2");
+		storeFold = new File(baseDir, STORE_LOC);
+		tempFold = new File(baseDir, TEMP_LOC);
+		inFold = new File(baseDir, IN_LOC);
 		
-		base = new SBase();
+		base = new SBase(this);
 		baseSorter = new TableRowSorter<SBase>(base);
 		
 		c = this.getContentPane();
@@ -355,26 +363,11 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 			baseSorter.setRowFilter(tmpFilter);
 			return;
 		}
-		else if(ft.matches("-r.* [0-9][0-9]*")){
-			int num = Integer.parseInt(ft.substring(ft.lastIndexOf(" ")+1));
-			Set<Integer> selects = new HashSet<Integer>();
-			while(selects.size() < num){
-				selects.add((int)Math.floor(Math.random()*base.count()));
-			}
-			System.out.println(selects.toString());
-			ArrayList<RowFilter<SBase, Object>> randomFilters = new ArrayList<RowFilter<SBase, Object>>();
-			for(int i : selects){
-				RowFilter<SBase, Object> temp = RowFilter.regexFilter(base.name.get(i), SBase.COL_NAME);
-				randomFilters.add(temp);
-			}
-			RowFilter<SBase, Object> exactFilter = RowFilter.orFilter(randomFilters);
-			baseSorter.setRowFilter(exactFilter);
-			return;
-		}
 		
 		boolean names = false;
 		boolean bads = false;
 		boolean exclusive = true;
+        int rdm = -1;
 		if(ft.contains("-n")){
 			names = true;
 			ft = ft.substring(0, ft.indexOf("-n")) + ft.substring(ft.indexOf("-n") + 2);
@@ -387,6 +380,16 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 			exclusive = false;
 			ft = ft.substring(0, ft.indexOf("-x")) + ft.substring(ft.indexOf("-x") + 2);
 		}
+        if(ft.contains("-r")) try {
+            int spbf = ft.indexOf("-r");
+            int spaf = ft.indexOf(" ", spbf+3);
+            if(spaf == -1) spaf = ft.length();
+            rdm = Integer.parseInt(ft.substring(spbf+2, spaf).trim());
+            ft = ft.substring(0, spbf) + ft.substring(spaf);
+        } catch(Exception e){
+            System.out.println(e.getMessage());
+            ft = ft.substring(0, ft.indexOf("-r")) + ft.substring(ft.indexOf("-r")+2);
+        }
 		
 		ft = ft.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("  *", " ").trim().toLowerCase();
 		String[] terms = ft.split(" ");
@@ -418,12 +421,28 @@ public class Ssys2 extends JFrame implements ActionListener, KeyListener{
 		}
 		
 		baseSorter.setRowFilter(omniFilter);
-	}
+
+        if(rdm != -1){
+            if(baseSorter.getViewRowCount() < rdm) return;
+            Set<Integer> selects = new HashSet<Integer>();
+            while(selects.size() < rdm){
+                selects.add((int)Math.floor(Math.random()*baseSorter.getViewRowCount()));
+            }
+            System.out.println(rdm + "/" + baseSorter.getViewRowCount() + " " + selects.toString());
+            ArrayList<RowFilter<SBase, Object>> randomFilters = new ArrayList<RowFilter<SBase, Object>>();
+            for(int i : selects){
+                RowFilter<SBase, Object> temp = RowFilter.regexFilter(base.name.get(baseSorter.convertRowIndexToModel(i)), SBase.COL_NAME);
+                randomFilters.add(temp);
+            }
+            RowFilter<SBase, Object> exactFilter = RowFilter.orFilter(randomFilters);
+            baseSorter.setRowFilter(exactFilter);
+        }
+    }
 	
 	/*
 	 * Statics
 	 */
-	public static File getFile(String storeName){
+	public File getFile(String storeName){
 		return new File(storeFold, storeName);
 	}
 	

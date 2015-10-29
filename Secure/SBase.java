@@ -28,18 +28,20 @@ public class SBase extends AbstractTableModel{
 	public ArrayList<Long> size;
 	
 	public long length;
+	private final Ssys2 instance;
 	
 	public static void main(String[] args){
 		Ssys2.main(args);
 	}
 
-	public SBase(){
+	public SBase(Ssys2 ins){
 		name = new ArrayList<String>();
 		tags = new ArrayList<String>();
 		date = new ArrayList<String>();
 		size = new ArrayList<Long>();
 		
 		length = 0;
+		instance = ins;
 	}
 	
 	public boolean load(SecureUtils sec){
@@ -48,7 +50,7 @@ public class SBase extends AbstractTableModel{
 		
 		File stfi = getCur(true);
 		if(stfi == null) return false;//first time load
-		File tmfi = new File(Ssys2.tempFold, stfi.getName());
+		File tmfi = new File(instance.tempFold, stfi.getName());
 		if(!sec.blockSecureSwap(stfi, tmfi, false)) return false;
 		try{
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tmfi));
@@ -75,7 +77,7 @@ public class SBase extends AbstractTableModel{
 		System.out.println("--saving--");
 		
 		File stfi = getCur(false);
-		File tmfi = new File(Ssys2.tempFold, stfi.getName());
+		File tmfi = new File(instance.tempFold, stfi.getName());
 		
 		try{
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tmfi));
@@ -99,12 +101,12 @@ public class SBase extends AbstractTableModel{
 		if(end <= start) end = name.size();
 		end = Math.min(end, name.size());
 		File topFold = new File("export " + start + " - " + (end-1));
-		Ssys2.rmrf(topFold);
+		instance.rmrf(topFold);
 		if(!topFold.exists()) topFold.mkdirs();
 		try{
 			PrintWriter curLib = new PrintWriter(new File(topFold, "zzlib.dat"));
 			for(int i=start; i<name.size(); i++){
-				File enc = Ssys2.getFile(i + SECURE_EXTENSION);
+				File enc = instance.getFile(i + SECURE_EXTENSION);
 				if(enc.exists()){
 					File dec = new File(topFold, name.get(i));
 					if(sec.blockSecureSwap(enc, dec, false)){
@@ -129,7 +131,7 @@ public class SBase extends AbstractTableModel{
 	
 	public void finishRetrieve(File fi){
 		System.out.println("Now we do something with " + fi);
-		String oname = Ssys2.tempFold.getName() + "\\" + fi.getName();
+		String oname = instance.tempFold.getName() + "\\" + fi.getName();
 		try {
 			String comm = "cmd /c \"start " + oname + "\"";
 			Process p = Runtime.getRuntime().exec(comm);
@@ -139,7 +141,7 @@ public class SBase extends AbstractTableModel{
 		}
 		//maybe we're on unix?
 		try{
-			Process p = Runtime.getRuntime().exec(new String[]{"vlc", Ssys2.tempFold.getName() + "/" + fi.getName()});
+			Process p = Runtime.getRuntime().exec(new String[]{"vlc", instance.tempFold.getName() + "/" + fi.getName()});
 		} catch(IOException e){
 			System.err.println("Really couldnt use");
 		}
@@ -147,13 +149,13 @@ public class SBase extends AbstractTableModel{
 	
 	public void retrieveFile(int idx, SecureUtils sec){
 		if(idx >= count()) return;
-		File out = new File(Ssys2.tempFold, name.get(idx));
+		File out = new File(instance.tempFold, name.get(idx));
 		if(out.exists()){
 			finishRetrieve(out);
 			return;
 		}
 		
-		File st = Ssys2.getFile(idx + SECURE_EXTENSION);
+		File st = instance.getFile(idx + SECURE_EXTENSION);
 		if(!st.exists()){
 			tags.set(idx, tags.get(idx) + " " + DELETE_ADDITION);
 			return;
@@ -163,10 +165,10 @@ public class SBase extends AbstractTableModel{
 	}
 	
 	public boolean importFile(String inloc, SecureUtils sec){
-		File fi = new File(Ssys2.inFold, inloc);
+		File fi = new File(instance.inFold, inloc);
 		if(!fi.exists() || fi.isDirectory()) return false;
 		String storeLoc = name.size() + SECURE_EXTENSION;
-		File crypt = Ssys2.getFile(storeLoc);
+		File crypt = instance.getFile(storeLoc);
 		if(!sec.blockSecureSwap(crypt, fi, true)) return false;
 		name.add(inloc.toLowerCase().replaceAll(" ", "."));
 		tags.add(DEFAULT_TAG.toLowerCase());
@@ -248,13 +250,13 @@ public class SBase extends AbstractTableModel{
 	/*
 	 * statics
 	 */
-	public static File getCur(boolean newest){
-		/**File go = Ssys2.getFile(STORE_NAMES[0]);
+	public File getCur(boolean newest){
+		/**File go = instance.getFile(STORE_NAMES[0]);
 		if(go.exists()) return go;
 		return newest ? null : go;**/
 		File[] fis = new File[STORE_NAMES.length];
 		for(int i=0; i<STORE_NAMES.length; i++){
-			fis[i] = Ssys2.getFile(STORE_NAMES[i]);
+			fis[i] = instance.getFile(STORE_NAMES[i]);
 		}
 
 		if(newest){
