@@ -5,8 +5,10 @@ import java.util.Scanner;
 
 public class CheatyPort {
 
-	public static final File MC_LOC = new File(new File(getSysStore()), ".minecraft");
+	//public static final File MC_LOC = new File(new File(getSysStore()), ".minecraft");
 	//public static final File MC_LOC = new File("C:\\Scyptnex\\FTB\\Unleashed\\minecraft");
+	//public static final File MC_LOC = new File("C:\\Scyptnex\\FTB\\Direwolf20_1_6_4\\minecraft");
+	public static final File MC_LOC = new File("C:\\Scyptnex\\FTB\\direwolf20_17\\minecraft");
 	public static final String LUA_EXT = ".lua";
 
 	public static void main(String[] args) throws IOException{
