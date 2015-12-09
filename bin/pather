@@ -1,0 +1,36 @@
+#! /usr/bin/env bash
+
+#-------------------------------------------------------------------------#
+#                                 pather                                  #
+#                                                                         #
+# Author: Nic H.                                                          #
+# Date: 2015-Dec-07                                                       #
+#                                                                         #
+# Add the argument to the PATH variable                                   #
+#-------------------------------------------------------------------------#
+
+function usage(){
+    grep "^#.*#$" $0
+}
+
+while getopts "h" opt; do
+    case $opt in
+        h)
+            usage
+            exit 0
+            ;;
+        \?)
+            usage
+            exit 1
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+if [ "x$1" != "x" ]; then
+    export PATH=`readlink -f $1`:$PATH
+else
+    usage
+    exit 1
+fi
+echo $PATH
