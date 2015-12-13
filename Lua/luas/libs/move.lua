@@ -30,6 +30,7 @@ end
 
 -- Returns true if there is enough fuel for this many moves
 function fuelCheck(amt)
+	print("[using " .. amt .. "/" .. turtle.getFuelLevel() .. " fuel]")
 	return (turtle.getFuelLevel() > amt)
 end
 
@@ -123,5 +124,28 @@ function softD()
 		--do nothing
 	end
 	y = y - 1
+end
+
+-- Turn to the heading
+function turn(newH)
+	while heading ~= newH do
+		local lt = (heading - newH + 4)%4
+		local rt = (newH - heading + 4)%4
+		if lt < rt then left() else right() end
+	end
+end
+
+-- Move softly to the x (-back +forward) location
+function softX(newX)
+	if newX == x then return end
+	if newX < x then turn(2) else turn(0) end
+	while x ~= newX do softF() end
+end
+
+-- Move softly to the z (-left +right) location
+function softZ(newZ)
+	if newZ == z then return end
+	if newZ < z then turn(3) else turn(1) end
+	while z ~= newZ do softF() end
 end
 
