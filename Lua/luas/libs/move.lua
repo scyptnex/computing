@@ -28,6 +28,11 @@ function location()
 	return x, y, z, heading
 end
 
+-- Returns true if there is enough fuel for this many moves
+function fuelCheck(amt)
+	return (turtle.getFuelLevel() > amt)
+end
+
 --turns right
 function right()
 	turtle.turnRight()
