@@ -7,17 +7,25 @@
 # Date: 2015-Dec-07                                                       #
 #                                                                         #
 # Add the argument to the PATH variable                                   #
+#                                                                         #
+# Examples:                                                               #
+#   ". pather path/to/foo" - prepends the absolute path to 'foo'          #
+#   ". pather -a bar baz" - appends the absolute paths to 'bar' and 'baz' #
+#                                                                         #
 #-------------------------------------------------------------------------#
 
 function usage(){
     grep "^#.*#$" $0
 }
 
-while getopts "h" opt; do
+while getopts "ha" opt; do
     case $opt in
         h)
             usage
             exit 0
+            ;;
+        a)
+            APPEND=true
             ;;
         \?)
             usage
@@ -27,10 +35,13 @@ while getopts "h" opt; do
 done
 shift $(($OPTIND -1))
 
-if [ "x$1" != "x" ]; then
-    export PATH=`readlink -f $1`:$PATH
+TMP=":"
+for PA in "$@"; do
+    TMP="$TMP`readlink -f $PA`:"
+done
+if [ "$APPEND" == "true" ]; then
+    export PATH="$PATH${TMP%:}"
 else
-    usage
-    exit 1
+    export PATH="${TMP#:}$PATH"
 fi
 echo $PATH
