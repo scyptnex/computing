@@ -1,0 +1,1 @@
+while not rs.getInput("bottom") do turtle.attack() end
