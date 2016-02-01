@@ -4,7 +4,7 @@ EXES=$(SRCS:.c=)
 all: $(EXES)
 
 %: %.c
-	gcc -fopenmp -o $@ $<
+	gcc -Wall -fopenmp -o $@ $<
 
 clean:
 	rm -f $(EXES)
