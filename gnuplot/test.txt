@@ -1,0 +1,29 @@
+set term pdf color
+
+set output "scatter_plot.pdf"
+
+#set xlabel "Size (weighted \# relations)"
+#set ylabel "Time (ms)"
+
+set size ratio 1
+
+set logscale xy
+set datafile separator ","
+#
+#  Plot the data using X and Y ranges [0,1],
+#  using the data in 'scatter_plot.txt',
+#  marking the data with points only (a scatter plot)
+#  using line type 3 (blue)
+#  and point type 4 (open square)
+#
+#splot 'results.comp.csv' using 0:1:2 with dots notitle
+#splot 'results.comp.csv' using 0:2:1 with dots notitle
+#splot 'results.comp.csv' using 1:0:2 with dots notitle
+#splot 'results.comp.csv' using 1:2:0 with dots notitle
+#splot 'results.comp.csv' using 2:0:1 with dots notitle
+#splot 'results.comp.csv' using 2:1:0 with dots notitle
+plot 'results.comp.csv' using 0:3 with dots notitle
+#
+#  Terminate.
+#
+quit

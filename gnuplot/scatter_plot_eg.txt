@@ -1,0 +1,46 @@
+#  scatter_plot_input.txt
+#
+#  Input to GNUPLOT, causing it to read SCATTER_PLOT.TXT and
+#  create a "scatter plot" of the data, that is, dots representing
+#  each point.
+#
+#  Choose the output device.
+#
+set term png medium
+#
+#  Name the output file.
+#
+set output "scatter_plot.png"
+#
+#  Set the plot title.
+#
+set title "Scatter Plot"
+#
+#  Get grid lines.
+#
+set grid
+#
+#  Set axis labels.
+#
+set xlabel "<--- X --->"
+set ylabel "<--- Y --->"
+#
+#  The following command forces X and Y axes to appear the same size.
+#
+set size ratio 1
+#
+#  Timestamp the plot.
+#
+set timestamp
+#
+#  Plot the data using X and Y ranges [0,1],
+#  using the data in 'scatter_plot.txt',
+#  marking the data with points only (a scatter plot)
+#  using line type 3 (blue)
+#  and point type 4 (open square)
+#
+plot [0:1] [0:1] 'scatter_plot_eg_data.txt' with points lt 3 pt 4
+#
+#  Terminate.
+#
+quit
