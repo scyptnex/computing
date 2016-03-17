@@ -1,0 +1,11 @@
+
+\documentclass[beamer=true]{standalone}
+\usepackage{tikz}
+\begin{document}
+\begin{standaloneframe}
+    \begin{tikzpicture}
+        \node[draw] (h) {hi};
+        \node<2->[draw,right of= h] (y) {there};
+    \end{tikzpicture}
+\end{standaloneframe}
+\end{document}

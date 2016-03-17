@@ -1,0 +1,49 @@
+%=========================================================================%
+%                                 bar.tex                                 %
+%                                                                         %
+% Author: Nic H.                                                          %
+% Date: 2016-Mar-17                                                       %
+%=========================================================================%
+
+\documentclass{beamer}
+
+\usepackage{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\renewcommand\familydefault{\sfdefault}
+
+\title{Bar}
+\author{Nic H.}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+this is a figure.
+
+\begin{figure}[b]
+    \input{FOO}
+    \caption{i am a cpation}
+    \label{fig1}
+\end{figure}
+
+as we see in figure~\ref{fig1}.
+\end{frame}
+
+\begin{frame}
+    \begin{figure}
+        \input{bf}
+        \caption{another caption}
+    \end{figure}
+    \begin{itemize}
+        \item a
+        \item b
+    \end{itemize}
+\end{frame}
+
+\end{document}
