@@ -1,28 +1,25 @@
 set term pdf color
 
-set output "scatter_plot.pdf"
-
-#set xlabel "Size (weighted \# relations)"
-#set ylabel "Time (ms)"
-
-set size ratio 1
+set ylabel "Time (ms)"
+set size square
+#set size ratio -1
+#set view equal xy
 set logscale xy
 set datafile separator ","
+set xtics (1, 1000, 1000000)
 
-#
-#  Plot the data using X and Y ranges [0,1],
-#  using the data in 'scatter_plot.txt',
-#  marking the data with points only (a scatter plot)
-#  using line type 3 (blue)
-#  and point type 4 (open square)
-#
-#splot 'results.comp.csv' using 0:1:2 with dots notitle
-#splot 'results.comp.csv' using 0:2:1 with dots notitle
-#splot 'results.comp.csv' using 1:0:2 with dots notitle
-#splot 'results.comp.csv' using 1:2:0 with dots notitle
-#splot 'results.comp.csv' using 2:0:1 with dots notitle
-#splot 'results.comp.csv' using 2:1:0 with dots notitle
-plot 'results.comp.csv' using 0:3 with dots notitle
+set output "compo.small.pdf"
+set xlabel "Smaller input size"
+plot 'results.comp.csv' using 2:1 with dots notitle
+set output "compo.large.pdf"
+set xlabel "Larger input size"
+plot 'results.comp.csv' using 3:1 with dots notitle
+set output "compo.loops.pdf"
+set xlabel "Outer relation iterations"
+plot 'results.comp.csv' using 4:1 with dots notitle
+set output "compo.out.pdf"
+set xlabel "Output size"
+plot 'results.comp.csv' using 6:1 with dots notitle
 #
 #  Terminate.
 #
