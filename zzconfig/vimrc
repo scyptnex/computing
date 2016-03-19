@@ -80,6 +80,7 @@ let mapleader = ","
 nnoremap <leader>w :w!<cr>
 nnoremap <leader>q :q<cr>
 nnoremap <leader>f :set filetype?<cr>
+nnoremap <leader>p gqip
 
 "ycm completion
 nnoremap <leader>g :YcmCompleter GoTo<CR>
