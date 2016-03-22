@@ -1,3 +1,0 @@
-#! /bin/sh
-
-svn status | grep "\?" | sed 's/^[^a-zA-Z0-9]*//g' | xargs svn add

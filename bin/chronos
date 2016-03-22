@@ -1,4 +1,0 @@
-#! /bin/sh
-
-#ssh hellas@hestia.feralhosting.com
-ssh hellas@chronos.feralhosting.com

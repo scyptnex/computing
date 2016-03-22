@@ -1,3 +1,0 @@
-#! /bin/sh
-
-git status | grep -A 999999 "Untracked files" | grep "#	" | sed 's/#.//' | xargs git add
