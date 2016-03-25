@@ -1,0 +1,35 @@
+#Passes
+primary [aaaa1111]
+secondary [aaaaa111]
+alpha [aa1111AAAA]
+beta [a1a1A!A!a1]
+gamma [aaa11!AAA11]
+public [a1aaaaa111] [A1aaaaa111] {111a1aaa}
+
+#################################################
+
+# Email
+Gmail <beta>
+Gmail cruft <beta>gmm (nic.h.misc@gmail.com)
+Gmail recipes <beta>re (nic.h.recipe@gmail.com)
+
+# Government
+MyGov KN536939 <secondary>gm (nhol4121)
+Ivote 37722857 (6 digit pin: norm + roman nums)  0969 5759 0631
+
+#Oracle
+
+#Other
+ACM (scholar one) <beta>so
+Aldi-mobile 639791 <secondary>am
+Bupa scyptnex <secondary>bu
+EasyChair nhol8058 <beta>ec
+Euler <beta>pe
+Everten <secondary>ev
+Facebook <beta>fb (nic.h.misc@gmail.com)  [M: 1989-09-19]
+Opal <beta>op [pin=rot6]
+Oracle nic.h.misc <Secondary>[A...]or
+Skype Nic.H.8058 (nic.h.misc@gmail.com) <beta>sk
+SPLASH/OOPSLA nhol8058@uni.sydney.edu.au <secondary>sp
+Translink 0160037591185002 <beta>tl
+Usyd <primary>=[Aaaa1111] (nhol8058@cs.usyd.edu.au)

@@ -1,0 +1,20 @@
+# Towards a Scalable Framework for Context-free Language Reachability#
+
+### Abstract ###
+
+Context-Free Language Reachability (CFL-R) is a search problem to identify paths in an input labelled graph that form sentences in a given context-free language.
+CFL-R provides a fundamental formulation for many applications, including shape analysis, data and control flow analysis, program slicing, specification-inferencing and points-to analysis.
+Unfortunately, generic algorithms for CFL-R scale poorly with large instances, leading research to focus on ad-hoc optimisations for specific applications.
+Hence, there is the need for scalable algorithms which solve arbitrary CFL-R instances.
+
+In this work, we present a generic algorithm for CFL-R with improved scalability, performance and/or generality over the state-of-the-art solvers.
+The algorithm adapts Datalog's semi-naive evaluation strategy for eliminating redundant computations.
+Our solver uses the quadtree data-structure, which reduces memory overheads, speeds up runtime, and eliminates the restriction to normalised input grammars.
+The resulting solver has up to 3.5x speed-up and 60% memory reduction over a state-of-the-art CFL-R solver based on dynamic programming.
+
+### Links ###
+
+* [Project files](../../cfl)
+* Tech report
+* [2015 Conference on Compiler Construction](http://link.springer.com/chapter/10.1007/978-3-662-46663-6_10)
+* Journal version

@@ -1,0 +1,33 @@
+syntax: glob
+
+# Build files
+*.class
+*.pyc
+*~
+build/
+
+# Eclipse
+.metadata*
+.classpath
+.settings
+.project
+.cproject
+
+# IntelliJ
+*build/deps/*
+*build/objs/*
+.idea/*
+*.iml
+out/production/*
+
+# Gradle
+.gradle/
+
+# Rust
+Cargo.lock
+target/debug
+target/doc
+
+# Misc
+libtcod-1.5.2
+*.sqlite3

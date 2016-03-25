@@ -1,0 +1,25 @@
+group 'Grape'
+version '1.0-FRUIT'
+
+apply plugin: 'application'
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+mainClassName = "gt.Main"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.5'
+}
+
+task rofl << {
+    System.out.println("wtf");
+    System.out.println(this.class.toString());
+}
