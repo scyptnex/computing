@@ -91,10 +91,9 @@ if [ "$MODE" != "encrypt" ] && ([ "$MODE" == "decrypt" ] || [[ $INPUT =~ .*$CIPH
     OPENSSL_MODE="-d"
     MODE_NAME="decrypting"
 fi
-if [ "$OUTPUT" == "" ]; then
-    OUTPUT="$OUT"
+if [ "$OUTPUT" != "" ]; then
+    OUT="$OUTPUT"
 fi
-echo $OUTPUT
 
 # early exit if the output file already exists (and not in force mode)
 if [ -f $OUT ] && [ $FORCE != "true" ] ; then
