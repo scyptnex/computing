@@ -39,15 +39,15 @@ public class Backdoor {
 }
 '
 
-[ -f $1/store/zzAlpha.dat ] || (echo "must have $$1/store/zzAlpha.dat" >&2 && exit 1)
+[ -f "$1/store/zzAlpha.dat" ] || (echo "must have $$1/store/zzAlpha.dat" >&2 && exit 1)
 echo "Whats the password"
 read PASS
 PHEX=`echo -n "$PASS" | sha256sum | sed -e 's/[ \t].*$//'`
 KHEX=${PHEX:0:32}
 IVHEX=${PHEX:32:32}
-openssl enc -aes-128-cbc -d -K $KHEX -iv $IVHEX -in $1/store/zzAlpha.dat -out backdoor.dat
+openssl enc -aes-128-cbc -d -K $KHEX -iv $IVHEX -in "$1/store/zzAlpha.dat" -out backdoor.dat
 echo $JAVA > Backdoor.java
 javac Backdoor.java
 java Backdoor backdoor.dat | tee backdoor.tsv
 rm Backdoor.java Backdoor.class backdoor.dat
-echo "openssl enc -aes-128-cbc -d -K $KHEX -iv $IVHEX -in $1/store/<file> -out <out>"
+echo "openssl enc -aes-128-cbc -d -K $KHEX -iv $IVHEX -in \"$1/store/<file>\" -out <out>"
