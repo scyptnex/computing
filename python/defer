@@ -1,0 +1,25 @@
+#! /usr/bin/env python
+
+'''
++-------------------------------------------------------------------------+
+|                                  defer                                  |
+|                                                                         |
+| Author: Nic H.                                                          |
+| Date: 2016-Apr-29                                                       |
++-------------------------------------------------------------------------+
+'''
+
+__doc__ = __doc__.strip()
+
+import sys
+import getopt
+import os
+import imp
+prettybox = imp.load_source("prettybox", os.path.join(os.path.dirname(os.path.realpath(__file__)), "prettybox"))
+
+
+def defer():
+    prettybox.prettybox(["hi", "there"])
+
+if __name__ == "__main__":
+    defer()
