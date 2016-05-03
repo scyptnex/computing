@@ -59,7 +59,7 @@ public class MyActivity extends AppCompatActivity {
         Intent in = new Intent(this, DisplayMessageActivity.class);
         EditText et = (EditText) findViewById(R.id.edit_message);
         String msg = et.getText().toString();
-        in.putExtra(EXTRA_MESSAGE, msg);
+        in.putExtra(EXTRA_MESSAGE, msg.toUpperCase());
         startActivity(in);
     }
 }

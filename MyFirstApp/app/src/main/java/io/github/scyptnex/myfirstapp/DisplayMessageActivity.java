@@ -30,11 +30,8 @@ public class DisplayMessageActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent in = getIntent();
         String msg = in.getStringExtra(MyActivity.EXTRA_MESSAGE);
-        TextView tv = new TextView(this);
-        tv.setTextSize(40);
-        tv.setText(msg);
-        RelativeLayout rl = (RelativeLayout) findViewById(R.id.content);
-        rl.addView(tv);
+        TextView tv = (TextView) findViewById(R.id.textview);
+        tv.setText(tv.getText().toString().toUpperCase() + msg.toLowerCase());
     }
 
 }
