@@ -27,12 +27,15 @@ public class Main {
 			if(fi.getName().endsWith(s)) ismovie = true;
 		}
 		if(ismovie){
-			String[] cmd = new String[]{"vlc", fi.getAbsolutePath()};
-			Process p = Runtime.getRuntime().exec(cmd);
+			try{
+				String[] cmd = new String[]{"vlc", fi.getAbsolutePath()};
+				Process p = Runtime.getRuntime().exec(cmd);
+				return;
+			} catch (IOException exc){
+				// dp nothing
+			}
 		}
-		else{
-			Desktop.getDesktop().open(fi);
-		}
+		Desktop.getDesktop().open(fi);
 	}
 	
 	public static boolean confirmPrompt(String msg){
