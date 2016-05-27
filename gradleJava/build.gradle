@@ -1,4 +1,8 @@
 apply plugin: 'java'
+apply plugin: 'antlr'
+apply plugin: 'application'
+
+mainClassName = "mathy.Misc"
 
 repositories {
     mavenCentral()
@@ -6,5 +10,14 @@ repositories {
 
 dependencies {
     testCompile 'junit:junit:4.12'
+        antlr "org.antlr:antlr4:4.5" // use ANTLR version 4
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.10'
+}
+
+
+generateGrammarSource {
+    arguments += ["-package", "exprs"]
+}
