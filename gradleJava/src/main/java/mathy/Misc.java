@@ -4,6 +4,9 @@ import exprs.ExprLexer;
 import exprs.ExprParser;
 import org.antlr.v4.runtime.*;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class Misc {
 
     public static long fibo(int n){
@@ -21,13 +24,6 @@ public class Misc {
     }
 
     public static void main(String[] args){
-        try{
-            int num = Integer.parseInt(args[0]);
-            System.out.println("Fib(" + num + ") = " + fibo(num) + ".");
-        } catch(Exception e){
-            System.err.println("Usage: java mathy.Misc <number>");
-        }
-
-        parse("x = 5\n y = 3 \n");
+        parse(Arrays.stream(args).map(s -> s + "\n").collect(Collectors.joining()));
     }
 }
