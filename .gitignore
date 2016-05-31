@@ -24,6 +24,9 @@ __pycache__
 out/*
 *.iml
 
+# QT Creator files #
+*.pro.user*
+
 # Rust/Cargo files #
 Cargo.lock
 **/target/debug/
