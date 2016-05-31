@@ -1,10 +1,9 @@
+package tagbase;
 
 import java.io.*;
 import java.util.*;
 
 public class TagBaseII {
-	
-	public static void main(String[] args){Main.main(args);};
 	
 	public static final String LIST_NAME = "zzList.txt";
 	public static final String IMPORT_FILENAME = "zzlib.dat";

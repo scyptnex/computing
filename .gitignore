@@ -19,10 +19,22 @@
 .pydevproject
 __pycache__
 
+# Gradle #
+*/build/
+*/.gradle/
+
 # Intelli J files #
 .idea/*
 out/*
 *.iml
+
+# Misc #
+Oracle/*.facts
+Lua/saves
+
+# Package Files #
+*.war
+*.ear
 
 # QT Creator files #
 *.pro.user*
@@ -30,12 +42,4 @@ out/*
 # Rust/Cargo files #
 Cargo.lock
 **/target/debug/
-
-# Package Files #
-*.war
-*.ear
-
-# Misc #
-Oracle/*.facts
-Lua/saves
 

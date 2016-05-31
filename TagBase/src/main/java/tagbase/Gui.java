@@ -1,3 +1,5 @@
+package tagbase;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -29,10 +31,6 @@ public class Gui extends JFrame{
 	private final TableRowSorter<Tabulator> tableSorter;
 	
 	private final TagBaseII tb;
-	
-	public static void main(String[] args){
-		Main.main(args);
-	}
 	
 	public Gui(TagBaseII base){
 		super("Tag Base");
