@@ -1,5 +1,7 @@
 package tagbase;
 
+import tagbase.gui.BaseChooser;
+
 import java.io.*;
 import java.util.*;
 
@@ -24,24 +26,14 @@ public class TagBaseII {
 	private final HashMap<String, String> paths;
 	
 	public static TagBaseII getBase(File mainDir){
-		//System.out.println(mainDir.getAbsolutePath());
-		File list = new File(mainDir, LIST_NAME);
-		if(!list.exists()){
-			if(Main.confirmPrompt("Directory " + mainDir.getAbsolutePath() + " is not a TagBase directory.\n\nMake it one?")){
-				try {
-					list.createNewFile();
-				} catch (IOException e) {
-					return null;
-				}
-			}
-			else{
-				return null;
-			}
-		}
-		try {
+		try{
+			mainDir = BaseChooser.choose(mainDir);
+			if(mainDir == null) return null; // exit when user cancels
+			File list = new File(mainDir, LIST_NAME);
+			list.createNewFile();
 			return new TagBaseII(list);
-		} catch (IOException e) {
-			return null;
+		} catch (IOException exc){
+			return null; // exit on error
 		}
 	}
 	

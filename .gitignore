@@ -24,7 +24,7 @@ __pycache__
 */.gradle/
 
 # Intelli J files #
-.idea/*
+*.idea
 out/*
 *.iml
 

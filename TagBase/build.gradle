@@ -1,5 +1,20 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-mainClassName = 'tagbase.Main'
+mainClassName = 'tagbase.Main';
+defaultTasks 'installDist';
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12';
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed";
+    }
+}
 

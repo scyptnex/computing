@@ -39,7 +39,7 @@ public class Main {
 		}
 		Desktop.getDesktop().open(fi);
 	}
-	
+
 	public static boolean confirmPrompt(String msg){
 		return JOptionPane.showConfirmDialog(gui, msg, "Confirm", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
 	}
