@@ -2,12 +2,29 @@ cmake_minimum_required (VERSION 2.6)
 
 add_executable(foo main)
 
+#=========#
+# Testing #
+#=========#
 enable_testing()
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS foo)
 
-add_test(NAME zero  COMMAND foo)
-set_tests_properties(zero PROPERTIES WILL_FAIL TRUE)
+macro(PASSING_TEST tname targ)
+    message("testing " ${tname} " with \"" ${targ} "\"")
+    add_test(NAME ${tname} COMMAND foo ${targ})
+endmacro()
 
-add_test(NAME one   COMMAND foo a)
-add_test(NAME two   COMMAND foo a b)
-add_test(NAME three COMMAND foo a b c)
+macro(FAILING_TEST tname targ)
+    PASSING_TEST(${tname} ${targ})
+    set_tests_properties(${tname} PROPERTIES WILL_FAIL TRUE)
+endmacro()
 
+#=======#
+# Tests #
+#=======#
+
+PASSING_TEST(blank "")
+FAILING_TEST(letter "a")
+PASSING_TEST(zero "0")
+FAILING_TEST(num "1")
+PASSING_TEST(zero2 "01")
+FAILING_TEST(num2 "10")
