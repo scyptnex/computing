@@ -23,5 +23,4 @@ endfunction()
 #============#
 # Unit Tests #
 #============#
-unit_test("foo")
-unit_test("bar")
+unit_test("simple_matrix")
