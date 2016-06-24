@@ -11,13 +11,43 @@
 #ifndef __DENSE_BIT_MATRIX_H__
 #define __DENSE_BIT_MATRIX_H__
 
-#include<string>
+#include <cstring>
 
-class dense_bit_matrix {
+#include "matrix.h"
+#include "static_utils.h"
 
-    public:
-        static const char letter = 'a';
-        static constexpr const char* str = "Hi there";
-};
+namespace sparse_matrix {
+
+    template<typename T>
+    class dense_bit_matrix : public matrix<static_utils::square_root(sizeof(T)*8), dense_bit_matrix<T>> {
+
+        private:
+            T data;
+
+        public:
+
+            static const unsigned available_bits = sizeof(T)*8;
+
+            dense_bit_matrix() : data() {
+                std::memset(&data, 0, sizeof(T));
+            }
+
+            void set(unsigned r, unsigned c) {
+                data |= 1<<(c*dense_bit_matrix<T>::side_length + r);
+            }
+            void unset(unsigned r, unsigned c) {
+                data &= ~(1<<(c*dense_bit_matrix<T>::side_length + r));
+            }
+            bool get(unsigned r, unsigned c) const {
+                return 1&(data >> (c*dense_bit_matrix<T>::side_length + r));
+            } 
+
+            dense_bit_matrix<T> operator*(const dense_bit_matrix<T>& other) const {
+
+                return dense_bit_matrix<T>();
+            }
+    };
+
+} // end namespace
 
 #endif /* __DENSE_BIT_MATRIX_H__ */

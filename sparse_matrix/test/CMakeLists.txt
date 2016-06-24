@@ -24,3 +24,4 @@ endfunction()
 # Unit Tests #
 #============#
 unit_test("simple_matrix")
+unit_test("dense_bit_matrix")
