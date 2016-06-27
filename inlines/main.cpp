@@ -6,7 +6,7 @@ typedef std::uint16_t T;
 
 const unsigned SIZE = 4;
 
-const T MASK = (2<<SIZE)-1;
+const T MASK = (1<<SIZE)-1;
 
 inline constexpr unsigned shift(unsigned r, unsigned c){
     return SIZE*r + c;
@@ -21,7 +21,8 @@ template<unsigned Ls, unsigned Rs, unsigned Os> inline void mult_simple_inner(co
 }
 
 template<unsigned Lm, unsigned Rm, unsigned Os> inline void mult_smart_inner(const T& l, const T& r, T& out) {
-    if((l & Lm) && (r & Rm)) out |= 1 << Os;
+    //std::cout << std::hex << (l&Lm) << " " << (r&Rm) << " " << std::endl;
+    if((l>>Lm)&(r>>Rm)&MASK) out |= 1 << Os;
 }
 
 template<unsigned Fr, unsigned To> inline void transpose_inner(const T& from, T& to) {
@@ -30,7 +31,7 @@ template<unsigned Fr, unsigned To> inline void transpose_inner(const T& from, T&
 
 template<unsigned A, unsigned B, unsigned Cur> struct ternary {
     static inline void mult_simple(const T& l, const T& r, T& out) {
-        mult_simple_inner<shift(SIZE-A, SIZE-B), shift(SIZE-B, SIZE-Cur), shift(SIZE-A, SIZE-Cur)>(l, r, out);
+        mult_simple_inner<shift(SIZE-A, SIZE-Cur), shift(SIZE-Cur, SIZE-B), shift(SIZE-A, SIZE-B)>(l, r, out);
         ternary<A, B, Cur-1>::mult_simple(l, r, out);
     }
 };
@@ -49,7 +50,7 @@ template<unsigned A, unsigned Cur> struct binary {
         binary<A, Cur-1>::mult_simple(l, r, out);
     }
     static inline void mult_smart(const T& l, const T& r, T& out) {
-        mult_smart_inner<MASK << (SIZE*A), MASK << (SIZE*Cur), shift(SIZE-A, SIZE-Cur)>(l, r, out);
+        mult_smart_inner<(SIZE*(SIZE-A)), (SIZE*(SIZE-Cur)), shift(SIZE-A, SIZE-Cur)>(l, r, out);
         binary<A, Cur-1>::mult_smart(l, r, out);
     }
     static inline void transpose(const T& from, T& to) {
@@ -107,6 +108,9 @@ T mult2(const T& a, const T& b){
     T ret = 0;
     T transp = 0;
     unary<SIZE>::transpose(b, transp);
+    //std::cout << "---\n";
+    //show((T)transp);
+    //std::cout << "---\n";
     unary<SIZE>::mult_smart(a, transp, ret);
     return ret;
 }
@@ -117,13 +121,29 @@ T read(){
     return val;
 }
 
-int main(){
-    T a = read();
-    T b = read();
-    show(a);
-    show(b);
-    T c = mult(a, b);
-    show(c);
-    T d = mult2(a, b);
-    show(d);
+int main(int argc, char** argv){
+    if(argc > 1){
+        for(unsigned x=0; x<(1 << (SIZE*SIZE)); ++x){
+            for(unsigned y=0; y<(1 << (SIZE*SIZE)); ++y){
+                T m1 = mult((T)x, (T)y);
+                T m2 = mult2((T)x, (T)y);
+                if(m1 != m2){
+                    show((T)x);
+                    show((T)y);
+                    show(m1);
+                    show(m2);
+                    return 1;
+                }
+            }
+        }
+    } else {
+        T a = read();
+        T b = read();
+        show(a);
+        show(b);
+        T c = mult(a, b);
+        show(c);
+        T d = mult2(a, b);
+        show(d);
+    }
 }
