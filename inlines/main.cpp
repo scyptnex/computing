@@ -37,7 +37,7 @@ template<unsigned A, unsigned B, unsigned Cur> struct ternary {
 };
 
 template<unsigned A, unsigned B> struct ternary<A, B, 0> {
-    static inline void mult_simple(const T& l, const T& r, T& out) {}
+    static inline void mult_simple(const T&, const T&, T&) {}
 };
 
 template<unsigned A, unsigned Cur> struct binary {
@@ -60,10 +60,10 @@ template<unsigned A, unsigned Cur> struct binary {
 };
 
 template<unsigned A> struct binary<A, 0> {
-    static inline void print(const T& val) {}
-    static inline void mult_simple(const T& l, const T& r, T& out) {}
-    static inline void mult_smart(const T& l, const T& r, T& out) {}
-    static inline void transpose(const T& from, T& to) {}
+    static inline void print(const T&) {}
+    static inline void mult_simple(const T&, const T&, T&) {}
+    static inline void mult_smart(const T&, const T&, T&) {}
+    static inline void transpose(const T&, T&) {}
 };
 
 template<unsigned Cur> struct unary {
@@ -87,10 +87,10 @@ template<unsigned Cur> struct unary {
 };
 
 template<> struct unary<0> {
-    static inline void print(const T& val) {}
-    static inline void mult_simple(const T& l, const T& r, T& out) {}
-    static inline void mult_smart(const T& l, const T& r, T& out) {}
-    static inline void transpose(const T& from, T& to) {}
+    static inline void print(const T&) {}
+    static inline void mult_simple(const T&, const T&, T&) {}
+    static inline void mult_smart(const T&, const T&, T&) {}
+    static inline void transpose(const T&, T&) {}
 };
 
 void show(const T& val){
@@ -121,7 +121,7 @@ T read(){
     return val;
 }
 
-int main(int argc, char** argv){
+int main(int argc, char**){
     if(argc > 1){
         for(unsigned x=0; x<(1 << (SIZE*SIZE)); ++x){
             for(unsigned y=0; y<(1 << (SIZE*SIZE)); ++y){
