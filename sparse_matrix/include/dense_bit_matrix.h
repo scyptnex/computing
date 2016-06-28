@@ -23,6 +23,7 @@ namespace sparse_matrix {
 
         private:
             T data;
+            static inline constexpr unsigned shift(unsigned r, unsigned c) { return c*dense_bit_matrix<T>::side_length + r; }
 
         public:
 
@@ -33,13 +34,15 @@ namespace sparse_matrix {
             }
 
             void set(unsigned r, unsigned c) {
-                data |= 1<<(c*dense_bit_matrix<T>::side_length + r);
+                data |= 1 << shift(r,c);
             }
+
             void unset(unsigned r, unsigned c) {
-                data &= ~(1<<(c*dense_bit_matrix<T>::side_length + r));
+                data &= ~(1 << shift(r,c));
             }
+
             bool get(unsigned r, unsigned c) const {
-                return 1&(data >> (c*dense_bit_matrix<T>::side_length + r));
+                return 1&(data >> shift(r,c));
             } 
 
             dense_bit_matrix<T> operator*(const dense_bit_matrix<T>& other) const {
