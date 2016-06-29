@@ -5,10 +5,10 @@ ASSEMBL=$(patsubst %.x,%.s,$(TARGETS))
 all: $(ASSEMBL) $(TARGETS)
 
 %.x: %.s
-	g++ -o $@ $<
+	$(CXX) -o $@ $<
 
-%.s: %.cpp
-	g++ --std=c++11 -O3 -S $<
+%.s: %.cpp $(wildcard *.h)
+	$(CXX) --std=c++11 -O3 -S $<
 
 clean:
 	rm -f $(TARGETS) $(ASSEMBL)
