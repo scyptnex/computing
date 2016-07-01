@@ -20,6 +20,7 @@ include_directories(include/)
 # TESTS
 #==
 add_subdirectory(test)
+add_subdirectory(src)
 
 #==
 # COMPILER FLAGS

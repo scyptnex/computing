@@ -12,36 +12,19 @@
 
 namespace sparse_matrix {
 
-    template<unsigned S, typename T>
-    struct matrix {
-        typedef T this_t;
-        static const unsigned side_length = S;
+    template<typename Mat>
+    struct matrix_utils {
     
-        virtual void set(unsigned, unsigned) = 0;
-        virtual void unset(unsigned, unsigned) = 0;
-        virtual bool get(unsigned, unsigned) const = 0;
-    
-        virtual T operator*(const T& other) const {
-            T ret;
-            for(int r=0; r<S; r++){
-                for(int x=0; x<S; x++){
-                    for(int c=0; c<S; c++){
-                        if(get(r, c) && other.get(c, x)) ret.set(r, x);
-                    }
-                }
-            }
-            return ret;
-        }
-    
-        template<typename OUT> void draw(OUT& out) const {
-            for(int r=0; r<S; ++r){
+        template<typename OUT> static inline void draw(const Mat& mat, OUT& out){
+            for(int r=0; r<Mat::side_length; ++r){
                 if(r != 0) out << "\n";
-                for(int c=0; c<S; ++c){
+                for(int c=0; c<Mat::side_length; ++c){
                     if(c != 0) out << " ";
-                    out << (get(r, c) ? "1" : "0");
+                    out << (mat.get(r, c) ? "1" : "0");
                 }
             }
         }
+
     };
 
 } // end namespace
