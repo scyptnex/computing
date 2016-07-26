@@ -2,7 +2,7 @@
 *.class
 *~
 .*.swp
-.ycm_extra_conf.pyc
+*.pyc
 
 # Code::Blocks files #
 *.depend
