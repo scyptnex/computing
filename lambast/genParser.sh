@@ -19,7 +19,7 @@ function usage(){
 ANTLR=`find ~/.gradle -iname "antlr4*.jar" | grep "org\.antlr" | grep -v "runtime" | grep -v "sources" | head -n 1`
 
 for FI in $(dirname $0)/*.g4; do
-    COM="java -jar $ANTLR -o $(dirname $FI) -Dlanguage=Python2 $FI"
+    COM="java -jar $ANTLR -visitor -no-listener -o $(dirname $FI) -Dlanguage=Python2 $FI"
     echo $COM
     $COM
 done

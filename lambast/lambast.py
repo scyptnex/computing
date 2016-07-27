@@ -12,33 +12,7 @@ __doc__ = __doc__.strip()
 import sys
 import getopt
 
-class Var:
-
-    def __init__(self, n):
-        self.name = n
-
-    def __str__(self):
-        return self.name
-
-class Exp:
-
-    def __init__(self, h, b):
-        if not isinstance(h, Var):
-            raise
-        self.head = h
-        self.body = b
-
-    def __str__(self):
-        return "(\\" + str(self.head) + "." + str(self.body) + ")"
-
-class App:
-
-    def __init__(self, l, r):
-        self.lhs = l
-        self.rhs = r
-
-    def __str__(self):
-        return "(" + str(self.lhs) + " " + str(self.rhs) + ")"
+from expression import *
 
 def lmbda(head, body):
     if not isinstance(head, list):
@@ -168,9 +142,9 @@ def lambast():
             print __doc__
             sys.exit(0)
 
-    tr = lmbda(["x", "y"], "x")
-    fa = lmbda(["x", "y"], "y")
-    no = lmbda(["f", "a", "b"], ["f", "b", "a"])
+    tr = readExpr("\\x y . x")
+    fa = readExpr("\\x y . y")
+    no = readExpr("\\f a b .(f b a)")
 
     print tr, fa
     print no
@@ -209,6 +183,23 @@ def lambast():
     four = simplify(App(addTwo, two), True)
     fourp = lmbda([], [succ, succ, zero])
     print fourp
+
+    print
+    print
+    nums = [simplify(reduce(lambda a, b : App(succ, a), range(0, i), zero)) for i in range(0,20)]
+    for n in nums:
+        print str(n)
+    CHK=readExpr("\\m n f x .(m f(n f x))")
+    ADD=readExpr("\\n f x . (f(n f x))")
+    MUL=readExpr("\\m n f . (m(n f))")
+    adr = lambda x, y : simplify(App(App(CHK, x), y))
+    print str(adr(nums[0], nums[0]))
+    print str(adr(nums[0], nums[1]))
+    print str(adr(nums[1], nums[0]))
+    print str(adr(nums[1], nums[1]))
+    print str(adr(nums[3], nums[4]))
+    print str(adr(nums[6], nums[2]))
+    print str(adr(nums[4], nums[4]))
 
 if __name__ == "__main__":
     lambast()
