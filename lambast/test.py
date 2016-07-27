@@ -1,14 +1,14 @@
 import sys
 from antlr4 import *
-from utlLexer import utlLexer
-from utlParser import utlParser
+from untypedLexer import untypedLexer
+from untypedParser import untypedParser
 
 def main(argv):
     input = FileStream(argv[1])
-    lexer = utlLexer(input)
+    lexer = untypedLexer(input)
     stream = CommonTokenStream(lexer)
-    parser = utlParser(stream)
-    tree = parser.expr()
+    parser = untypedParser(stream)
+    tree = parser.program()
     print(tree.toStringTree(recog=parser))
 
 if __name__ == '__main__':

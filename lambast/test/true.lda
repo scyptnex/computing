@@ -1,0 +1,2 @@
+= true1 \ x . ( \y . x)
+= true2 \x y.x
