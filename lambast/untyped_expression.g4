@@ -20,5 +20,5 @@ var
     : ID
     ;
 
-ID  :   [a-zA-Z0-9_]+ ; // identifiers
+ID  :   [a-zA-Z0-9_+*/=&|!]+ ; // identifiers
 WS  :   [ \t\n\r]+ -> skip ; // toss out whitespace

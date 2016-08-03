@@ -109,7 +109,12 @@ class Constructor( untyped_expressionVisitor, antlr4.error.ErrorListener.ErrorLi
 #=========================#
 class Analyser:
 
-    def bound_free(term):
+    def __init__(self, verb, defs):
+        self.verbose = verb
+        self.defs = defs
+        self.lmb = None
+
+    def bound_free(self, term):
         if isinstance(term, Var):
             return (set(), set([term.name]))
         elif isinstance(term, Exp):
@@ -120,6 +125,86 @@ class Analyser:
             (lb, lf) = bound_free(term.lhs)
             (rb, rf) = bound_free(term.rhs)
             return (lb|rb, lf|rf) # this only works if lhs and rhs dont share variable names
+
+    def name_of(self, count, is_free):
+        if is_free:
+            return "f%d" % (count - 11) if count > 10 else chr(ord('a')+count)
+        return "b%d" % (count - 11) if count > 10 else chr(ord('z')-count)
+
+    def substitute(self, term=None):
+        if not term:
+            if self.verbose: print "substitution:"
+            self.lmb = self.substitute(self.lmb)
+            if self.verbose: print "  ", self.lmb
+            return
+        if isinstance(term, Var):
+            if self.defs.has_key(term.name):
+                if(self.verbose): print "    ", term.name, self.defs[term.name]
+                return self.defs[term.name]
+            return term
+        elif isinstance(term, Exp):
+            return Exp(self.substitute(term.head), self.substitute(term.body))
+        else:
+            return App(self.substitute(term.lhs), self.substitute(term.rhs))
+
+
+    def alpha(self, term=None,names=None,bound=0,free=0):
+        if not term:
+            if self.verbose: print "renaming:"
+            (self.lmb, b, f) = self.alpha(self.lmb,{})
+            if self.verbose: print "  ", self.lmb
+            return
+        if isinstance(term, Var):
+            if names.has_key(term.name):
+                return (Var(names[term.name]), bound, free)
+            else:
+                return (Var(self.name_of(free, True)), bound, free+1)
+        elif isinstance(term, Exp):
+            names[term.head.name] = self.name_of(bound, False)
+            (l1, b1, f1) = self.alpha(term.head, names, bound+1, free)
+            (l2, b2, f2) = self.alpha(term.body, names, b1, f1)
+            return (Exp(l1, l2), b2, f2)
+        else:
+            (l1, b1, f1) = self.alpha(term.lhs, names, bound, free)
+            (l2, b2, f2) = self.alpha(term.rhs, names, b1, f1)
+            return (App(l1, l2), b2, f2)
+
+    def beta(self, term=None, subVar=None, subExp=None):
+        if not term:
+            if self.verbose: print "application:"
+            self.lmb = self.beta(self.lmb, None, None)
+            if self.verbose: print "  ", self.lmb
+            return
+        if subVar:
+            if isinstance(term, Var):
+                return subExp if term.name == subVar else term
+            elif isinstance(term, Exp):
+                return Exp(self.beta(term.head, subVar, subExp), self.beta(term.body, subVar, subExp))
+            else:
+                return App(self.beta(term.lhs, subVar, subExp), self.beta(term.rhs, subVar, subExp))
+        else:
+            if isinstance(term, Var):
+                return term
+            elif isinstance(term, Exp):
+                return Exp(term.head, self.beta(term.body, None, None))
+            else:
+                l = self.beta(term.lhs, None, None)
+                r = self.beta(term.rhs, None, None)
+                if isinstance(l, Exp):
+                    if self.verbose:
+                        print "    ", l.head.name, "=>", r, ":", l.body
+                    ret = self.beta(l.body, l.head.name, r)
+                    return self.beta(ret, None, None)
+                else:
+                    return App(l, r)
+
+    def simplify(self, lambd):
+        self.lmb = lambd
+        if self.verbose: print "simplifying:\n  %s" %str(self.lmb)
+        self.substitute()
+        self.alpha()
+        self.beta()
+        return self.lmb
 
 #============#
 # Calculator #
@@ -133,26 +218,30 @@ class Calculator:
         self.nam = ""
         self.asg = False
 
+    def _help(self):
+        if self.vrb:
+            print "Variables:"
+            for (k, v) in self.defs.items():
+                print "    " + k + " = " + str(v)
+        else:
+            print "Commands:"
+            print "    ?                            display this help message"
+            print "    @?                           list the defined variables"
+            print "    <lambda expression> ?        compute the lambda expression"
+            print "    <lambda expression> @?       verbosely compute the lambda expression"
+            print "    <lambda expression> = <var>  define a variable"
+            print "    <lambda expression> @= <var> show working when defining a variable"
+
     def _execute(self):
         if len(self.buf.strip()) > 0:
             lmb = Constructor().readExpr(self.buf)
+            lmb = Analyser(self.vrb, self.defs).simplify(lmb)
             if self.asg :
                 self.defs[self.nam] = lmb
             else:
                 print lmb
         else:
-            if self.vrb:
-                print "Variables:"
-                for (k, v) in self.defs.items():
-                    print "    " + k + " = " + str(v)
-            else:
-                print "Commands:"
-                print "    ?                            display this help message"
-                print "    @?                           list the defined variables"
-                print "    <lambda expression> ?        compute the lambda expression"
-                print "    <lambda expression> @?       verbosely compute the lambda expression"
-                print "    <lambda expression> = <var>  define a variable"
-                print "    <lambda expression> @= <var> show working when defining a variable"
+            self._help()
         defs = self.defs
         self.__init__()
         self.defs = defs
@@ -173,7 +262,6 @@ class Calculator:
                 self.asg = True
             else:
                 self.buf += char
-
 
 if __name__ == "__main__":
     calc = Calculator()
@@ -199,7 +287,7 @@ if __name__ == "__main__":
                 for line in fi:
                     calc.use(line)
     if interpret or len(args) == 0:
-        if len(args) == 0: print "type \"?\" for help."
+        print "type \"?\" for help."
         line = sys.stdin.readline()
         while line:
             calc.use(line)
