@@ -1,5 +1,6 @@
 
 \f x y.(x(f x y)) = S
+\n f x.(n (\g h.(h (g f))) (\u.x) (\u.u)) = P
 
 \x y.y = 0
 S 0 = 1

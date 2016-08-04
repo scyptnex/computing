@@ -46,6 +46,23 @@ class App:
     def __str__(self):
         return "(" + str(self.lhs) + " " + str(self.rhs) + ")"
 
+def lambdaString(l):
+    #if isinstance(l, Var):
+    #    return str(l)
+    #elif isinstance(l, Exp):
+    #    sub = lambdaString(l.body)
+    #    if sub[0] == '\\':
+    #        return '\\' + lambdaString(l.head) + " " + sub[1:]
+    #    else:
+    #        return '\\' + lambdaString(l.head) + "." + sub
+    #else:
+    #    r = lambdaString(l.rhs)
+    #    if isinstance(l.rhs, App):
+    #        return lambdaString(l.lhs) + " (" + r + ")"
+    #    else:
+    #        return lambdaString(l.lhs) + " " + r
+    return str(l)
+
 #==============#
 # Construction #
 #==============#
@@ -135,11 +152,11 @@ class Analyser:
         if not term:
             if self.verbose: print "substitution:"
             self.lmb = self.substitute(self.lmb)
-            if self.verbose: print "  ", self.lmb
+            if self.verbose: print "  ", lambdaString(self.lmb)
             return
         if isinstance(term, Var):
             if self.defs.has_key(term.name):
-                if(self.verbose): print "    ", term.name, self.defs[term.name]
+                if(self.verbose): print "    ", term.name, lambdaString(self.defs[term.name])
                 return self.defs[term.name]
             return term
         elif isinstance(term, Exp):
@@ -152,7 +169,7 @@ class Analyser:
         if not term:
             if self.verbose: print "renaming:"
             (self.lmb, b, f) = self.alpha(self.lmb,{})
-            if self.verbose: print "  ", self.lmb
+            if self.verbose: print "  ", lambdaString(self.lmb)
             return
         if isinstance(term, Var):
             if names.has_key(term.name):
@@ -173,7 +190,7 @@ class Analyser:
         if not term:
             if self.verbose: print "application:"
             self.lmb = self.beta(self.lmb, None, None)
-            if self.verbose: print "  ", self.lmb
+            if self.verbose: print "  ", lambdaString(self.lmb)
             return
         if subVar:
             if isinstance(term, Var):
@@ -191,9 +208,9 @@ class Analyser:
                 l = self.beta(term.lhs, None, None)
                 r = self.beta(term.rhs, None, None)
                 if isinstance(l, Exp):
-                    if self.verbose:
-                        print "    ", l.head.name, "=>", r, ":", l.body
+                    if self.verbose: print "    ", l.head.name, "=>", r, ":",
                     ret = self.beta(l.body, l.head.name, r)
+                    if self.verbose: print lambdaString(ret)
                     return self.beta(ret, None, None)
                 else:
                     return App(l, r)
