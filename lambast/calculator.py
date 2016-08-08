@@ -33,7 +33,7 @@ class Var:
 class Exp:
     def __init__(self, h, b):
         if not isinstance(h, Var):
-            raise
+            raise Exception("Attepting to put non-var in the head: %s" % str(h))
         self.head = h
         self.body = b
     def __str__(self):
@@ -205,15 +205,16 @@ class Analyser:
             elif isinstance(term, Exp):
                 return Exp(term.head, self.beta(term.body, None, None))
             else:
-                l = self.beta(term.lhs, None, None)
-                r = self.beta(term.rhs, None, None)
-                if isinstance(l, Exp):
-                    if self.verbose: print "    ", l.head.name, "=>", r, ":",
-                    ret = self.beta(l.body, l.head.name, r)
+                if isinstance(term.lhs, Exp):
+                    if self.verbose: print "    ", term.lhs.head.name, "=>", term.rhs, ":",
+                    ret = self.beta(term.lhs.body, term.lhs.head.name, term.rhs)
                     if self.verbose: print lambdaString(ret)
                     return self.beta(ret, None, None)
+                term.lhs = self.beta(term.lhs, None, None)
+                if isinstance(term.lhs, Exp):
+                    return self.beta(term, None, None)
                 else:
-                    return App(l, r)
+                    return App(term.lhs, self.beta(term.rhs, None, None))
 
     def simplify(self, lambd):
         self.lmb = lambd
