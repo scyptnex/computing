@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -23,7 +24,7 @@ public class AutoPort {
 			sysStore = System.getProperty("user.home");
 		sysStore = sysStore + File.separator + ".minecraft";
 
-		new AutoPort("luas", sysStore, "C:\\Scyptnex\\FTB\\Unleashed\\minecraft", ".");
+		new AutoPort("luas", sysStore, "C:\\Scyptnex\\FTB\\Unleashed\\minecraft", ".", Paths.get(System.getProperty("user.home"), "soft", "ftb", "FTBInfinity", "minecraft").toString());
 	}
 
 	public AutoPort(String sourceDir, String ... targetDirs) throws IOException{
