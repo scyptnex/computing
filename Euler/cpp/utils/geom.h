@@ -17,6 +17,11 @@ template<typename T> struct vec3{
     vec3() : x(0), y(0), z(0) {}
     vec3(T _x, T _y) : x(_x), y(_y), z(0) {}
     vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
+    // arithmetic
+    vec3 operator+(const vec3& rhs) const { return {x+rhs.x, y+rhs.y, z+rhs.z}; } 
+    vec3 scale(T factor) const { return {x*factor, y*factor, z*factor}; }
+    // comparison
+    bool operator<(const vec3& rhs) const { return x == rhs.x ? (y == rhs.y ? z<rhs.z : y<rhs.y ) : x<rhs.x; }
 };
 template<typename T> std::ostream& operator<<(std::ostream& in, const vec3<T>& v){
     return in << "(" << v.x << "," << v.y << "," << v.z << ")";
