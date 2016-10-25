@@ -22,7 +22,7 @@ ull pps(ull sqrt){
         // dd == rq
         ull q=num/d, r=num%d;
         if(d*d == r*q){
-            cout << num << ", " << r << ", " << d << ", " << q << endl;
+            cout << num << ", " << r << ", " << d << ", " << q << "      " << rational<ull>{d,r} << endl;
             return num;
         }
     }
@@ -31,8 +31,8 @@ ull pps(ull sqrt){
 
 void solv(int argc, char** argv){
     ull base=1, tot=0;
-    //while(base*base < 1000000000000){
-    while(base*base < 100000){
+    while(base*base < 1000000000000){
+    //while(base*base < 100000){
         tot += pps(base);
         if(base%10000 == 0) cout << base << endl;
         base++;
