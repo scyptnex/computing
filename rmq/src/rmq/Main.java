@@ -26,12 +26,12 @@ public class Main {
                 new Naive(),
                 new Sqrt(),
                 new Log(),
-                new Super()
+                //new Super()
         };
         int[][] answers = new int[solvers.length][QUERY_COUNT];
 
-        for(int len=10; len<=100; len*=10){
-        //for(int len=10; len<=10000000; len*=10){
+        //for(int len=10; len<=100; len*=10){
+        for(int len=10; len<=10000000; len*=10){
             System.out.println(len);
             ArrayList<Integer> testCase = gen(len);
             ArrayList<Integer> starts = gen(QUERY_COUNT, 0, len);

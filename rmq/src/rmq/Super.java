@@ -6,10 +6,13 @@ package rmq;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Super implements RMQ{
+
+    Log blockQueryIndex = new Log();
 
     @Override
     public String getName() {
@@ -31,6 +34,32 @@ public class Super implements RMQ{
             height[idx++] = curH;
         }
         return idx;
+    }
+
+    public void blockerize(int[] bin, int begin, int blockLen, int[][][] lookups){
+        int desc = 0;
+        int[][] mins = new int[blockLen][blockLen];
+        int[][] vals = new int[blockLen][blockLen];
+        int[][] tots = new int[blockLen][blockLen];
+        for(int i=0; i<blockLen && i+begin < bin.length; i++){
+            if(bin[begin+i] == 1) desc += (1<<i);
+            if(i == 0) for(int j=0; j<blockLen; j++){
+                mins[j][0] = j;
+                vals[j][0] = bin[begin+i];
+                tots[j][0] = bin[begin+i];
+            }
+            else for(int j=0; j+i<blockLen; j++){
+                tots[j][i] = tots[j][i-1] + tots[j+i][0];
+                if(vals[j][i-1] > tots[j][i]){
+                    vals[j][i] = tots[j][i];
+                    mins[j][i] = j+i;
+                } else {
+                    vals[j][i] = vals[j][i-1];
+                    mins[j][i] = mins[j][i-1];
+                }
+            }
+        }
+        lookups[desc] = mins;
     }
 
     @Override
@@ -72,6 +101,24 @@ public class Super implements RMQ{
             bin[i] = height[i]-height[i+1];
         }
         System.out.println(show(bin));
+        // break the walk into blocks
+        int blockLen = -1;
+        while((1<<(blockLen+1)) <= n) blockLen++;
+        int[] blockIdxs = new int[height.length/blockLen + 1];
+        ArrayList<Integer> blockMins = new ArrayList<>(blockIdxs.length);
+        for(int i=0; i<height.length; i++){
+            if(i%blockLen == 0){
+                blockMins.add(height[i]);
+                blockIdxs[i/blockLen] = i;
+            } else if(height[i] < blockMins.get(i/blockLen)){
+                blockMins.set(i/blockLen, height[i]);
+                blockIdxs[i/blockLen] = i;
+            }
+        }
+        blockQueryIndex.preprocess(blockMins);
+        // determine the minimum for any binary block
+
+        System.out.println(blockLen + ", " + blockMins + " - " + show(blockIdxs));
     }
 
     @Override
