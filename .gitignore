@@ -35,6 +35,7 @@ Lua/saves
 # Package Files #
 *.war
 *.ear
+*.egg-info/
 
 # QT Creator files #
 *.pro.user*
