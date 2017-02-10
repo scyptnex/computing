@@ -14,11 +14,24 @@ import math
 import eul.geom as geom
 import eul.filer as filer
 
+def same_side(p1, p2, a, b):
+    """http://blackpawn.com/texts/pointinpoly/"""
+    p1 = p1 + [0]
+    p2 = p2 + [0]
+    a = a + [0]
+    b = b + [0]
+    cp1 = geom.cross_product(geom.pairwise_sub(b, a), geom.pairwise_sub(p1, a))
+    cp2 = geom.cross_product(geom.pairwise_sub(b, a), geom.pairwise_sub(p2, a))
+    return geom.dot_product(cp1, cp2) >= 0
+
 def contains_origin(a, b, c):
-    return abs(geom.angle_between(a, b)) + abs(geom.angle_between(b, c)) >= math.pi
+    """http://blackpawn.com/texts/pointinpoly/"""
+    o = [0,0]
+    return same_side(o, a, b, c) and same_side(o, b, a, c) and same_side(o, c, a, b)
 
-print contains_origin([-340,495], [-153,-910], [835,-947])
-print contains_origin([-175,41], [-421,-714], [574,-645])
-
+count = 0
 for ln in filer.stream_delimited_lines("E102.txt", ","):
-    print ln
+    coords = [int(s) for s in ln]
+    if contains_origin(coords[0:2], coords[2:4], coords[4:6]):
+        count += 1
+print count
