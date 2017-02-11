@@ -9,6 +9,8 @@
 
 __doc__ = __doc__.strip()
 
+import eul.numeric as numeric
+
 def incr(arr, low, hi):
     i = 0
     arr[i] += 1
@@ -68,7 +70,7 @@ while sum(perturb) < len(ss)*5:
             break
     if brk:
         continue
-    if passes(cur):
+    if numeric.is_special(cur):
         best = cur
     if count%10000 == 0:
         print perturb, count, best
