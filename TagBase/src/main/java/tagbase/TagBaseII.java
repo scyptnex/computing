@@ -1,13 +1,20 @@
 package tagbase;
 
+import tagbase.files.StateRecorder;
 import tagbase.gui.BaseChooser;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class TagBaseII {
 	
 	public static final String LIST_NAME = "zzList.txt";
+	public static final String FILE_NAME = "zzTagBase.json";
 	public static final String IMPORT_FILENAME = "zzlib.dat";
 	public static final int MAX_PROMPT_LINES = 20;
 	
@@ -176,11 +183,22 @@ public class TagBaseII {
 				pw.println(paths.get(nm));
 			}
 			pw.close();
+			Path p = Paths.get(mainDir.getPath(), FILE_NAME);
+			StateRecorder.saveState(serializeState(), p);
 			return true;
 		}
 		catch(IOException e){
 			return false;
 		}
+	}
+	public Stream<Map<String, String>> serializeState(){
+		return names.stream().map(n -> new String[]{
+				"name", n,
+				"tags", tags.get(n),
+				"date", dates.get(n),
+				"size", sizes.get(n) + "",
+				"path", paths.get(n)
+			}).map(l -> IntStream.range(0, l.length).filter(i -> i%2==0).boxed().collect(Collectors.toMap(i -> l[i], i -> l[i+1])));
 	}
 	public void scry(){
 		ArrayList<String> newPaths = new ArrayList<String>();
