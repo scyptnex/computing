@@ -193,6 +193,7 @@ public class TagBaseII {
 	}
 	public Stream<Map<String, String>> serializeState(){
 		return names.stream().map(n -> new String[]{
+				"index", indexes.get(n) + "",
 				"name", n,
 				"tags", tags.get(n),
 				"date", dates.get(n),

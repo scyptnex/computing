@@ -3,12 +3,10 @@ package tagbase.files;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class StateRecorder {
@@ -24,8 +22,12 @@ public class StateRecorder {
     }
 
     public static Map<String, String> stringToItem(String s){
+        return stringToItem(s, Map.class);
+    }
+
+    public static <T> T stringToItem(String s, Class<T> cl){
         try {
-            return mapper.readValue(s, Map.class);
+            return mapper.readValue(s, cl);
         } catch (IOException e) {
             return null;
         }
