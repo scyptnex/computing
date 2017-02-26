@@ -16,6 +16,11 @@ public class Misc {
         return ImageIO.read(cl.getResourceAsStream("icon.png"));
     }
 
+    public static BufferedImage getKingPic() throws IOException {
+        ClassLoader cl = Misc.class.getClassLoader();
+        return ImageIO.read(cl.getResourceAsStream("king.png"));
+    }
+
     public static void logImage(BufferedImage img, String logName) throws IOException {
         ImageIO.write(img, "png", new File(logName + ".png"));
     }

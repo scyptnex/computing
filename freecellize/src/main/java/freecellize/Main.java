@@ -20,13 +20,13 @@ public class Main {
 
     public static void main(String[] args) throws AWTException, IOException, InterruptedException {
         Screenterface screen = new Screenterface();
-        BufferedImage fci = Misc.getFreecellIcon();
-        BufferedImage begin = screen.screenGrab();
-        Rectangle rct = getBestLocationOfSubimage(begin, fci);
+        //find the window with freecell
+        Rectangle rct = getBestLocationOfSubimage(screen.screenGrab(), Misc.getFreecellIcon());
         screen.lclick(rct.x + rct.width/2, rct.y + rct.height/2);
         Thread.sleep(500);
-        BufferedImage fin = screen.screenGrab();
-        Misc.logImage(fin, "FINAL");
+        //find the location of the freecell window
+        Rectangle kng = getBestLocationOfSubimage(screen.screenGrab(), Misc.getKingPic());
+        screen.moveMosue(kng.x + kng.width/2, kng.y + kng.height/2);
     }
 
     public static Rectangle getBestLocationOfSubimage(BufferedImage large, BufferedImage small){
@@ -34,16 +34,36 @@ public class Main {
         int sh = small.getHeight();
         long s = System.currentTimeMillis();
         double[] smallHist = calcHist(small, 0, 0, sw, sh);
+        int[] topLeftOfSmall = new int[4];
+        small.getRaster().getPixel(0, 0, topLeftOfSmall);
         double[] loc = IntStream.range(0, large.getWidth()-sw).boxed()
                 .flatMap(x -> IntStream.range(0, large.getHeight() - sh).mapToObj(y -> new int[]{x, y}))
                 .parallel()
+                .filter(a -> similarPixel(a[0], a[1], large, topLeftOfSmall))
                 .map(a -> new double[]{a[0], a[1], histSimilarity(calcHist(large, a[0], a[1], sw, sh), smallHist)})
                 .filter(d -> d[2] < 0.3)
                 //.sorted((d1, d2) -> Double.compare(d1[2], d2[2]))
                 //.peek(d -> System.out.println(d[0] + ", " + d[1] + " = " + d[2]))
                 .min((d1, d2) -> Double.compare(d1[2], d2[2])).get();
-        logTime(s, "Finding the freecell window in the task bar");
+        logTime(s, "Finding the subimage");
         return new Rectangle((int)loc[0], (int)loc[1], sw, sh);
+    }
+
+    /**
+     * checks the pixel in the image against a given value, returning true if every colour channel is within 16
+     */
+    public static boolean similarPixel(int x, int y, BufferedImage im, int[] px){
+        int[] chk = new int[4];
+        im.getRaster().getPixel(x, y, chk);
+//        boolean ret = true;
+        for(int i=0; i<3; i++){
+            if(Math.abs(chk[i] - px[i]) > 16) return false;
+        }
+//        for(int i=0; i<3; i++){
+//            System.out.print(px[i] + "-" + chk[i] + "  ");
+//        }
+//        System.out.println(ret);
+        return true;
     }
 
     /**
