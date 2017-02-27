@@ -25,8 +25,22 @@ public class Main {
         screen.lclick(rct.x + rct.width/2, rct.y + rct.height/2);
         Thread.sleep(500);
         //find the location of the freecell window
-        Rectangle kng = getBestLocationOfSubimage(screen.screenGrab(), Misc.getKingPic());
-        screen.moveMosue(kng.x + kng.width/2, kng.y + kng.height/2);
+        BufferedImage kingPic = Misc.getKingPic();
+        int[] boardGreen = getPx(kingPic, 0, 0); // board colour might come in handy
+        Rectangle kng = getBestLocationOfSubimage(screen.screenGrab(), kingPic);
+        int kmidx = kng.x + kng.width/2;
+        int kmidy = kng.y + kng.height/2;
+        //              1500x502
+        //1223x597 ------------------ 1772x576
+        //1226x684
+        int cwid = (272+277)/7;
+        int chei = (684-580)/6;
+        for(int r=0; r<7; r++){
+            for(int c=0; c<8; c++) if(r < 7 || c < 4) {
+                screen.moveMosue(kmidx-277+cwid*c, kmidy+80+chei*r);
+                Thread.sleep(50);
+            }
+        }
     }
 
     public static Rectangle getBestLocationOfSubimage(BufferedImage large, BufferedImage small){
@@ -53,8 +67,7 @@ public class Main {
      * checks the pixel in the image against a given value, returning true if every colour channel is within 16
      */
     public static boolean similarPixel(int x, int y, BufferedImage im, int[] px){
-        int[] chk = new int[4];
-        im.getRaster().getPixel(x, y, chk);
+        int[] chk = getPx(im, x, y);
 //        boolean ret = true;
         for(int i=0; i<3; i++){
             if(Math.abs(chk[i] - px[i]) > 16) return false;
@@ -75,14 +88,17 @@ public class Main {
      */
     public static double[] calcHist(BufferedImage img, int xStart, int yStart, int w, int h){
         Map<Integer, Long> counts = IntStream.range(xStart, xStart+w).boxed()
-                .flatMap(x -> IntStream.range(yStart, yStart+w).mapToObj(y -> {
-                    int[] px = new int[4];
-                    img.getRaster().getPixel(x, y, px);
-                    return px;
-                })).map(px -> px[0]/64 + (px[1]/64)*4 + (px[2]/64)*16)
+                .flatMap(x -> IntStream.range(yStart, yStart+w).mapToObj(y -> getPx(img, x, y)))
+                .map(px -> px[0]/64 + (px[1]/64)*4 + (px[2]/64)*16)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         double[] ret = new double[64];
         Arrays.parallelSetAll(ret, i -> counts.getOrDefault(i, 0l)/256.0);
+        return ret;
+    }
+
+    public static int[] getPx(BufferedImage img, int x, int y){
+        int[] ret = new int[4];
+        img.getRaster().getPixel(x, y, ret);
         return ret;
     }
 
