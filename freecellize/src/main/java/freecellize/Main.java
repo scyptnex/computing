@@ -26,7 +26,7 @@ public class Main {
         Thread.sleep(500);
         //find the location of the freecell window
         BufferedImage kingPic = Misc.getKingPic();
-        int[] boardGreen = getPx(kingPic, 0, 0); // board colour might come in handy
+        int[] boardGreen = Misc.getPx(kingPic, 0, 0); // board colour might come in handy
         Rectangle kng = getBestLocationOfSubimage(screen.screenGrab(), kingPic);
         int kmidx = kng.x + kng.width/2;
         int kmidy = kng.y + kng.height/2;
@@ -67,7 +67,7 @@ public class Main {
      * checks the pixel in the image against a given value, returning true if every colour channel is within 16
      */
     public static boolean similarPixel(int x, int y, BufferedImage im, int[] px){
-        int[] chk = getPx(im, x, y);
+        int[] chk = Misc.getPx(im, x, y);
 //        boolean ret = true;
         for(int i=0; i<3; i++){
             if(Math.abs(chk[i] - px[i]) > 16) return false;
@@ -88,17 +88,11 @@ public class Main {
      */
     public static double[] calcHist(BufferedImage img, int xStart, int yStart, int w, int h){
         Map<Integer, Long> counts = IntStream.range(xStart, xStart+w).boxed()
-                .flatMap(x -> IntStream.range(yStart, yStart+w).mapToObj(y -> getPx(img, x, y)))
+                .flatMap(x -> IntStream.range(yStart, yStart+w).mapToObj(y -> Misc.getPx(img, x, y)))
                 .map(px -> px[0]/64 + (px[1]/64)*4 + (px[2]/64)*16)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         double[] ret = new double[64];
         Arrays.parallelSetAll(ret, i -> counts.getOrDefault(i, 0l)/256.0);
-        return ret;
-    }
-
-    public static int[] getPx(BufferedImage img, int x, int y){
-        int[] ret = new int[4];
-        img.getRaster().getPixel(x, y, ret);
         return ret;
     }
 
