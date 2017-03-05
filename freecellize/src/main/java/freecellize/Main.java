@@ -27,13 +27,13 @@ public class Main {
         //find the location of the freecell window
         BufferedImage kingPic = Misc.getKingPic();
         int[] boardGreen = Misc.getPx(kingPic, 0, 0); // board colour might come in handy
-        Rectangle kng = getBestLocationOfSubimage(screen.screenGrab(), kingPic);
-        for(int r=0; r<7; r++){
-            for(int c=0; c<8; c++) {
-                Point loc = CardMaker.locate(r, c, kng);
-                screen.moveMosue(loc.x, loc.y);
-                Thread.sleep(200);
-            }
+        BufferedImage board = screen.screenGrab();
+        Rectangle kng = getBestLocationOfSubimage(board, kingPic);
+        for(int x=0; x<52; x++){
+            Point l = CardIsh.locate(x/8, x%8, kng);
+            CardIsh oo = new CardIsh(board, l.x, l.y);
+            System.out.print(String.format("%4s", CardIsh.mostSimilar(oo)));
+            if(x%8==7) System.out.println();
         }
     }
 
@@ -53,7 +53,7 @@ public class Main {
                 //.sorted((d1, d2) -> Double.compare(d1[2], d2[2]))
                 //.peek(d -> System.out.println(d[0] + ", " + d[1] + " = " + d[2]))
                 .min((d1, d2) -> Double.compare(d1[2], d2[2])).get();
-        logTime(s, "Finding the subimage");
+        Misc.logTime(s, "Finding the subimage");
         return new Rectangle((int)loc[0], (int)loc[1], sw, sh);
     }
 
@@ -95,10 +95,6 @@ public class Main {
      */
     public static double histSimilarity(double[] h1, double[] h2){
         return IntStream.range(0, h1.length).mapToDouble(i -> Math.abs(h1[i] - h2[i])).sum();
-    }
-
-    public static void logTime(long start, String msg){
-        System.err.println(msg + " : " + (System.currentTimeMillis() - start) + "ms");
     }
 
 }

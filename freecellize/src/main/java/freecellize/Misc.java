@@ -26,6 +26,16 @@ public class Misc {
         return ImageIO.read(cl.getResourceAsStream("sample.png"));
     }
 
+    public static BufferedImage getCardSmall(String code) throws IOException {
+        ClassLoader cl = Misc.class.getClassLoader();
+        if(code.equals("ac") || code.equals("as")){
+            code = "black_ace";
+        } else if(code.equals("ah") || code.equals("ad")){
+            code = "red_ace";
+        }
+        return ImageIO.read(cl.getResourceAsStream("cards/" + code + ".png"));
+    }
+
     public static void logImage(BufferedImage img, String logName) throws IOException {
         ImageIO.write(img, "png", new File(logName + ".png"));
     }
@@ -51,6 +61,10 @@ public class Misc {
         int[] ret = new int[4];
         img.getRaster().getPixel(x, y, ret);
         return ret;
+    }
+
+    public static void logTime(long start, String msg){
+        System.err.println(msg + " : " + (System.currentTimeMillis() - start) + "ms");
     }
 
 }
