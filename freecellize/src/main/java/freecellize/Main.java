@@ -28,17 +28,11 @@ public class Main {
         BufferedImage kingPic = Misc.getKingPic();
         int[] boardGreen = Misc.getPx(kingPic, 0, 0); // board colour might come in handy
         Rectangle kng = getBestLocationOfSubimage(screen.screenGrab(), kingPic);
-        int kmidx = kng.x + kng.width/2;
-        int kmidy = kng.y + kng.height/2;
-        //              1500x502
-        //1223x597 ------------------ 1772x576
-        //1226x684
-        int cwid = (272+277)/7;
-        int chei = (684-580)/6;
         for(int r=0; r<7; r++){
-            for(int c=0; c<8; c++) if(r < 7 || c < 4) {
-                screen.moveMosue(kmidx-277+cwid*c, kmidy+80+chei*r);
-                Thread.sleep(50);
+            for(int c=0; c<8; c++) {
+                Point loc = CardMaker.locate(r, c, kng);
+                screen.moveMosue(loc.x, loc.y);
+                Thread.sleep(200);
             }
         }
     }

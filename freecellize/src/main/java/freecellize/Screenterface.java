@@ -26,12 +26,16 @@ public class Screenterface {
         robot.mouseRelease(InputEvent.BUTTON1_MASK);
     }
 
-    public BufferedImage screenGrab(){
+    public BufferedImage screenGrab(int mouseX, int mouseY){
         //first get the mouse out of the way
-        moveMosue(0, 0);
+        moveMosue(mouseX, mouseY);
         // now grab
         Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
         return robot.createScreenCapture(screenRect);
+    }
+
+    public BufferedImage screenGrab() {
+        return screenGrab(0, 0);
     }
 
 }

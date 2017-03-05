@@ -42,7 +42,7 @@ public class Misc {
         mins[GREEN] = Math.abs(  0 - cvals[0]) + Math.abs(127 - cvals[1]) + Math.abs(  0 - cvals[2]);
         int mn = 0;
         for(int i=1; i<mins.length; i++){
-            if(mins[i] < mins[mn]) mn = i;
+            if(mins[i] < mins[mn]) mn = i; // bias the earlier colours, so that magenta looks red not white
         }
         return mn;
     }
