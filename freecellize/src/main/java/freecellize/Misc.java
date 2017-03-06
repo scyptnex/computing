@@ -1,6 +1,7 @@
 package freecellize;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,35 +27,22 @@ public class Misc {
         return ImageIO.read(cl.getResourceAsStream("sample.png"));
     }
 
-    public static BufferedImage getCardSmall(String code) throws IOException {
+    public static BufferedImage getCardLarge(String code) throws IOException {
         ClassLoader cl = Misc.class.getClassLoader();
+        return ImageIO.read(cl.getResourceAsStream("cards/" + code + ".png"));
+    }
+
+    public static BufferedImage getCardSmall(String code) throws IOException {
         if(code.equals("ac") || code.equals("as")){
             code = "black_ace";
         } else if(code.equals("ah") || code.equals("ad")){
             code = "red_ace";
         }
-        return ImageIO.read(cl.getResourceAsStream("cards/" + code + ".png"));
+        return getCardLarge(code);
     }
 
     public static void logImage(BufferedImage img, String logName) throws IOException {
         ImageIO.write(img, "png", new File(logName + ".png"));
-    }
-
-    public static final int RED   = 0; // 255   0   0
-    public static final int BLACK = 1; //   0   0   0
-    public static final int WHITE = 2; // 255 255 255
-    public static final int GREEN = 3; //   0 127   0
-    public static int closestColour(int[] cvals){
-        int[] mins = new int[4];
-        mins[RED  ] = Math.abs(255 - cvals[0]) + Math.abs(  0 - cvals[1]) + Math.abs(  0 - cvals[2]);
-        mins[BLACK] = Math.abs(  0 - cvals[0]) + Math.abs(  0 - cvals[1]) + Math.abs(  0 - cvals[2]);
-        mins[WHITE] = Math.abs(255 - cvals[0]) + Math.abs(255 - cvals[1]) + Math.abs(255 - cvals[2]);
-        mins[GREEN] = Math.abs(  0 - cvals[0]) + Math.abs(127 - cvals[1]) + Math.abs(  0 - cvals[2]);
-        int mn = 0;
-        for(int i=1; i<mins.length; i++){
-            if(mins[i] < mins[mn]) mn = i; // bias the earlier colours, so that magenta looks red not white
-        }
-        return mn;
     }
 
     public static int[] getPx(BufferedImage img, int x, int y){
@@ -65,6 +53,21 @@ public class Misc {
 
     public static void logTime(long start, String msg){
         System.err.println(msg + " : " + (System.currentTimeMillis() - start) + "ms");
+    }
+
+    /**
+     * finds the offset vs the supposed location of the king
+     * A full card is 70x95 (71x95)
+     * A card tab is 70x18 (71x18
+     * left of card to left of card is 78
+     */
+    public static Point locate(int row, int col){
+        return new Point(78*col - 292, 18*row + 86);
+    }
+
+    public static Point locate(int row, int col, Rectangle king){
+        Point l = locate(row, col);
+        return new Point(l.x + king.x, l.y + king.y);
     }
 
 }

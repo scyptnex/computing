@@ -9,9 +9,10 @@ package freecellize;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,6 +23,7 @@ public class Main {
         Screenterface screen = new Screenterface();
         //find the window with freecell
         Rectangle rct = getBestLocationOfSubimage(screen.screenGrab(), Misc.getFreecellIcon());
+        //Rectangle rct = new Rectangle(101, 1058, 16, 16);
         screen.lclick(rct.x + rct.width/2, rct.y + rct.height/2);
         Thread.sleep(500);
         //find the location of the freecell window
@@ -29,11 +31,41 @@ public class Main {
         int[] boardGreen = Misc.getPx(kingPic, 0, 0); // board colour might come in handy
         BufferedImage board = screen.screenGrab();
         Rectangle kng = getBestLocationOfSubimage(board, kingPic);
+        //Rectangle kng = new Rectangle(1475, 196, 32, 32);
+        String[][] codes = new String[8][7];
         for(int x=0; x<52; x++){
-            Point l = CardIsh.locate(x/8, x%8, kng);
-            CardIsh oo = new CardIsh(board, l.x, l.y);
-            System.out.print(String.format("%4s", CardIsh.mostSimilar(oo)));
-            if(x%8==7) System.out.println();
+            Point l = Misc.locate(x/8, x%8, kng);
+            Similariser oo = new Similariser(x + "", board, l.x, l.y, Similariser.SMALL_WIDTH, Similariser.SMALL_HEIGHT);
+            String code = Similariser.mostSimilarSmall(oo);
+            if(code.startsWith("a")){
+                BufferedImage grab = screen.holdRightScreenGrab(l.x + (Similariser.SMALL_WIDTH/2), l.y + (Similariser.SMALL_HEIGHT)/2);
+                Similariser big = new Similariser(x + "", grab, l.x, l.y, Similariser.SMALL_WIDTH, Similariser.LARGE_HEIGHT);
+                code = Similariser.mostSimilarLarge(big);
+            }
+            codes[x%8][x/8] = code;
+        }
+        Process p = new ProcessBuilder()
+                .command("fc-solve", "-m", "-snx").start();
+        PrintWriter pw = new PrintWriter(p.getOutputStream());
+        for(int col=0; col<8; col++){
+            for(int row=0; row<7; row++) if (row < 6 || col < 4) {
+                pw.print(String.format("%s ", codes[col][row].toUpperCase()));
+            }
+            pw.println();
+        }
+        Scanner sca = new Scanner(p.getInputStream());
+        pw.close();
+        sca.nextLine();
+        sca.nextLine();
+        String ln = sca.nextLine();
+        while(ln.length() > 0){
+            System.out.println(ln);
+            ln = sca.nextLine();
+        }
+        sca.close();
+        int ret = p.waitFor();
+        if(ret != 0){
+            throw new RuntimeException("Couldnt find a solution");
         }
     }
 

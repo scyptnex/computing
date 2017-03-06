@@ -18,12 +18,19 @@ public class Screenterface {
     public void lclick(int x, int y){
         moveMosue(x, y);
         robot.mousePress(InputEvent.BUTTON1_MASK);
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        nothowSleep(50);
         robot.mouseRelease(InputEvent.BUTTON1_MASK);
+    }
+
+    public BufferedImage holdRightScreenGrab(int mouseX, int mouseY){
+        moveMosue(mouseX, mouseY);
+        robot.mousePress(InputEvent.BUTTON3_MASK);
+        nothowSleep(50);
+        Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+        BufferedImage ret = robot.createScreenCapture(screenRect);
+        nothowSleep(50);
+        robot.mouseRelease(InputEvent.BUTTON3_MASK);
+        return ret;
     }
 
     public BufferedImage screenGrab(int mouseX, int mouseY){
@@ -36,6 +43,14 @@ public class Screenterface {
 
     public BufferedImage screenGrab() {
         return screenGrab(0, 0);
+    }
+
+    private static void nothowSleep(int ms){
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }
