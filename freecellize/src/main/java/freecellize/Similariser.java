@@ -3,7 +3,6 @@ package freecellize;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

@@ -32,29 +32,15 @@ public class Main {
         BufferedImage board = screen.screenGrab();
         Rectangle kng = getBestLocationOfSubimage(board, kingPic);
         //Rectangle kng = new Rectangle(1475, 196, 32, 32);
-        String[][] codes = new String[8][7];
-        for(int x=0; x<52; x++){
-            Point l = Misc.locate(x/8, x%8, kng);
-            Similariser oo = new Similariser(x + "", board, l.x, l.y, Similariser.SMALL_WIDTH, Similariser.SMALL_HEIGHT);
-            String code = Similariser.mostSimilarSmall(oo);
-            if(code.startsWith("a")){
-                BufferedImage grab = screen.holdRightScreenGrab(l.x + (Similariser.SMALL_WIDTH/2), l.y + (Similariser.SMALL_HEIGHT)/2);
-                Similariser big = new Similariser(x + "", grab, l.x, l.y, Similariser.SMALL_WIDTH, Similariser.LARGE_HEIGHT);
-                code = Similariser.mostSimilarLarge(big);
-            }
-            codes[x%8][x/8] = code;
-        }
+
+        String[][] codes = readStartState(screen, board, kng);
+        State initial = new State(codes);
+
         Process p = new ProcessBuilder()
                 .command("fc-solve", "-m", "-snx").start();
-        PrintWriter pw = new PrintWriter(p.getOutputStream());
-        for(int col=0; col<8; col++){
-            for(int row=0; row<7; row++) if (row < 6 || col < 4) {
-                pw.print(String.format("%s ", codes[col][row].toUpperCase()));
-            }
-            pw.println();
-        }
+        initial.printForSolver(new PrintStream(p.getOutputStream()));
         Scanner sca = new Scanner(p.getInputStream());
-        pw.close();
+        p.getOutputStream().close();
         sca.nextLine();
         sca.nextLine();
         String ln = sca.nextLine();
@@ -67,6 +53,22 @@ public class Main {
         if(ret != 0){
             throw new RuntimeException("Couldnt find a solution");
         }
+    }
+
+    public static String[][] readStartState(Screenterface screen, BufferedImage board, Rectangle kng){
+        String[][] codes = new String[8][7];
+        for(int x=0; x<52; x++){
+            Point l = Misc.locate(x/8, x%8, kng);
+            Similariser oo = new Similariser(x + "", board, l.x, l.y, Similariser.SMALL_WIDTH, Similariser.SMALL_HEIGHT);
+            String code = Similariser.mostSimilarSmall(oo);
+            if(code.startsWith("a")){
+                BufferedImage grab = screen.holdRightScreenGrab(l.x + (Similariser.SMALL_WIDTH/2), l.y + (Similariser.SMALL_HEIGHT)/2);
+                Similariser big = new Similariser(x + "", grab, l.x, l.y, Similariser.SMALL_WIDTH, Similariser.LARGE_HEIGHT);
+                code = Similariser.mostSimilarLarge(big);
+            }
+            codes[x%8][x/8] = code;
+        }
+        return codes;
     }
 
     public static Rectangle getBestLocationOfSubimage(BufferedImage large, BufferedImage small){
