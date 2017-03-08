@@ -10,6 +10,7 @@ package freecellize;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
@@ -35,6 +36,8 @@ public class Main {
 
         String[][] codes = readStartState(screen, board, kng);
         State initial = new State(codes);
+        System.out.println("Initial state");
+        System.out.println(initial.dump());
 
         Process p = new ProcessBuilder()
                 .command("fc-solve", "-m", "-snx").start();
@@ -44,8 +47,12 @@ public class Main {
         sca.nextLine();
         sca.nextLine();
         String ln = sca.nextLine();
+        ArrayList<String> moves = new ArrayList<>();
         while(ln.length() > 0){
-            System.out.println(ln);
+            String[] ms = ln.split(" ");
+            for(String s : ms) if(s.length() > 0){
+                moves.add(s);
+            }
             ln = sca.nextLine();
         }
         sca.close();
@@ -53,6 +60,12 @@ public class Main {
         if(ret != 0){
             throw new RuntimeException("Couldnt find a solution");
         }
+        for(int i=0; i<moves.size(); i++){
+            System.out.println(String.format("%3d %3s --------------", i, moves.get(i)));
+            initial.makeMove(moves.get(i));
+            System.out.println(initial.dump());
+        }
+        //moves.stream().forEachOrdered(System.out::println);
     }
 
     public static String[][] readStartState(Screenterface screen, BufferedImage board, Rectangle kng){
