@@ -10,10 +10,8 @@ package freecellize;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -63,6 +61,10 @@ public class Main {
         for(int i=0; i<moves.size(); i++){
             System.out.println(String.format("%3d %3s --------------", i, moves.get(i)));
             initial.makeMove(moves.get(i));
+            List<String> am = initial.getAutoMoves();
+            if(am.size() > 0){
+                throw new RuntimeException("AUTO " + am.toString());
+            }
             System.out.println(initial.dump());
         }
         //moves.stream().forEachOrdered(System.out::println);
@@ -91,10 +93,13 @@ public class Main {
         double[] smallHist = calcHist(small, 0, 0, sw, sh);
         int[] topLeftOfSmall = new int[4];
         small.getRaster().getPixel(0, 0, topLeftOfSmall);
+        int[] centerOfSmall = new int[4];
+        small.getRaster().getPixel(sw/2, sh/2, centerOfSmall);
         double[] loc = IntStream.range(0, large.getWidth()-sw).boxed()
                 .flatMap(x -> IntStream.range(0, large.getHeight() - sh).mapToObj(y -> new int[]{x, y}))
                 .parallel()
                 .filter(a -> similarPixel(a[0], a[1], large, topLeftOfSmall))
+                .filter(a -> similarPixel(a[0]+sw/2, a[1]+sh/2, large, centerOfSmall))
                 .map(a -> new double[]{a[0], a[1], histSimilarity(calcHist(large, a[0], a[1], sw, sh), smallHist)})
                 .filter(d -> d[2] < 0.3)
                 //.sorted((d1, d2) -> Double.compare(d1[2], d2[2]))

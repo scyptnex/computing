@@ -1,10 +1,7 @@
 package freecellize;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Stack;
-import java.util.Vector;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class State {
@@ -76,24 +73,77 @@ public class State {
         return -1;
     }
 
+    //returns 1-13 of the card's face value
+    public int faceVal(int col){
+        return faceVal(columns.get(col).peek());
+    }
+
+    public static int faceVal(String card){
+        char c = card.charAt(0);
+        switch (c){
+            case 'a' : return 1;
+            case 'j' : return 11;
+            case 'q' : return 12;
+            case 'k' : return 13;
+            default  : return c == '1' ? 10 : c-'0';
+        }
+    }
+
     public void makeMove(String move){
         // first check for a stack swap
-        if(move.matches("[0-9]*")){
-            throw new RuntimeException("TODO");
+        Stack<String> hand = new Stack<>();
+        if(move.length() > 2){
+            for(int i=1; i<Long.parseLong(move.substring(3), 16); i++) hand.push(retrieve(move.charAt(0)));
+        } else if(move.matches("[0-9]*")){
+            while(!columns.get(move.charAt(0)-'1').empty() &&
+                    !columns.get(move.charAt(1)-'1').empty() &&
+                    faceVal(move.charAt(0)-'1') < faceVal(move.charAt(1)-'1') - 1){
+                //System.out.print(faceVal(move.charAt(0)-'1') + " - " + faceVal(move.charAt(1)-'1') + " , ");
+                hand.push(retrieve(move.charAt(0)));
+                //System.out.println(hand.peek());
+            }
         }
         // otherwise retrieve and emplace
-        emplace(move.charAt(1), retrieve(move.charAt(0)));
+        hand.push(retrieve(move.charAt(0)));
+        while(!hand.empty()){
+            emplace(move.charAt(1), hand.pop());
+        }
     }
 
     //uses triangle logic, 2c->h is an auto move if ah and ad are home already
-    public String[] getAutoMoves(){
-        return null;
+    public List<String> getAutoMoves(){
+        int[] bottoms = new int[]{0,0,0,0};
+        for(String c : homes) if(c != null){
+            bottoms[getSuit(c)] = faceVal(c);
+        }
+        List<String> ret = new ArrayList<>();
+        for(int src=0; src<12; src++){
+            String check = src < 8 ? (columns.get(src).size() > 0 ? columns.get(src).peek() : null) : freecells[src-8];
+            if(check != null){
+                int mysuit = getSuit(check);
+                int myval = faceVal(check);
+                if(bottoms[mysuit] == myval-1 && bottoms[mysuit^0b10] >= myval-1 && bottoms[mysuit^0b11] >= myval-1){
+                    ret.add( (char)(src < 8 ? src + '1' : src - 8 + 'a') + "h");
+                }
+            }
+        }
+        return ret;
     }
 
     public void printForSolver(PrintStream os){
         columns.stream()
                 .map(s -> s.stream().collect(Collectors.joining(" ")))
                 .forEachOrdered(os::println);
+    }
+
+    // 500 order
+    public static int getSuit(String card){
+        switch (card.charAt(card.length()-1)){
+            case 's' : return 0;
+            case 'c' : return 1;
+            case 'd' : return 2;
+            default  : return 3;
+        }
     }
 
 }
