@@ -39,6 +39,7 @@ Lua/saves
 
 # QT Creator files #
 *.pro.user*
+build*Qt*Debug/
 
 # Rust/Cargo files #
 Cargo.lock
