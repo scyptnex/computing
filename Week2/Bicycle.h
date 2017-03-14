@@ -3,30 +3,30 @@
 
 #include "Vehicle.h"
 
-namespace vehicle {
+namespace week02 {
 
     class Bicycle : public Vehicle
     {
-    public:
-        Bicycle(int numberOfPassengers,
-            int topSpeed,
-            bool helmet = false,
-            int numberOfWheels = 2);
+        public:
+            Bicycle(int numberOfPassengers,
+                    int topSpeed,
+                    bool helmet = false,
+                    int numberOfWheels = 2);
 
-        Bicycle(int numberOfPassengers,
-            int topSpeed,
-            std::string color,
-            bool helmet = false,
-            int numberOfWheels = 2);
+            Bicycle(int numberOfPassengers,
+                    int topSpeed,
+                    std::string color,
+                    bool helmet = false,
+                    int numberOfWheels = 2);
 
-        virtual ~Bicycle() = default;
+            virtual ~Bicycle() = default;
 
-        int getSafetyRating();
+            int getSafetyRating();
 
-    protected:
-        bool m_helmetUsed;
+        protected:
+            bool m_helmetUsed;
     };
 
-} // end namespace vehicle
+} // end namespace week02
 
 #endif // BICYCLE_H

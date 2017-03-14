@@ -4,7 +4,7 @@
 #include "Bus.h"
 #include "Car.h"
 
-using namespace vehicle;
+using namespace week02;
 
 int main(int argc, char *argv[])
 {

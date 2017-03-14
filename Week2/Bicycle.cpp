@@ -1,19 +1,19 @@
 #include "Bicycle.h"
 
-namespace vehicle {
+namespace week02 {
 
     Bicycle::Bicycle(int numberOfPassengers,
-                     int topSpeed,
-                     bool helmet,
-                     int numberOfWheels) :
+            int topSpeed,
+            bool helmet,
+            int numberOfWheels) :
         Vehicle(numberOfPassengers, topSpeed, numberOfWheels),
         m_helmetUsed(helmet) {}
 
     Bicycle::Bicycle(int numberOfPassengers,
-                     int topSpeed,
-                     std::string colour,
-                     bool helmet,
-                     int numberOfWheels) :
+            int topSpeed,
+            std::string colour,
+            bool helmet,
+            int numberOfWheels) :
         Vehicle(numberOfPassengers, topSpeed, numberOfWheels, colour),
         m_helmetUsed(helmet) {}
 
@@ -29,4 +29,4 @@ namespace vehicle {
         }
     }
 
-} // end namespace vehicle
+} // end namespace week02

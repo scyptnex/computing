@@ -1,24 +1,24 @@
 #include "Bus.h"
 
-namespace vehicle {
+namespace week02 {
 
     Bus::Bus(int numberOfPassengers,
-             int topSpeed,
-             double kilometresPerLitre,
-             bool sb,
-             bool stand,
-             int numberOfWheels) :
+            int topSpeed,
+            double kilometresPerLitre,
+            bool sb,
+            bool stand,
+            int numberOfWheels) :
         MotorVehicle(numberOfPassengers, topSpeed, numberOfWheels, kilometresPerLitre),
         m_seatBeltsInstalled(sb),
         m_standingPassengersAllowed(stand) {}
 
     Bus::Bus(int numberOfPassengers,
-             int topSpeed,
-             double kilometresPerLitre,
-             std::string color,
-             bool sb,
-             bool stand,
-             int numberOfWheels) :
+            int topSpeed,
+            double kilometresPerLitre,
+            std::string color,
+            bool sb,
+            bool stand,
+            int numberOfWheels) :
         MotorVehicle(numberOfPassengers, topSpeed, numberOfWheels, color, kilometresPerLitre),
         m_seatBeltsInstalled(sb),
         m_standingPassengersAllowed(stand) {}
@@ -38,4 +38,4 @@ namespace vehicle {
         return SafetyRating;
     }
 
-} // end namespace vehicle
+} // end namespace week02

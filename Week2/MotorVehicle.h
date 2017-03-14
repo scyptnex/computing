@@ -3,32 +3,32 @@
 
 #include "Vehicle.h"
 
-namespace vehicle
+namespace week02
 {
     class MotorVehicle : public Vehicle
     {
-    public:
-        MotorVehicle(int numberOfPassengers,
-            int topSpeed,
-            int numberOfWheels,
-            double kilometresPerLitre) :
-            Vehicle(numberOfPassengers, topSpeed, numberOfWheels),
-            m_kmpl(kilometresPerLitre) {}
+        public:
+            MotorVehicle(int numberOfPassengers,
+                    int topSpeed,
+                    int numberOfWheels,
+                    double kilometresPerLitre) :
+                Vehicle(numberOfPassengers, topSpeed, numberOfWheels),
+                m_kmpl(kilometresPerLitre) {}
 
-        MotorVehicle(int numberOfPassengers,
-            int topSpeed,
-            int numberOfWheels,
-            std::string color,
-            double kilometresPerLitre) :
-            Vehicle(numberOfPassengers, topSpeed, numberOfWheels, color),
-            m_kmpl(kilometresPerLitre) {}
+            MotorVehicle(int numberOfPassengers,
+                    int topSpeed,
+                    int numberOfWheels,
+                    std::string color,
+                    double kilometresPerLitre) :
+                Vehicle(numberOfPassengers, topSpeed, numberOfWheels, color),
+                m_kmpl(kilometresPerLitre) {}
 
-        virtual ~MotorVehicle() = default;
+            virtual ~MotorVehicle() = default;
 
-        virtual double getKilometresPerLitre() { return m_kmpl; }
+            virtual double getKilometresPerLitre() { return m_kmpl; }
 
-    protected:
-        double m_kmpl;
+        protected:
+            double m_kmpl;
     };
 }
 

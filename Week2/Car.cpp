@@ -1,24 +1,24 @@
 #include "Car.h"
 
-namespace vehicle {
+namespace week02 {
 
     Car::Car(int numberOfPassengers,
-             int topSpeed,
-             double kilometresPerLitre,
-             int numberOfAirBags,
-             bool abs,
-             int numberOfWheels) :
+            int topSpeed,
+            double kilometresPerLitre,
+            int numberOfAirBags,
+            bool abs,
+            int numberOfWheels) :
         MotorVehicle(numberOfPassengers, topSpeed, numberOfWheels, kilometresPerLitre),
         m_numberOfAirBags(numberOfAirBags),
         m_abs(abs) {}
 
     Car::Car(int numberOfPassengers,
-             int topSpeed,
-             double kilometresPerLitre,
-             std::string color,
-             int numberOfAirBags,
-             bool abs,
-             int numberOfWheels) :
+            int topSpeed,
+            double kilometresPerLitre,
+            std::string color,
+            int numberOfAirBags,
+            bool abs,
+            int numberOfWheels) :
         MotorVehicle(numberOfPassengers, topSpeed, numberOfWheels, color, kilometresPerLitre),
         m_numberOfAirBags(numberOfAirBags),
         m_abs(abs) {}
@@ -45,4 +45,4 @@ namespace vehicle {
         return SafetyRating;
     }
 
-} // end namespace vehicle
+} // end namespace week02
