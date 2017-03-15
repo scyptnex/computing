@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>defender.png</file>
+        <file>fireball.png</file>
+    </qresource>
+</RCC>
