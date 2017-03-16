@@ -15,9 +15,10 @@ CONFIG += c++11
 
 
 SOURCES += main.cpp\
-        dialog.cpp
+    battlesphere.cpp
 
-HEADERS  += dialog.h
+HEADERS  += \
+    battlesphere.h
 
 RESOURCES += \
     resources.qrc
