@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QPainter>
 #include <QPixmap>
+#include <QSound>
+#include <QTimer>
 
 namespace si {
 
@@ -12,6 +14,8 @@ namespace si {
         Q_OBJECT
         QPixmap defender;
         QPixmap bullet;
+        QSound sound;
+        QTimer* timer;
         int dx = 0;
         int dy = 350;
         int ds = 3;

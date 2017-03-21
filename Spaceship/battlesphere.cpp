@@ -1,21 +1,22 @@
 #include "battlesphere.h"
-#include <QTimer>
 
 namespace si {
 
-    BattleSphere::BattleSphere(QWidget *parent) : QDialog(parent) {
+BattleSphere::BattleSphere(QWidget *parent) : QDialog(parent), sound(":/sounds/explosion_x.wav") {
         defender.load(":/images/defender.png");
         bullet.load(":/images/fireball.png");
         setStyleSheet("background-color: #000000;");
         this->resize(600, 400);
         update();
 
-        QTimer *timer = new QTimer(this);
+        timer = new QTimer(this);
         connect(timer, SIGNAL(timeout()), this, SLOT(nextFrame()));
         timer->start(32);
     }
 
-    BattleSphere::~BattleSphere() {}
+    BattleSphere::~BattleSphere() {
+        delete timer;
+    }
 
     void BattleSphere::paintEvent(QPaintEvent *event) {
         QPainter painter(this);
@@ -39,6 +40,7 @@ namespace si {
         if(by <= -100){
             bx = dx + (defender.width()/2) - (bullet.width()/2);
             by = dy - bullet.height();
+            sound.play();
         } else {
             by -= bs;
         }
