@@ -2,7 +2,7 @@
 
 namespace si {
 
-BattleSphere::BattleSphere(QWidget *parent) : QDialog(parent), sound(":/sounds/explosion_x.wav") {
+    BattleSphere::BattleSphere(QWidget *parent) : QDialog(parent), sound(":/sounds/explosion_x.wav") {
         defender.load(":/images/defender.png");
         bullet.load(":/images/fireball.png");
         setStyleSheet("background-color: #000000;");
