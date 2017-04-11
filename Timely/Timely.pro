@@ -19,4 +19,4 @@ SOURCES += main.cpp \
     time.cpp
 
 HEADERS += \
-    time.h
+    custom_time.h
