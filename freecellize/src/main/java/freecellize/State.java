@@ -10,12 +10,18 @@ public class State {
     final String[] homes;
     final ArrayList<Stack<String>> columns;
 
-    public State(String[][] beginState){
+    public State() {
         freecells = new String[]{null, null, null, null};
         homes = new String[]{null, null, null, null};
         columns = new ArrayList<>();
-        for(int col=0; col<8; col++){
+        for(int col=0; col<8; col++) {
             columns.add(new Stack<>());
+        }
+    }
+
+    public State(String[][] beginState){
+        this();
+        for(int col=0; col<8; col++){
             for(int row=0; row<7; row++) if (row < 6 || col < 4) {
                 columns.get(col).push(beginState[col][row]);
             }

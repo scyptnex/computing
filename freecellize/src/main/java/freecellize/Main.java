@@ -21,6 +21,7 @@ public class Main {
     public static void main(String[] args) throws AWTException, IOException, InterruptedException {
         Screenterface screen = new Screenterface();
         //find the window with freecell
+        // TODO wmctrl -a "Freecell"
         Rectangle rct = getBestLocationOfSubimage(screen.screenGrab(), Misc.getFreecellIcon());
         //Rectangle rct = new Rectangle(101, 1058, 16, 16);
         screen.lclick(rct.x + rct.width/2, rct.y + rct.height/2);
