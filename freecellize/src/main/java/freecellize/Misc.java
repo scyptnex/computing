@@ -70,4 +70,23 @@ public class Misc {
         return new Point(l.x + king.x, l.y + king.y);
     }
 
+    public static Point locate(char cell){
+        if(cell >= '1' && cell <= '8') return locate(0, cell-'1');
+        int off = 0;
+        int num = 0;
+        if(cell >= 'h' && cell <= 'k'){
+            off = 50;
+            num = cell-'h';
+        } else {
+            off = -298;
+            num = cell-'a';
+        }
+        return new Point((Similariser.SMALL_WIDTH+2)*num + off, -19);
+    }
+
+    public static Point locate(char cell, Rectangle king){
+        Point l = locate(cell);
+        return new Point(l.x + king.x, l.y + king.y);
+    }
+
 }

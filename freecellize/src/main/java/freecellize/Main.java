@@ -9,7 +9,8 @@ package freecellize;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
@@ -28,11 +29,18 @@ public class Main {
         Thread.sleep(500);
         //find the location of the freecell window
         BufferedImage kingPic = Misc.getKingPic();
-        int[] boardGreen = Misc.getPx(kingPic, 0, 0); // board colour might come in handy
+
         BufferedImage board = screen.screenGrab();
         Rectangle kng = getBestLocationOfSubimage(board, kingPic);
-        //Rectangle kng = new Rectangle(1475, 196, 32, 32);
 
+        for(int games=0; games<1; games++){
+            if(games != 0) screen.returnKey();
+            solve(kng, screen);
+        }
+    }
+
+    public static void solve(Rectangle kng, Screenterface screen) throws IOException, InterruptedException {
+        BufferedImage board = screen.screenGrab();
         String[][] codes = readStartState(screen, board, kng);
         State initial = new State(codes);
         System.out.println("Initial state");
@@ -59,14 +67,57 @@ public class Main {
         if(ret != 0){
             throw new RuntimeException("Couldnt find a solution");
         }
+        //List<String> autos = new ArrayList<>();
+        int delay = 120;
+        char lastClick = 'x'; // just something that isnt a real click
         for(int i=0; i<moves.size(); i++){
-            System.out.println(String.format("%3d %3s --------------", i, moves.get(i)));
-            initial.makeMove(moves.get(i));
-            List<String> am = initial.getAutoMoves();
-            if(am.size() > 0){
-                throw new RuntimeException("AUTO " + am.toString());
-            }
+            String m = moves.get(i);
+            System.out.println("===========================");
+            System.out.println(String.format("%3d %3s %s", i, m, ""));
+            System.out.println();
             System.out.println(initial.dump());
+
+            List<Character> clicks = initial.makeMove(m);
+            System.out.println(clicks);
+            System.out.println("===========================");
+                for(Character c : clicks){
+                    if(c == lastClick){
+                        // prevent the OS from interpreting a double click
+                        screen.lclick(kng.x + kng.width/2, kng.y + kng.height/2);
+                        Thread.sleep(delay);
+                    }
+                    lastClick = c;
+                    Point loc = Misc.locate(c, kng);
+                    screen.lclick(loc.x + Similariser.SMALL_WIDTH/2, loc.y + Similariser.SMALL_HEIGHT/2);
+                    Thread.sleep(delay);
+                }
+            if(!initial.getAutoMoves().isEmpty()){
+                Stack<String> unmade = new Stack<>();
+                List<String> run = initial.autoMoveSequence();
+                /*
+                TODO 21630
+                solution makes moves with an auto-homed card
+                need some way of tracking the number of auto-homed cards in a stack so when
+                the game tries to make moves with them we know they are gone
+                 */
+                System.out.println("MVOES " + run);
+                while(!run.isEmpty()){
+                    i++;
+                    String nm = moves.get(i);
+                    if(!run.contains(nm)) unmade.push(nm);
+                    else run.remove(nm);
+                }
+                System.out.println("UNMADE " + unmade);
+                System.out.println();
+                while(!unmade.isEmpty()){
+                    moves.set(i, unmade.pop());
+                    i--;
+                }
+            }
+            //autos = initial.getAutoMoves();
+            if(initial.hasVictoryRun()) break;
+            //if(i > 135) delay = 1000;
+            if(i > 85) break;
         }
         //moves.stream().forEachOrdered(System.out::println);
     }

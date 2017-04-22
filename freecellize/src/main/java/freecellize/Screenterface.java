@@ -2,6 +2,7 @@ package freecellize;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 public class Screenterface {
@@ -20,6 +21,12 @@ public class Screenterface {
         robot.mousePress(InputEvent.BUTTON1_MASK);
         nothowSleep(50);
         robot.mouseRelease(InputEvent.BUTTON1_MASK);
+    }
+
+    public void returnKey(){
+        robot.keyPress(KeyEvent.VK_ENTER);
+        nothowSleep(50);
+        robot.keyRelease(KeyEvent.VK_ENTER);
     }
 
     public BufferedImage holdRightScreenGrab(int mouseX, int mouseY){
