@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class State {
 
@@ -128,31 +129,51 @@ public class State {
                 .mapToObj(i -> (char)(i+'a') + "")
                 .collect(Collectors.toList());
         List<String> moves = new ArrayList<>();
+        if(emptyStacks.size() <= 1 && amt > (emptyFrees.size()+1)*(emptyStacks.size()+1)){
+            System.err.println(this.dump());
+            throw new RuntimeException("Impossible stack move " + src + " " + dst);
+        }
         if(amt > (emptyFrees.size()+1)*(emptyStacks.size()+1)){
-            throw new RuntimeException("TODO, support compound moves");
+            long maxCards = (emptyFrees.size()+1)*emptyStacks.size();
+            State copy = new State(this);
+            List<Character> pre = copy.makeMove(src + emptyStacks.get(0) + "x" + Long.toHexString(maxCards));
+            List<Character> mid = copy.makeMove(src + "" + dst + "x" + Long.toHexString(amt-maxCards));
+            List<Character> post = copy.makeMove(emptyStacks.get(0) + dst + "x" + Long.toHexString(maxCards));
+            List<Character> all = Stream.of(pre, mid, post).flatMap(Collection::stream).collect(Collectors.toList());
+            String s = "";
+            List<String> ret = new ArrayList<>();
+            for(char c : all){
+                s = s + c;
+                if(s.length() >= 2){
+                    ret.add(s);
+                    s = "";
+                }
+            }
+            return ret;
+        } else {
+            int towards = 0;
+            Stack<int[]> stackMoves = new Stack<>();
+            while (amt > emptyFrees.size() + 1) {
+                moves.addAll(planStackMove(src, emptyStacks.get(towards).charAt(0), emptyFrees.size() + 1));
+                stackMoves.push(new int[]{emptyStacks.get(towards).charAt(0), dst, emptyFrees.size() + 1});
+                amt -= (emptyFrees.size() + 1);
+                towards++;
+            }
+            Stack<String> freeLocs = new Stack<>();
+            for (int i = 0; i < amt - 1; i++) {
+                freeLocs.push(emptyFrees.get(i));
+                moves.add(src + emptyFrees.get(i));
+            }
+            moves.add(src + "" + dst);
+            while (!freeLocs.empty()) {
+                moves.add(freeLocs.pop() + dst);
+            }
+            while (!stackMoves.empty()) {
+                int[] sm = stackMoves.pop();
+                moves.addAll(planStackMove((char) sm[0], (char) sm[1], sm[2]));
+            }
+            return moves;
         }
-        int towards = 0;
-        Stack<int[]> stackMoves = new Stack<>();
-        while(amt > emptyFrees.size()+1){
-            moves.addAll(planStackMove(src, emptyStacks.get(towards).charAt(0), emptyFrees.size()+1));
-            stackMoves.push(new int[]{emptyStacks.get(towards).charAt(0), dst, emptyFrees.size()+1});
-            amt -= (emptyFrees.size()+1);
-            towards++;
-        }
-        Stack<String> freeLocs = new Stack<>();
-        for(int i=0; i<amt-1; i++){
-            freeLocs.push(emptyFrees.get(i));
-            moves.add(src + emptyFrees.get(i));
-        }
-        moves.add(src + "" + dst);
-        while(!freeLocs.empty()){
-            moves.add(freeLocs.pop() + dst);
-        }
-        while(!stackMoves.empty()){
-            int[] sm = stackMoves.pop();
-            moves.addAll(planStackMove((char)sm[0], (char)sm[1], sm[2]));
-        }
-        return moves;
     }
 
     public List<Character> doMove(char from, char to){
@@ -186,7 +207,10 @@ public class State {
                 fc = i;
                 break;
             }
+            //TODO 8559 ghost cards leave the freecells forcing this temporary to be necessary
             if(fc != -1 && m.matches("[0-9]*") && columns.get(m.charAt(1)-'1').empty()){
+                //if you try to move a stack to an empty when there are freecells available, a popup will
+                // appear, to avoid this when moving a single card to an empty we first put it in the freecell
                 clicks.addAll(doMove(m.charAt(0), (char)(fc + 'a')));
                 clicks.addAll(doMove((char)(fc + 'a'), m.charAt(1)));
             } else {
@@ -196,50 +220,68 @@ public class State {
         return clicks;
     }
 
-    //uses triangle logic, 2c->h is an auto move if ah and ad are home already
-    // ALSO 2 auto moves, even though this requires 1 induction on the triangle logic!!!
-    public List<String> getAutoMoves(){
+
+    /**
+     * uses triangle logic, 2c->h is an auto move if ah and ad are home already
+     * ALSO 2 auto moves, even though this requires 1 induction on the triangle logic!!!
+     * returns -1 if no auto move exists
+     */
+    public int getAutoMoveSrc(){
         int[] bottoms = new int[]{0,0,0,0};
-        //System.out.println(bottoms[0] + ", " + bottoms[1] + ", " + bottoms[2] + ", " + bottoms[3] + " ==");
         for(String c : homes) if(c != null){
             bottoms[getSuit(c)] = faceVal(c);
         }
-        //System.out.println(bottoms[0] + ", " + bottoms[1] + ", " + bottoms[2] + ", " + bottoms[3] + " ==");
-        List<String> ret = new ArrayList<>();
         for(int src=0; src<12; src++){
             String check = src < 8 ? (columns.get(src).size() > 0 ? columns.get(src).peek() : null) : freecells[src-8];
             if(check != null){
                 int mysuit = getSuit(check);
                 int myval = faceVal(check);
-                //System.out.println(src + ", " + mysuit + ", " + (mysuit^0b10) + ", " + (mysuit^0b11));
                 if(bottoms[mysuit] == myval-1 && (
                         (myval <= 2) || (bottoms[mysuit^0b10] >= myval-1 && bottoms[mysuit^0b11] >= myval-1))){
-                    ret.add( (char)(src < 8 ? src + '1' : src - 8 + 'a') + "h");
+                    return src;
                 }
             }
         }
-        return ret;
+        return -1;
+    }
+    public String getAutoMoveOrNull(){
+        int src = getAutoMoveSrc();
+        if(src == -1) return null;
+        return (char)(src < 8 ? src + '1' : src - 8 + 'a') + "h";
+    }
+    /**
+     * 0-7 are columns, 8-11 are freecells
+     */
+    public int[] autoMoveGhosts(){
+        int[] ghostPieces = new int[12];
+        Arrays.setAll(ghostPieces, i->0);
+        new State(this).makeAutoMoveSequence().forEach(am -> {
+            int idx = am.charAt(0);
+            idx = idx>='1' && idx<='8' ? idx-'1' : idx+8-'a';
+            ghostPieces[idx]++;
+            //to ensure that a ghost auto-moved piece winds up in its real home, set the homes to have a stub
+            if(idx < 8 && homes[getHome(columns.get(idx).peek())] == null){
+                String c = columns.get(idx).peek();
+                c = "0" + c.substring(c.length()-1);
+                homes[getHome(c)] = c;
+            }
+        });
+        return ghostPieces;
     }
 
-    public List<String> autoMoveSequence(){
-        //State clone = new State(this);
-        List<String> am = getAutoMoves();
+    public List<String> makeAutoMoveSequence(){
+        String am;
         List<String> ret = new ArrayList<>();
-        while(!am.isEmpty()){
-            makeMove(am.get(0));
-            ret.add(am.get(0));
-            am = getAutoMoves();
+        while((am = getAutoMoveOrNull()) != null){
+            makeMove(am);
+            ret.add(am);
         }
         return ret;
     }
 
     public boolean hasVictoryRun(){
         State clone = new State(this);
-        List<String> am = clone.getAutoMoves();
-        while(!am.isEmpty()){
-            clone.makeMove(am.get(0));
-            am = clone.getAutoMoves();
-        }
+        clone.makeAutoMoveSequence();
         return clone.columns.stream().allMatch(Vector::isEmpty);
     }
 

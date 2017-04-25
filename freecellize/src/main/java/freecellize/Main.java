@@ -19,7 +19,11 @@ import java.util.stream.IntStream;
 
 public class Main {
 
+    static boolean continuing = true;
+
     public static void main(String[] args) throws AWTException, IOException, InterruptedException {
+        int maxGames = 1;
+        if(args.length>0) maxGames = Integer.parseInt(args[0]);
         Screenterface screen = new Screenterface();
         //find the window with freecell
         // TODO wmctrl -a "Freecell"
@@ -33,9 +37,25 @@ public class Main {
         BufferedImage board = screen.screenGrab();
         Rectangle kng = getBestLocationOfSubimage(board, kingPic);
 
-        for(int games=0; games<1; games++){
-            if(games != 0) screen.returnKey();
+        int games = 0;
+        while(continuing && games < maxGames){
+            System.out.println("========================================================================");
+            System.out.printf( "| Game %13d                                                   |\n", games);
+            System.out.println("========================================================================");
+            if(games != 0){
+                screen.returnKey();
+                Thread.sleep(1000);
+            }
+            double t = System.currentTimeMillis();
             solve(kng, screen);
+            System.out.printf("Time: %.2f\n", (System.currentTimeMillis()-t)/1000.0d);
+            System.out.print("Press tab to exit in");
+            for(int tim=5; tim>=0 && continuing; tim--){
+                System.out.print(" " + tim);
+                Thread.sleep(1000);
+            }
+            System.out.println();
+            games++;
         }
     }
 
@@ -67,59 +87,74 @@ public class Main {
         if(ret != 0){
             throw new RuntimeException("Couldnt find a solution");
         }
+        /*
+         * Normalise the moves into a list of 1-card movements
+         */
+        State actual = new State(initial);
+        List<Character> tmpClicks = new ArrayList<>();
+        for(String mv : moves){
+            tmpClicks.addAll(initial.makeMove(mv));
+        }
+        initial = actual;
+        moves = new ArrayList<>(tmpClicks.size()/2);
+        Character cur = null;
+        for(Character c : tmpClicks){
+            if(cur == null){
+                cur = c;
+            } else {
+                if(moves.size()%24 == 0) System.out.println();
+                moves.add("" + cur + (c >= 'h' && c <= 'k' ? "h" : c));
+                System.out.print(moves.get(moves.size()-1) + " ");
+                cur = null;
+            }
+        }
+        System.out.println();
+        System.out.println("Moves: " + moves.size());
+        /*
+         * play the actual game
+         */
         //List<String> autos = new ArrayList<>();
         int delay = 120;
         char lastClick = 'x'; // just something that isnt a real click
+        int[] ghostPieces = new int[12];//0-7 are columns, 8-11 are freecells
+        Arrays.setAll(ghostPieces, i->0);
         for(int i=0; i<moves.size(); i++){
+
+            // the move
             String m = moves.get(i);
+            char ms = m.charAt(0);
+            char md = m.charAt(1);
+            int ghostIndex = (ms <= '8' && ms >= '1' ? ms-'1' : ms-'a'+8);
+
+
             System.out.println("===========================");
             System.out.println(String.format("%3d %3s %s", i, m, ""));
             System.out.println();
             System.out.println(initial.dump());
+            System.out.println();
+            System.out.println("Ghosting: " + (ghostPieces[ghostIndex] == 0));
 
+            // make the move internally and find out its clicks
             List<Character> clicks = initial.makeMove(m);
-            System.out.println(clicks);
-            System.out.println("===========================");
-                for(Character c : clicks){
-                    if(c == lastClick){
+
+            // check if we are trying to move a ghost piece
+            if(ghostPieces[ghostIndex] == 0){
+                for (Character c : clicks) {
+                    if (c == lastClick) {
                         // prevent the OS from interpreting a double click
-                        screen.lclick(kng.x + kng.width/2, kng.y + kng.height/2);
+                        screen.lclick(kng.x + kng.width / 2, kng.y + kng.height / 2);
                         Thread.sleep(delay);
                     }
                     lastClick = c;
                     Point loc = Misc.locate(c, kng);
-                    screen.lclick(loc.x + Similariser.SMALL_WIDTH/2, loc.y + Similariser.SMALL_HEIGHT/2);
+                    screen.lclick(loc.x + Similariser.SMALL_WIDTH / 2, loc.y + Similariser.SMALL_HEIGHT / 2);
                     Thread.sleep(delay);
                 }
-            if(!initial.getAutoMoves().isEmpty()){
-                Stack<String> unmade = new Stack<>();
-                List<String> run = initial.autoMoveSequence();
-                /*
-                TODO 21630
-                solution makes moves with an auto-homed card
-                need some way of tracking the number of auto-homed cards in a stack so when
-                the game tries to make moves with them we know they are gone
-                 */
-                System.out.println("MVOES " + run);
-                while(!run.isEmpty()){
-                    i++;
-                    String nm = moves.get(i);
-                    if(!run.contains(nm)) unmade.push(nm);
-                    else run.remove(nm);
-                }
-                System.out.println("UNMADE " + unmade);
-                System.out.println();
-                while(!unmade.isEmpty()){
-                    moves.set(i, unmade.pop());
-                    i--;
-                }
             }
-            //autos = initial.getAutoMoves();
-            if(initial.hasVictoryRun()) break;
-            //if(i > 135) delay = 1000;
-            if(i > 85) break;
+            ghostPieces = initial.autoMoveGhosts();
+            // Make a big stack move then some of its cards ghost home before the move completes
+            if(i > 95) break;
         }
-        //moves.stream().forEachOrdered(System.out::println);
     }
 
     public static String[][] readStartState(Screenterface screen, BufferedImage board, Rectangle kng){
