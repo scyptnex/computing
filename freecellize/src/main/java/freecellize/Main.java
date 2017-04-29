@@ -19,26 +19,19 @@ import java.util.stream.IntStream;
 
 public class Main {
 
-    static boolean continuing = true;
-
     public static void main(String[] args) throws AWTException, IOException, InterruptedException {
         int maxGames = 1;
         if(args.length>0) maxGames = Integer.parseInt(args[0]);
         Screenterface screen = new Screenterface();
-        //find the window with freecell
-        // TODO wmctrl -a "Freecell"
-        Rectangle rct = getBestLocationOfSubimage(screen.screenGrab(), Misc.getFreecellIcon());
-        //Rectangle rct = new Rectangle(101, 1058, 16, 16);
-        screen.lclick(rct.x + rct.width/2, rct.y + rct.height/2);
-        Thread.sleep(500);
-        //find the location of the freecell window
-        BufferedImage kingPic = Misc.getKingPic();
 
+        selectFreecellWindow(screen); //find the location of the freecell window
+
+        BufferedImage kingPic = Misc.getKingPic();
         BufferedImage board = screen.screenGrab();
         Rectangle kng = getBestLocationOfSubimage(board, kingPic);
 
         int games = 0;
-        while(continuing && games < maxGames){
+        while(games < maxGames){
             System.out.println("========================================================================");
             System.out.printf( "| Game %13d                                                   |\n", games);
             System.out.println("========================================================================");
@@ -50,12 +43,26 @@ public class Main {
             solve(kng, screen);
             System.out.printf("Time: %.2f\n", (System.currentTimeMillis()-t)/1000.0d);
             System.out.print("Press tab to exit in");
-            for(int tim=5; tim>=0 && continuing; tim--){
+            for(int tim=5; tim>=0; tim--){
                 System.out.print(" " + tim);
                 Thread.sleep(1000);
             }
             System.out.println();
             games++;
+        }
+    }
+
+    public static void selectFreecellWindow(Screenterface screen) throws IOException, InterruptedException {
+        try {
+            Process p = new ProcessBuilder().command("wmctrl", "-a", "Freecell Game #").start();
+            if (p.waitFor() != 0){
+                System.err.println("wmctrl failed, using screengrab instead");
+                throw new Exception();
+            }
+        } catch(Exception exc) {
+            Rectangle rct = getBestLocationOfSubimage(screen.screenGrab(), Misc.getFreecellIcon());
+            screen.lclick(rct.x + rct.width / 2, rct.y + rct.height / 2);
+            Thread.sleep(500);
         }
     }
 
@@ -127,12 +134,12 @@ public class Main {
             int ghostIndex = (ms <= '8' && ms >= '1' ? ms-'1' : ms-'a'+8);
 
 
-            System.out.println("===========================");
-            System.out.println(String.format("%3d %3s %s", i, m, ""));
-            System.out.println();
-            System.out.println(initial.dump());
-            System.out.println();
-            System.out.println("Ghosting: " + (ghostPieces[ghostIndex] == 0));
+//            System.out.println("===========================");
+//            System.out.println(String.format("%3d %3s %s", i, m, ""));
+//            System.out.println();
+//            System.out.println(initial.dump());
+//            System.out.println();
+//            System.out.println("Ghosting: " + (ghostPieces[ghostIndex] == 0));
 
             // make the move internally and find out its clicks
             List<Character> clicks = initial.makeMove(m);
@@ -153,7 +160,7 @@ public class Main {
             }
             ghostPieces = initial.autoMoveGhosts();
             // Make a big stack move then some of its cards ghost home before the move completes
-            if(i > 95) break;
+            //if(i > 95) break;
         }
     }
 

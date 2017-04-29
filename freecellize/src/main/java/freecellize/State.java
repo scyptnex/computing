@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 public class State {
 
+    String fcSave = null;
     final String[] freecells;
     final String[] homes;
     final ArrayList<Stack<String>> columns;
@@ -70,6 +71,10 @@ public class State {
         } else {
             String ret = freecells[loc - 'a'];
             freecells[loc - 'a'] = null;
+            if(fcSave != null && fcSave.charAt(0) == loc){
+                freecells[loc-'a'] = fcSave.substring(1);
+                fcSave = null;
+            }
             return ret;
         }
     }
@@ -80,6 +85,7 @@ public class State {
             columns.get(loc - '1').push(card);
         } else if (loc >= 'a' && loc <= 'd'){
             //TODO assert cell is free
+            if(freecells[loc-'a'] != null) fcSave = loc + freecells[loc-'a'];
             freecells[loc - 'a'] = card;
         } else {
             homes[getHome(card)] = card;
@@ -207,7 +213,13 @@ public class State {
                 fc = i;
                 break;
             }
-            //TODO 8559 ghost cards leave the freecells forcing this temporary to be necessary
+            int[] realGhosts = autoMoveGhosts();
+            if(fc == -1){
+                for(int i=0; i<4; i++) if(realGhosts[i+8] > 0){
+                    fc = i;
+                    break;
+                }
+            }
             if(fc != -1 && m.matches("[0-9]*") && columns.get(m.charAt(1)-'1').empty()){
                 //if you try to move a stack to an empty when there are freecells available, a popup will
                 // appear, to avoid this when moving a single card to an empty we first put it in the freecell
@@ -226,13 +238,15 @@ public class State {
      * ALSO 2 auto moves, even though this requires 1 induction on the triangle logic!!!
      * returns -1 if no auto move exists
      */
-    public int getAutoMoveSrc(){
-        int[] bottoms = new int[]{0,0,0,0};
-        for(String c : homes) if(c != null){
-            bottoms[getSuit(c)] = faceVal(c);
-        }
+    public int getAutoMoveSrc(int[] bottoms, int[] ghosts){
         for(int src=0; src<12; src++){
-            String check = src < 8 ? (columns.get(src).size() > 0 ? columns.get(src).peek() : null) : freecells[src-8];
+            String check = null;
+            if(src < 8){
+                int idx = columns.get(src).size() - ghosts[src] - 1;
+                check = idx >= 0 ? columns.get(src).get(idx) : null;
+            } else if(ghosts[src] == 0) {
+                check = freecells[src-8];
+            }
             if(check != null){
                 int mysuit = getSuit(check);
                 int myval = faceVal(check);
@@ -244,6 +258,21 @@ public class State {
         }
         return -1;
     }
+    public int getAutoMoveSrc(int[] bottoms){
+        int[] arr = new int[12];
+        Arrays.fill(arr, 0);
+        return getAutoMoveSrc(bottoms, arr);
+    }
+    public int getAutoMoveSrc(){
+        return getAutoMoveSrc(getAutoMoveBottoms());
+    }
+    public int[] getAutoMoveBottoms(){
+        int[] bottoms = new int[]{0,0,0,0};
+        for(String c : homes) if(c != null){
+            bottoms[getSuit(c)] = faceVal(c);
+        }
+        return bottoms;
+    }
     public String getAutoMoveOrNull(){
         int src = getAutoMoveSrc();
         if(src == -1) return null;
@@ -253,19 +282,33 @@ public class State {
      * 0-7 are columns, 8-11 are freecells
      */
     public int[] autoMoveGhosts(){
+        int[] bottoms = getAutoMoveBottoms();
         int[] ghostPieces = new int[12];
-        Arrays.setAll(ghostPieces, i->0);
-        new State(this).makeAutoMoveSequence().forEach(am -> {
-            int idx = am.charAt(0);
-            idx = idx>='1' && idx<='8' ? idx-'1' : idx+8-'a';
-            ghostPieces[idx]++;
-            //to ensure that a ghost auto-moved piece winds up in its real home, set the homes to have a stub
-            if(idx < 8 && homes[getHome(columns.get(idx).peek())] == null){
-                String c = columns.get(idx).peek();
-                c = "0" + c.substring(c.length()-1);
-                homes[getHome(c)] = c;
+        Arrays.fill(ghostPieces, 0);
+
+        int src;
+        while((src = getAutoMoveSrc(bottoms, ghostPieces)) != -1){
+            String card;
+            if(src >= 8) {
+                card = freecells[src-8];
+            } else {
+                card = columns.get(src).get(columns.get(src).size() - 1 - ghostPieces[src]);
             }
-        });
+            bottoms[getSuit(card)] = faceVal(card);
+            ghostPieces[src]++;
+        }
+
+//        new State(this).makeAutoMoveSequence().forEach(am -> {
+//            int idx = am.charAt(0);
+//            idx = idx>='1' && idx<='8' ? idx-'1' : idx+8-'a';
+//            ghostPieces[idx]++;
+//            //to ensure that a ghost auto-moved piece winds up in its real home, set the homes to have a stub
+//            if(idx < 8 && homes[getHome(columns.get(idx).peek())] == null){
+//                String c = columns.get(idx).peek();
+//                c = "0" + c.substring(c.length()-1);
+//                homes[getHome(c)] = c;
+//            }
+//        });
         return ghostPieces;
     }
 
