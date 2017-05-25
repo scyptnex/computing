@@ -43,6 +43,7 @@ public class Main {
             solve(kng, screen);
             System.out.printf("Time: %.2f\n", (System.currentTimeMillis()-t)/1000.0d);
             System.out.print("Press tab to exit in");
+            screen.moveMosue(kng.x, kng.y + kng.height*4);
             for(int tim=5; tim>=0; tim--){
                 System.out.print(" " + tim);
                 Thread.sleep(1000);
