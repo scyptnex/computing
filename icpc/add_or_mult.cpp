@@ -55,13 +55,20 @@ template<typename F, typename...Ts> auto forward_call(F fnc, std::tuple<Ts...> t
     return forward_call_helper(fnc, tpl, typename gens<sizeof...(Ts)>::type());
 }
 
-void solve(int a, int m, int sl, int sh, int fl, int fh){
+std::string solve(int a, int m, int sl, int sh, int fl, int fh){
+    if(sl >= fl && sh <= fh) return "empty";
+    if(a == 0) return "impossible";
+    int max_mults = hf - fl;
+    int adds = (fl - sl - 1)/a + 1;
+    if (sh + a*adds > fh) return "impossible";
     for(int len=1; len<24; len++){
     }
+    return "hi";
 }
 
 int main(){
     std::tuple<int, int, int, int, int, int> b;
+    int i=0;
     while(true){
         read_block(std::cin, b);
         if(
@@ -73,8 +80,7 @@ int main(){
                 std::get<5>(b) == 0) {
             return 0;
         }
-        std::cout << b << std::endl;
-        forward_call(solve, b);
+        std::cout << "Case " << ++i << ": " << forward_call(solve, b) << "|" << b << std::endl;
     }
     return 0;
 }
