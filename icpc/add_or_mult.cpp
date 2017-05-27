@@ -1,5 +1,6 @@
-#include <iostream>
 #include <functional>
+#include <iostream>
+#include <string>
 #include <tuple>
 
 template<typename S, unsigned I, typename...Ts>
@@ -55,15 +56,48 @@ template<typename F, typename...Ts> auto forward_call(F fnc, std::tuple<Ts...> t
     return forward_call_helper(fnc, tpl, typename gens<sizeof...(Ts)>::type());
 }
 
+std::string solve_fixed(int a, int m, int sl, int sh, int fl, int fh, int tm){
+    int l = sl;
+    int h = sh;
+    for(int i=0; i<tm; i++){
+        l *= m;
+        h *= m;
+    }
+    if(l > fh) return "";
+    int adds = (fl - l)/a;
+    l += a*adds;
+    h += a*adds;
+
+    auto t = std::make_tuple(l, h, fl, fh);
+    std::cout << "\t" << tm << " " << t <<  " " << adds << std::endl;
+    return "";
+}
+
 std::string solve(int a, int m, int sl, int sh, int fl, int fh){
     if(sl >= fl && sh <= fh) return "empty";
-    if(a == 0) return "impossible";
-    int max_mults = hf - fl;
-    int adds = (fl - sl - 1)/a + 1;
-    if (sh + a*adds > fh) return "impossible";
-    for(int len=1; len<24; len++){
+    int start_diff = sh - sl;
+    int final_diff = fh - fl;
+    // calculate the maximum number of multiplications
+    int max_mults =  0;
+    if(m <= 1) max_mults = 0;
+    else{
+        long diff = start_diff;
+        long high = sh;
+        while(diff*m <= final_diff && high*m <= fh){
+            diff *= m;
+            high *= m;
+            max_mults++;
+        }
     }
-    return "hi";
+    // calculate the maximum number of adds
+    int max_adds = (fh-sh)/a;
+    // cannot use any instruction
+    if (max_adds <= 0 && max_mults <= 0) return "impossible";
+    std::cout << "\t" << max_mults << std::endl;
+    for(int mults = 0; mults <= max_mults; mults++){
+        solve_fixed(a, m, sl, sh, fl, fh, mults);
+    }
+    return std::to_string(max_mults) + " - " +std::to_string(max_adds);
 }
 
 int main(){
@@ -80,7 +114,8 @@ int main(){
                 std::get<5>(b) == 0) {
             return 0;
         }
-        std::cout << "Case " << ++i << ": " << forward_call(solve, b) << "|" << b << std::endl;
+        std::cout << b << "|" << "\n";
+        std::cout << "Case " << ++i << ": " << forward_call(solve, b) << std::endl;
     }
     return 0;
 }
