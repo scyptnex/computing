@@ -121,6 +121,7 @@ public class Main {
         /*
          * play the actual game
          */
+        //TODO 16374
         //List<String> autos = new ArrayList<>();
         int delay = 120;
         char lastClick = 'x'; // just something that isnt a real click
