@@ -52,10 +52,3 @@ factor: NUM           { $$ = $1; }
 | LP exp RP           { $$ = $2; }
 
 %%
-//-- FUNCTION DEFINITIONS ---------------------------------
-int main()
-{
-  yyparse();
-  return 0;
-}
-

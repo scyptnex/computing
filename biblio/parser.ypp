@@ -1,0 +1,37 @@
+%skeleton "lalr1.cc" /* -*- C++ -*- */
+%require "3.0.2"
+%defines
+%define parser_class_name { Parser }
+
+%define api.token.constructor
+%define api.value.type variant
+%{
+#include <iostream>
+#include <string>
+#include <vector>
+
+//-- Lexer prototype required by bison, aka getNextToken()
+int yylex(); 
+int yyerror(const char *p) { std::cerr << "Parse error!" << std::endl; }
+%}
+
+%token <std::string> TEXT "text"
+%token <char> ENTRY "new bib entry"
+
+%type <std::vector<std::string>> biblist
+%type <std::string> entry
+%type <std::string> entry_type
+
+//-- GRAMMAR RULES ---------------------------------------
+%%
+%start biblist;
+
+biblist : entry biblist { $2.push_back($1); $$ = $2; }
+        | %empty { $$ = std::vector(); }
+        ;
+
+entry : ENTRY entry_type { $$ = $2; }
+
+entry_type : TEXT { $$ = $1; }
+
+%%

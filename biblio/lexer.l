@@ -1,5 +1,5 @@
 %{
-#include "ex1.tab.hpp"
+#include "parser.tab.hpp"
 #include <iostream>
 using namespace std;
 %}
@@ -8,13 +8,13 @@ using namespace std;
 
 %%
 
-[0-9]+   { yylval.val = atoi(yytext); return NUM; }
-[\+|\-]  { yylval.sym = yytext[0]; return OPA; }
-[\*|/]   { yylval.sym = yytext[0]; return OPM; }
-"("      { return LP; }
-")"      { return RP; }
-";"      { return STOP; }
+"%".*$   { }
+"@"      { return ENTRY; }
+"{"      { return L_BRACE; }
+"}"      { return R_BRACE; }
+"="      { return EQUALS; }
+","      { return COMMA;}
 <<EOF>>  { return 0; }
 [ \t\n]+ { }
-.        { cerr << "Unrecognized token!" << endl; exit(1); }
+.        { cerr << "Unrecognized token!: " << yytext << endl; exit(1); }
 %%

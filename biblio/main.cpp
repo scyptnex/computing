@@ -9,6 +9,7 @@
 #include <string>
 
 #include "bibliography.h"
+#include "parser.tab.hpp"
 
 using namespace bib;
 
@@ -19,6 +20,12 @@ int main(){
     en.add(std::move(e));
     en.add(std::move(e2));
     std::cout << en << std::endl;
+
+    //parsing stuff
+    extern int yydebug;
+    yydebug = 1;
+    yyparse();
+
     return 0;
 }
 
