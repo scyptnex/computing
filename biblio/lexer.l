@@ -9,11 +9,11 @@ using namespace std;
 %%
 
 "%".*$   { }
-"@"      { return ENTRY; }
-"{"      { return L_BRACE; }
-"}"      { return R_BRACE; }
-"="      { return EQUALS; }
-","      { return COMMA;}
+"@"      { return yy::Parser::make_ENTRY(); }
+"{"      { return yy::Parser::make_L_BRACE(); }
+"}"      { return yy::Parser::make_R_BRACE(); }
+"="      { return yy::Parser::make_EQUALS(); }
+","      { return yy::Parser::make_COMMA();}
 <<EOF>>  { return 0; }
 [ \t\n]+ { }
 .        { cerr << "Unrecognized token!: " << yytext << endl; exit(1); }

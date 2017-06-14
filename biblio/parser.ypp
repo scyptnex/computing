@@ -16,7 +16,11 @@ int yyerror(const char *p) { std::cerr << "Parse error!" << std::endl; }
 %}
 
 %token <std::string> TEXT "text"
-%token <char> ENTRY "new bib entry"
+%token ENTRY   "new bib entry"
+%token L_BRACE "start of section"
+%token R_BRACE "end of section"
+%token EQUALS  "k-v separator"
+%token COMMA   "separator"
 
 %type <std::vector<std::string>> biblist
 %type <std::string> entry
