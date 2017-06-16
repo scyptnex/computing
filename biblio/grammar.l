@@ -1,5 +1,11 @@
 %{
-#include "parser.tab.hpp"
+
+#undef YY_DECL
+#define YY_DECL yy::Parser::symbol_type yylex(void)
+
+#define yyterminate() yy::Parser::make_END()
+
+#include "grammar_parse.hpp"
 #include <iostream>
 using namespace std;
 %}
@@ -14,7 +20,7 @@ using namespace std;
 "}"      { return yy::Parser::make_R_BRACE(); }
 "="      { return yy::Parser::make_EQUALS(); }
 ","      { return yy::Parser::make_COMMA();}
-<<EOF>>  { return 0; }
+<<EOF>>  { return yyterminate(); }
 [ \t\n]+ { }
 .        { cerr << "Unrecognized token!: " << yytext << endl; exit(1); }
 %%

@@ -9,7 +9,7 @@
 #include <string>
 
 #include "bibliography.h"
-#include "parser.tab.hpp"
+#include "grammar_parse.hpp"
 
 using namespace bib;
 
@@ -24,7 +24,7 @@ int main(){
     //parsing stuff
     extern int yydebug;
     yydebug = 1;
-    yyparse();
+    yy::Parser::parse();
 
     return 0;
 }

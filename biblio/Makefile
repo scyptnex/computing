@@ -1,8 +1,8 @@
 debug:
-	bison -t -d *.ypp
-	flex -d *.l
-	g++ --std=c++11 -o debug *.cpp lex.yy.c
+	bison -o grammar_parse.cpp *.y
+	flex -o grammar_scan.cpp *.l
+	g++ --std=c++11 -o debug *.cpp
 
 clean:
-	rm -f *.tab.cpp *.tab.hpp stack.hh lex.yy.c a.out debug release
+	rm -f grammar_*.*pp stack.hh lex.yy.c a.out debug release
 

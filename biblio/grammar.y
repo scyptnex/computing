@@ -11,7 +11,7 @@
 #include <vector>
 
 //-- Lexer prototype required by bison, aka getNextToken()
-int yylex(); 
+#define yylex FOO
 int yyerror(const char *p) { std::cerr << "Parse error!" << std::endl; }
 %}
 
@@ -21,6 +21,7 @@ int yyerror(const char *p) { std::cerr << "Parse error!" << std::endl; }
 %token R_BRACE "end of section"
 %token EQUALS  "k-v separator"
 %token COMMA   "separator"
+%token END     "the end of the input"
 
 %type <std::vector<std::string>> biblist
 %type <std::string> entry
