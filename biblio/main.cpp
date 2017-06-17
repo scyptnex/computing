@@ -9,7 +9,8 @@
 #include <string>
 
 #include "bibliography.h"
-#include "grammar_parse.hpp"
+#include "parser.hpp"
+#include "scanner.h"
 
 using namespace bib;
 
@@ -22,9 +23,9 @@ int main(){
     std::cout << en << std::endl;
 
     //parsing stuff
-    extern int yydebug;
-    yydebug = 1;
-    yy::Parser::parse();
+    bib::scanner sca;
+    bib::parser psr(sca);
+    psr.parse();
 
     return 0;
 }
