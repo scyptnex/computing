@@ -19,43 +19,19 @@
 
 
 [a-z]+      { 
-                cout << "Scanner: identifier [" << yytext << "]" << endl;
+                std::cout << "Scanner: identifier [" << yytext << "]" << std::endl;
                 return bib::parser::make_STRING(yytext); 
             }
-            
-\(          {
-                cout << "Scanner: '('" << endl;
-                return bib::parser::make_LEFTPAR();
-            }
-            
-\)          { 
-                cout << "Scanner: ')'" << endl;
-                return bib::parser::make_RIGHTPAR();
-            }
-            
-;           {
-                cout << "Scanner: ';'" << endl;
-                return bib::parser::make_SEMICOLON();
-            }
-            
-,           {
-                cout << "Scanner: ','" << endl;
-                return bib::parser::make_COMMA();
-            }
-            
-[\n\t ]     {
-                //cout << "Scanner: whitechar (ignored)" << endl;
-            }
 
-[1-9][0-9]* {
-                cout << "Scanner: decimal number: " << yytext << endl;
-                uint64_t number = strtoull(yytext, 0, 10);
-                return bib::parser::make_NUMBER(number);
-            }
+@           { return bib::parser::make_ENTRY_START(); }
+\{          { return bib::parser::make_L_BRACE(); }
+\}          { return bib::parser::make_R_BRACE(); }
+=           { return bib::parser::make_EQUALS(); }
+,           { return bib::parser::make_COMMA(); }
+            
+[\n\t ]     {}
 
-.           { 
-                cout << "Scanner: unknown character [" << yytext << "]" << endl; 
-            }
+.           { std::cout << "Scanner: unknown character [" << yytext << "]" << std::endl; }
             
 <<EOF>>     { return yyterminate(); }
 

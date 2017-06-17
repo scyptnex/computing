@@ -14,6 +14,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Executable
 add_executable(bibliog
+    bibliography.cpp
     main.cpp
     ${BISON_bibParser_OUTPUTS}
     ${FLEX_bibScanner_OUTPUTS}

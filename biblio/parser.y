@@ -1,12 +1,13 @@
 %skeleton "lalr1.cc" /* -*- C++ -*- */
 %require "3.0"
+
 %defines
 %define parser_class_name { parser }
-
 %define api.token.constructor
 %define api.value.type variant
 %define parse.assert
 %define api.namespace { bib }
+
 %code requires
 {
 
@@ -23,9 +24,7 @@
     #include <iostream>
     #include <string>
     #include <vector>
-    #include <stdint.h>
-
-    using namespace std;
+    #include "bibliography.h"
 
     namespace bib {
         class scanner;
@@ -54,82 +53,47 @@
 
 %define api.token.prefix {TOKEN_}
 
+%token <std::string> STRING "string"
+%token ENTRY_START "@"
+%token L_BRACE     "{"
+%token R_BRACE     "}"
+%token COMMA       ","
+%token EQUALS      "="
 %token END 0 "end of file"
-%token <std::string> STRING  "string";
-%token <uint64_t> NUMBER "number";
-%token LEFTPAR "leftpar";
-%token RIGHTPAR "rightpar";
-%token SEMICOLON "semicolon";
-%token COMMA "comma";
 
-%type <std::string> command;
-%type <std::vector<uint64_t>> arguments;
+%type <bib::bibliography>         bibliography
+%type <bib::entry>                entry
+%type <bib::element>              element
+%type <std::vector<bib::element>> element_list
 
-%start program
+%start start
 
 %%
 
-program :   {
-                cout << "*** RUN ***" << endl;
-                cout << "Type function with list of parmeters. Parameter list can be empty" << endl
-                     << "or contain positive integers only. Examples: " << endl
-                     << " * function()" << endl
-                     << " * function(1,2,3)" << endl
-                     << "Terminate listing with ; to see parsed AST" << endl
-                     << "Terminate parser with Ctrl-D" << endl;
-                
-                cout << endl << "prompt> ";
-            }
-        | program command
-            {
-                cout << "command parsed, updating AST" << endl;
-                cout << endl << "prompt> ";
-            }
-        | program SEMICOLON
-            {
-                cout << "*** STOP RUN ***" << endl;
-            }
+start : bibliography END
+        { std::cout << $1 << std::endl; }
+
+bibliography : %empty
+               { $$ = bib::bibliography(); }
+             | bibliography entry
+               { $1.entries.push_back($2); $$ = $1; }
+             ;
+
+entry : ENTRY_START STRING L_BRACE STRING element_list R_BRACE
+        { $$ = bib::entry($2, $4); $$.elements = $5; }
+      ;
+
+element_list : %empty
+               { $$ = std::vector<bib::element>(); }
+             | element_list COMMA element
+               { $1.push_back($3); $$ = $1; }
+             ;
+
+element : STRING EQUALS STRING
+          { $$ = bib::element($1, $3); }
         ;
-
-
-command : STRING LEFTPAR RIGHTPAR
-        {
-            cout << "cmd" << endl;
-            $$ =  "hello";
-        }
-    | STRING LEFTPAR arguments RIGHTPAR
-        {
-            string &id = $1;
-            const std::vector<uint64_t> &args = $3;
-            cout << "function: " << id << ", " << args.size() << endl;
-            $$ = "world";
-        }
-    ;
-
-arguments : NUMBER
-        {
-            uint64_t number = $1;
-            $$ = std::vector<uint64_t>();
-            $$.push_back(number);
-            cout << "first argument: " << number << endl;
-        }
-    | arguments COMMA NUMBER
-        {
-            uint64_t number = $3;
-            std::vector<uint64_t> &args = $1;
-            args.push_back(number);
-            $$ = args;
-            cout << "next argument: " << number << ", arg list size = " << args.size() << endl;
-        }
-    ;
-    
 %%
 
 void bib::parser::error(std::string const& err){
     std::cout << "Error: " << err << std::endl;
 }
-
-// Bison expects us to provide implementation - otherwise linker complains
-//void bib::parser::error(const bib::parser::syntax_error& er) {
- //       cout << "Error: " << er << endl;
-//}
