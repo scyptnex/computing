@@ -18,21 +18,15 @@
 %%
 
 
-[a-z]+      { 
-                std::cout << "Scanner: identifier [" << yytext << "]" << std::endl;
-                return bib::parser::make_STRING(yytext); 
-            }
-
+[a-z]+      { return bib::parser::make_STRING(yytext); }
 @           { return bib::parser::make_ENTRY_START(); }
 \{          { return bib::parser::make_L_BRACE(); }
 \}          { return bib::parser::make_R_BRACE(); }
 =           { return bib::parser::make_EQUALS(); }
 ,           { return bib::parser::make_COMMA(); }
-            
-[\n\t ]     {}
 
+[\n\t ]     {}
 .           { std::cout << "Scanner: unknown character [" << yytext << "]" << std::endl; }
-            
 <<EOF>>     { return yyterminate(); }
 
 
