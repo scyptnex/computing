@@ -54,14 +54,16 @@
 %define api.token.prefix {TOKEN_}
 
 %token <std::string> STRING "string"
+%token <std::string> ESCAPE "escape sequence"
 %token <std::string> NAME   "named identifier"
 %token <std::string> QTEXT  "quoted text"
 %token <std::string> BTEXT  "bracketed text"
-%token <std::string> ENTRY  "@ entry"
-%token L_BRACE     "{"
-%token R_BRACE     "}"
-%token COMMA       ","
-%token EQUALS      "="
+%token <std::string> ENTRY       "@"
+%token <std::string> L_BRACE     "{"
+%token <std::string> R_BRACE     "}"
+%token <std::string> COMMA       ","
+%token <std::string> EQUALS      "="
+%token <std::string> DQUOTE      "\""
 %token END 0 "end of file"
 
 %type <bib::bibliography>         bibliography
@@ -69,14 +71,14 @@
 %type <bib::element>              element
 %type <std::vector<bib::element>> element_list
 %type <std::string>               text
-%type <std::string>               text_unit
+%type <std::string>               ltext
 
 %start start
 
 %%
 
 start : bibliography END
-        { std::cout << $1 << std::endl; }
+        { for(const auto& entr : $1.entries) std::cout << std::endl << "==" << std::endl << entr << std::endl; }
 
 bibliography : %empty
                { $$ = bib::bibliography(); }
@@ -84,8 +86,8 @@ bibliography : %empty
                { $1.entries.push_back($2); $$ = $1; }
              ;
 
-entry : ENTRY L_BRACE STRING element_list R_BRACE
-        { $$ = bib::entry($1, $3); $$.elements = $4; }
+entry : ENTRY STRING L_BRACE STRING element_list R_BRACE
+        { $$ = bib::entry($2, $4); $$.elements = $5; }
       ;
 
 element_list : %empty
@@ -96,23 +98,32 @@ element_list : %empty
                { $$ = $1; }
              ;
 
-element : STRING EQUALS text_unit
-          { $$ = bib::element($1, $3); }
+element : STRING EQUALS text
+          { $$ = bib::element($1, $2.substr(1) + $3); }
         ;
 
-text : text_unit
+text : STRING
        { $$ = $1; }
-     | text_unit text
-       { $$ = $1 + $2; }
+     | DQUOTE ltext DQUOTE
+       { $$ = $1 + $2 + $3; }
+     | L_BRACE ltext R_BRACE
+       { $$ = $1 + $2 + $3; }
      ;
 
-text_unit : QTEXT
-       { $$ = $1; }
-     | STRING
-       { $$ = $1; }
-     | L_BRACE text R_BRACE
-       { $$ = "{" + $2 + "}"; }
-     ;
+ltext : %empty
+        { $$ = ""; }
+      | ltext text
+        { $$ = $1 + $2; }
+      | ltext ESCAPE
+        { $$ = $1 + $2; }
+      | ltext ENTRY
+        { $$ = $1 + $2; }
+      | ltext EQUALS
+        { $$ = $1 + $2; }
+      | ltext COMMA
+        { $$ = $1 + $2; }
+      ;
+
 %%
 
 void bib::parser::error(std::string const& err){

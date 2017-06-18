@@ -122,6 +122,7 @@ public class Main {
          * play the actual game
          */
         //TODO 16374
+        //TODO 17528
         //TODO 24285
         //List<String> autos = new ArrayList<>();
         int delay = 120;

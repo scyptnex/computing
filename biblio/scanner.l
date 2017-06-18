@@ -18,14 +18,14 @@
 %%
 
 
-[a-zA-Z0-9:_-]+([\n\t ]+[a-zA-Z0-9:_-]+)* { return bib::parser::make_STRING(yytext); }
-@[a-zA-Z]+  { return bib::parser::make_ENTRY(yytext+1); }
-\"([^"]*\\\")*[^"]*\" { return bib::parser::make_QTEXT(yytext); }
-\'([^']*\\\')*[^']*\' { return bib::parser::make_QTEXT(yytext); }
-\{          { return bib::parser::make_L_BRACE(); }
-\}          { return bib::parser::make_R_BRACE(); }
-=           { return bib::parser::make_EQUALS(); }
-,           { return bib::parser::make_COMMA(); }
+[^@{}=,"\n\t \\]+[\t\n ]* { /*std::cout << "LX: " << yytext << std::endl;*/ return bib::parser::make_STRING(yytext); }
+\\.[\t\n ]*               { /*std::cout << "LX: " << yytext << std::endl;*/ return bib::parser::make_ESCAPE (yytext); }
+  @[\t\n ]*               { /*std::cout << "LX: " << yytext << std::endl;*/ return bib::parser::make_ENTRY  (yytext); }
+ \{[\t\n ]*               { /*std::cout << "LX: " << yytext << std::endl;*/ return bib::parser::make_L_BRACE(yytext); }
+ \}[\t\n ]*               { /*std::cout << "LX: " << yytext << std::endl;*/ return bib::parser::make_R_BRACE(yytext); }
+  =[\t\n ]*               { /*std::cout << "LX: " << yytext << std::endl;*/ return bib::parser::make_EQUALS (yytext); }
+  ,[\t\n ]*               { /*std::cout << "LX: " << yytext << std::endl;*/ return bib::parser::make_COMMA  (yytext); }
+ \"[\t\n ]*               { /*std::cout << "LX: " << yytext << std::endl;*/ return bib::parser::make_DQUOTE (yytext); }
 
 [\n\t ]     {}
 .           { std::cout << "Scanner: unknown character [" << yytext << "]" << std::endl; }
