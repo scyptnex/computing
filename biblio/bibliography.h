@@ -21,6 +21,8 @@ struct element {
     std::string value;
     element() {}
     element(const std::string& n, const std::string& v) : name(n), value(v) {}
+    void sanitise();
+    static std::string clean_string(const std::string&);
 };
 
 struct entry {
@@ -32,10 +34,12 @@ struct entry {
     void add(element&& el){
         elements.push_back(el);
     }
+    void sanitise();
 };
 
 struct bibliography {
     std::vector<entry> entries;
+    void sanitise();
 };
 
 } // end namespace bib

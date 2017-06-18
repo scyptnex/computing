@@ -50,6 +50,7 @@
 
 %lex-param { bib::scanner &scanner }
 %parse-param { bib::scanner &scanner }
+%parse-param { bib::bibliography &result }
 
 %define api.token.prefix {TOKEN_}
 
@@ -66,6 +67,7 @@
 %token <std::string> DQUOTE      "\""
 %token END 0 "end of file"
 
+%type <bib::bibliography>         start
 %type <bib::bibliography>         bibliography
 %type <bib::entry>                entry
 %type <bib::element>              element
@@ -78,12 +80,12 @@
 %%
 
 start : bibliography END
-        { for(const auto& entr : $1.entries) std::cout << std::endl << "==" << std::endl << entr << std::endl; }
+      ;
 
 bibliography : %empty
-               { $$ = bib::bibliography(); }
+               { /*do nothing*/ }
              | bibliography entry
-               { $1.entries.push_back($2); $$ = $1; }
+               { result.entries.push_back($2); }
              ;
 
 entry : ENTRY STRING L_BRACE STRING element_list R_BRACE

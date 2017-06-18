@@ -14,19 +14,33 @@
 
 using namespace bib;
 
-int main(int argc, char* argv[]){
-    element e("hi", "there");
-    element e2("hi", "you are cool");
-    entry en("book", "hollingum2015towards");
-    en.add(std::move(e));
-    en.add(std::move(e2));
-    std::cout << en << std::endl;
+void pprint(std::ostream& os, const bib::element& el) {
+    os << el.name << " = {" << el.value << "}";
+}
 
+void pprint(std::ostream& os, const bib::entry& en) {
+    os << '@' << en.publication_type << "{" << en.name;
+    for(const auto& el : en.elements) {
+        os << std::endl << "    ";
+        pprint(os, el);
+        os << ",";
+    }
+    os << std::endl << "}";
+}
+
+int main(int argc, char* argv[]){
     //parsing stuff
     bib::scanner sca;
-    bib::parser psr(sca);
+    bib::bibliography bbl;
+    bib::parser psr(sca, bbl);
     if(argc > 1) psr.set_debug_level(1);
-    psr.parse();
+    int res = psr.parse();
+    bbl.sanitise();
+    std::cout << "Result: " << res << "\nSize: " << bbl.entries.size() << std::endl;
+    for(auto& e : bbl.entries){
+        pprint(std::cout, e);
+        std::cout << std::endl << std::endl;
+    }
 
     return 0;
 }

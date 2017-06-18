@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 project(bibliog CXX)
 
+set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
+
 # Flex/Bison
 find_package(BISON)
 find_package(FLEX)
