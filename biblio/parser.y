@@ -54,7 +54,10 @@
 %define api.token.prefix {TOKEN_}
 
 %token <std::string> STRING "string"
-%token ENTRY_START "@"
+%token <std::string> NAME   "named identifier"
+%token <std::string> QTEXT  "quoted text"
+%token <std::string> BTEXT  "bracketed text"
+%token <std::string> ENTRY  "@ entry"
 %token L_BRACE     "{"
 %token R_BRACE     "}"
 %token COMMA       ","
@@ -65,6 +68,8 @@
 %type <bib::entry>                entry
 %type <bib::element>              element
 %type <std::vector<bib::element>> element_list
+%type <std::string>               text
+%type <std::string>               text_unit
 
 %start start
 
@@ -79,19 +84,35 @@ bibliography : %empty
                { $1.entries.push_back($2); $$ = $1; }
              ;
 
-entry : ENTRY_START STRING L_BRACE STRING element_list R_BRACE
-        { $$ = bib::entry($2, $4); $$.elements = $5; }
+entry : ENTRY L_BRACE STRING element_list R_BRACE
+        { $$ = bib::entry($1, $3); $$.elements = $4; }
       ;
 
 element_list : %empty
                { $$ = std::vector<bib::element>(); }
              | element_list COMMA element
                { $1.push_back($3); $$ = $1; }
+             | element_list COMMA
+               { $$ = $1; }
              ;
 
-element : STRING EQUALS STRING
+element : STRING EQUALS text_unit
           { $$ = bib::element($1, $3); }
         ;
+
+text : text_unit
+       { $$ = $1; }
+     | text_unit text
+       { $$ = $1 + $2; }
+     ;
+
+text_unit : QTEXT
+       { $$ = $1; }
+     | STRING
+       { $$ = $1; }
+     | L_BRACE text R_BRACE
+       { $$ = "{" + $2 + "}"; }
+     ;
 %%
 
 void bib::parser::error(std::string const& err){

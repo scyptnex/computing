@@ -14,7 +14,7 @@
 
 using namespace bib;
 
-int main(){
+int main(int argc, char* argv[]){
     element e("hi", "there");
     element e2("hi", "you are cool");
     entry en("book", "hollingum2015towards");
@@ -25,6 +25,7 @@ int main(){
     //parsing stuff
     bib::scanner sca;
     bib::parser psr(sca);
+    if(argc > 1) psr.set_debug_level(1);
     psr.parse();
 
     return 0;

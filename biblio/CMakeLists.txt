@@ -4,8 +4,8 @@ project(bibliog CXX)
 # Flex/Bison
 find_package(BISON)
 find_package(FLEX)
-BISON_TARGET(bibParser parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
-FLEX_TARGET(bibScanner scanner.l  ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp)
+BISON_TARGET(bibParser parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp COMPILE_FLAGS "--debug -d" )
+FLEX_TARGET(bibScanner scanner.l  ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp COMPILE_FLAGS "-d")
 ADD_FLEX_BISON_DEPENDENCY(bibScanner bibParser)
 
 # Includes
