@@ -22,4 +22,7 @@ add_executable(bibliog
     ${FLEX_bibScanner_OUTPUTS}
 )
 target_compile_features(bibliog PRIVATE cxx_range_for)
+target_compile_features(bibliog PRIVATE cxx_lambdas)
+target_compile_features(bibliog PRIVATE cxx_lambda_init_captures)
+target_compile_features(bibliog PRIVATE cxx_generic_lambdas)
 

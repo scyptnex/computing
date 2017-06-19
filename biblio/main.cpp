@@ -15,15 +15,14 @@
 using namespace bib;
 
 void pprint(std::ostream& os, const bib::element& el) {
-    os << el.name << " = {" << el.value << "}";
+    os << el.name << "=" << el.value;
 }
 
 void pprint(std::ostream& os, const bib::entry& en) {
     os << '@' << en.publication_type << "{" << en.name;
     for(const auto& el : en.elements) {
-        os << std::endl << "    ";
+        os << "," << std::endl << "    ";
         pprint(os, el);
-        os << ",";
     }
     os << std::endl << "}";
 }
@@ -36,12 +35,10 @@ int main(int argc, char* argv[]){
     if(argc > 1) psr.set_debug_level(1);
     int res = psr.parse();
     bbl.sanitise();
-    std::cout << "Result: " << res << "\nSize: " << bbl.entries.size() << std::endl;
     for(auto& e : bbl.entries){
         pprint(std::cout, e);
         std::cout << std::endl << std::endl;
     }
-
     return 0;
 }
 

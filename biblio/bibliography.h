@@ -23,6 +23,9 @@ struct element {
     element(const std::string& n, const std::string& v) : name(n), value(v) {}
     void sanitise();
     static std::string clean_string(const std::string&);
+    bool operator<(const element&) const;
+private:
+    static const std::vector<std::string> priorities;
 };
 
 struct entry {
@@ -35,6 +38,7 @@ struct entry {
         elements.push_back(el);
     }
     void sanitise();
+    bool operator<(const entry&) const;
 };
 
 struct bibliography {
