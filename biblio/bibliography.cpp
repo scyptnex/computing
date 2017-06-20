@@ -37,15 +37,16 @@ std::string element::clean_string(const std::string& s){
     auto length = ret.size();
     // if (ret[0] == '"' && ret[length-1] == '"') {
     //     ret = ret.substr(1, length-2);
-    // } else if (ret[0] == '{' && ret[length-1] == '}' ) {
-    //     ret = ret.substr(1, length-2);
-    // }
     return ret;
 }
 
 void element::sanitise(){
     name = clean_string(name);
     value = clean_string(value);
+    auto length = value.size();
+    if (string_ignore_equal(name, "month") && value[0] == '{' && value[length-1] == '}' ) {
+         value = trim(value.substr(1, length-2));
+    }
 }
 
 const std::vector<std::string> bib::element::priorities = std::vector<std::string>({"title", "author", "year", "url", "doi"});
