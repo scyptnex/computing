@@ -1,11 +1,25 @@
-import java.util.*;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class Multirator <E> implements Iterator<E> {
 
     private List<Iterator<E>> subLists;
-    private Iterator<Iterator<E>> current;
+    private Iterator<Iterator<E>> currentIterator;
+    private Iterator<E> currentItem;
+
+    public Multirator(){
+        this(Collections.emptyList());
+    }
 
     public Multirator(List<Iterable<E>> subs){
         subLists = subs.stream().map(Iterable::iterator).collect(Collectors.toList());
@@ -14,52 +28,74 @@ public class Multirator <E> implements Iterator<E> {
 
     @Override
     public boolean hasNext() {
-        return subLists.stream().anyMatch(Iterator::hasNext);
+        if (currentItem == null) return false;
+        if (currentItem.hasNext()) return true;
+        while(currentIterator.hasNext()){
+            currentItem = currentIterator.next();
+            if (currentItem.hasNext()) return true;
+        }
+        restart();
+        return currentItem != null;
     }
 
     @Override
     public E next() {
-        Iterator<E> cur = null;
-        while(cur == null || !cur.hasNext()){
-            // infinite loop when the initial list is empty
-            if(!current.hasNext()) restart();
-            cur = current.next();
+        E ret = currentItem.next();
+        if(currentIterator.hasNext()){
+            currentItem = currentIterator.next();
+            hasNext();
+        } else {
+            restart();
         }
-        return cur.next();
+        return ret;
     }
 
     private void restart(){
-        current = subLists.iterator();
+        subLists = subLists.stream().filter(Iterator::hasNext).collect(Collectors.toList());
+        currentIterator = subLists.iterator();
+        currentItem = currentIterator.hasNext() ? currentIterator.next() : null;
     }
 
-    public static void main(String[] args){
-        ArrayList<String> l1 = Stream.of("A", "B", "C").collect(Collectors.toCollection(ArrayList::new));
-        LinkedList<String> l2 = Stream.of().map(Object::toString).collect(Collectors.toCollection(LinkedList::new));
-        ArrayList<String> l3 = Stream.of("D", "E", "F", "G", "H", "I", "J", "K").collect(Collectors.toCollection(ArrayList::new));
-        Multirator<String> mr = new Multirator<>(Arrays.asList(l1, l2, l3));
-        while(mr.hasNext()){
-            System.out.print(mr.next() + " ");
+    public static class Tests {
+        @SafeVarargs
+        private static <L> List<L> l(L ... ls){
+            return Arrays.asList(ls);
         }
-        System.out.println();
-        mr = new Multirator<>(Arrays.asList(l1, l1));
-        while(mr.hasNext()){
-            System.out.print(mr.next() + " ");
+        private static <T> Iterable<T> i(Iterator<T> it){
+            // hack on the grouds that an iterable is a functional interface
+            // dont expect this to work if you ask for the iterator more than once :P
+            Iterable<T> itr = () -> it;
+            return StreamSupport.stream(itr.spliterator(), false).collect(Collectors.toList());
         }
-        System.out.println();
-        mr = new Multirator<>(Arrays.asList(l2, l2));
-        while(mr.hasNext()){
-            System.out.print(mr.next() + " ");
+        @Test
+        public void testDefaultMultirator(){
+            Multirator<String> m = new Multirator<>();
+            assertThat(i(m), is(equalTo(l())));
         }
-        System.out.println();
-        mr = new Multirator<>(new ArrayList<>());
-        while(mr.hasNext()){
-            System.out.print(mr.next() + " ");
+        @Test
+        public void testEmptyMultirator(){
+            Multirator<String> m = new Multirator<>(l());
+            assertThat(i(m), is(equalTo(l())));
         }
-        System.out.println();
-        mr = new Multirator<>(Arrays.asList(l3));
-        while(mr.hasNext()){
-            System.out.print(mr.next() + " ");
+        @Test
+        public void testMultiratorOfEmpty(){
+            Multirator<String> m = new Multirator<>(l(l()));
+            assertThat(i(m), is(equalTo(l())));
         }
-        System.out.println();
+        @Test
+        public void testMultiratorOfEmpties(){
+            Multirator<String> m = new Multirator<>(l(l(), l()));
+            assertThat(i(m), is(equalTo(l())));
+        }
+        @Test
+        public void testMultiratorSquish(){
+            Multirator<String> m = new Multirator<>(l(l(), l("a"), l()));
+            assertThat(i(m), is(equalTo(l("a"))));
+        }
+        @Test
+        public void testMultiratorOrder(){
+            Multirator<String> m = new Multirator<>(l(l("a", "d"), l("b"), l("c", "e", "f"), l()));
+            assertThat(i(m), is(equalTo(l("a", "b", "c", "d", "e", "f"))));
+        }
     }
 }
