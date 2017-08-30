@@ -13,6 +13,7 @@ macro(PROBLEM pname)
     target_compile_features(${pname} PUBLIC cxx_auto_type cxx_constexpr)
 endmacro()
 
+PROBLEM(p109)
 PROBLEM(p141)
 PROBLEM(p164)
 PROBLEM(p165)
