@@ -6,7 +6,9 @@
 # Author: nic                                                             #
 # Date: 2018-Mar-05                                                       #
 #                                                                         #
-# Interactive tool for modifying PDF files.                               #
+# Interactive tool for modifying PDF files. This tool modifies files that #
+# you put on the desktop, so if it cant find your file you might need to  #
+# rename it to have a .pdf (lowercase) extension.                         #
 #                                                                         #
 # Options:                                                                #
 #   -h           Display this help message                                #
@@ -25,15 +27,22 @@ function errxit(){
     exit 1
 }
 
-function choix(){
-    CHOICES=`mktemp`
-    cat > $CHOICES
-    echo >&2
-    cat "$CHOICES" | awk '{print NR") "$0}' | column >&2
-    echo "Please choose from the above options:" >&2
-    read -p "Please choose from the above options: " CHOICE >&2
-    sed -n "$CHOICE"p "$CHOICES"
-    rm $CHOICES
+function choose_pdf(){
+    cat >&2 << EOF
+
+Please select one of the following .pdf files:
+EOF
+    select FILE in *.pdf; do
+        case "$FILE" in
+            *.pdf )
+                echo $FILE
+                break
+                ;;
+            *)
+                errxit "No file selected"
+                ;;
+        esac
+    done
 }
 
 while getopts "h" opt; do
@@ -51,5 +60,10 @@ shift $(($OPTIND -1))
 
 [ $# -eq 1 ] || errxit "Please specify the working directory"
 
-CHOICE=`ls "$1" | grep -i ".*\.pdf" | choix`
-echo = $CHOICE =
+usage
+pushd "$1" > /dev/null 2>/dev/null
+trap "popd > /dev/null 2>/dev/null" EXIT
+
+CHOICE=`choose_pdf "$1"`
+echo = $CHOICE = 
+
