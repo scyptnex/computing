@@ -1,12 +1,12 @@
 package tagbase;
 
-import java.awt.Desktop;
-import java.io.*;
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.swing.*;
+import java.util.Date;
 
 public class Main {
 	
@@ -49,8 +49,13 @@ public class Main {
 	}
 	
 	public static void exit(){
-		tb.save();
-		System.exit(0);
+		try {
+			tb.saver().save(tb);
+			System.exit(0);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	
 	public static void exitErr(String errMsg){

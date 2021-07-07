@@ -1,7 +1,7 @@
 package tagbase.application;
 
-import tagbase.TagBaseII;
 import tagbase.data.Base;
+import tagbase.files.MainDirRecordSaverLoader;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,7 +10,7 @@ public class DefaultReader implements Reader{
 
     @Override
     public String getListName() {
-        return TagBaseII.LIST_NAME;
+        return MainDirRecordSaverLoader.LIST_NAME;
     }
 
     @Override
