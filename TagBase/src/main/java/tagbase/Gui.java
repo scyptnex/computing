@@ -1,13 +1,16 @@
 package tagbase;
 
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
-
-import javax.swing.*;
-import javax.swing.table.*;
-
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Gui extends JFrame {
 
@@ -311,13 +314,22 @@ public class Gui extends JFrame {
                 selects.add((int)Math.floor(Math.random()*tableSorter.getViewRowCount()));
             }
             System.out.println(rdm + "/" + tableSorter.getViewRowCount() + " " + selects.toString());
-            ArrayList<RowFilter<Tabulator, Object>> randomFilters = new ArrayList<>();
-            for(int i : selects){
-                RowFilter<Tabulator, Object> temp = RowFilter.regexFilter(tb.name(tableSorter.convertRowIndexToModel(i)), COL_NAME);
-                randomFilters.add(temp);
-            }
-            RowFilter<Tabulator, Object> exactFilter = RowFilter.orFilter(randomFilters);
-            tableSorter.setRowFilter(exactFilter);
+            selects = selects.stream().map(tableSorter::convertRowIndexToModel).collect(Collectors.toSet());
+            tableSorter.setRowFilter(new IndexFilter(selects));
+        }
+    }
+
+    class IndexFilter extends RowFilter<Tabulator, Integer> {
+
+        private Set<Integer> indices;
+
+        IndexFilter(Set<Integer> indices){
+            this.indices = indices;
+        }
+
+        @Override
+        public boolean include(Entry<? extends Tabulator, ? extends Integer> entry) {
+            return indices.contains(entry.getIdentifier());
         }
     }
 
