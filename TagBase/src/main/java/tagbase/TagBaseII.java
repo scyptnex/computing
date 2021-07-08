@@ -1,5 +1,6 @@
 package tagbase;
 
+import tagbase.application.Interactor;
 import tagbase.data.Record;
 import tagbase.data.RecordKeeper;
 import tagbase.data.RecordKeeperBuilder;
@@ -11,8 +12,10 @@ import tagbase.gui.BaseChooser;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public class TagBaseII implements RecordKeeper, RecordKeeperBuilder {
+public class TagBaseII implements RecordKeeper, RecordKeeperBuilder, Interactor {
 
     public static final String IMPORT_FILENAME = "zzlib.dat";
     public static final int MAX_PROMPT_LINES = 20;
@@ -30,6 +33,8 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder {
     private final HashMap<String, String> dates;
     private final HashMap<String, Long> sizes;
     private final HashMap<String, String> paths;
+
+    private Map<String, Long> cachedTagHistogram = null;
 
     public static TagBaseII getBase(File mainDir) {
         try {
@@ -117,6 +122,26 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder {
         return this;
     }
 
+    @Override
+    public void synchronize() {
+        scry();
+    }
+
+    @Override
+    public void use(Record r) {
+        //System.out.println("Do something with item " + idx);
+        File fi = new File(mainDir, r.getPath());
+        if (!fi.exists()) {
+            System.err.println("Couldnt find " + fi.getName() + ", try rescanning");
+            return;
+        }
+        try {
+            Main.use(fi);
+        } catch (IOException e1) {
+            System.err.println("Failed to open");
+        }
+    }
+
     /**
      * Methods
      */
@@ -155,8 +180,24 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder {
     }
 
     @Override
-    public int getSize() {
+    public int getCount() {
         return count();
+    }
+
+    @Override
+    public long getTotalSizeBytes() {
+        return totalSize;
+    }
+
+    @Override
+    public Map<String, Long> getTagHistogram() {
+        if(cachedTagHistogram == null) {
+            cachedTagHistogram = tags.values().stream()
+                    .flatMap(t -> Arrays.stream(t.split(" ")))
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        }
+        return cachedTagHistogram;
     }
 
     @Override
@@ -170,32 +211,6 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder {
 
     public RecordSaver saver(){
         return new MainDirRecordSaverLoader(mainDir);
-    }
-
-    public void displayTags() {
-        HashMap<String, Integer> counts = new HashMap<String, Integer>();
-        for (String nm : names)
-            for (String tag : tags.get(nm).split(" ")) {
-                if (counts.containsKey(tag)) {
-                    counts.put(tag, counts.get(tag) + 1);
-                } else {
-                    counts.put(tag, 1);
-                }
-            }
-        String[] tgs = new String[counts.size()];
-        int[] amts = new int[counts.size()];
-        int count = 0;
-        for (String s : counts.keySet()) {
-            tgs[count] = s;
-            amts[count] = counts.get(s);
-            count++;
-        }
-        sortBy(tgs, amts);
-        String message = "Tag Count:";
-        for (int i = 0; i < tgs.length; i++) {
-            message = message + "\n  " + tgs[i] + ", " + amts[i];
-        }
-        Main.informPrompt(message);
     }
 
     public String getTotalSize() {
@@ -215,27 +230,7 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder {
 
     public void retag(String name, String tag) {
         tags.put(name, tag);
-    }
-
-    public void rename(int idx, String name) {
-        File oldName = new File(mainDir, paths.get(names.get(idx)));
-        File newName = new File(oldName.getParentFile(), name);
-        if (oldName.renameTo(newName)) {
-            String oldn = names.get(idx);
-            String nm = newName.getName();
-            names.set(idx, nm);
-            indexes.put(nm, indexes.remove(oldn));
-            tags.put(nm, tags.remove(oldn));
-            sizes.put(nm, sizes.remove(oldn));
-            dates.put(nm, dates.remove(oldn));
-            paths.put(nm, paths.remove(oldn));
-        } else {
-            Main.informPrompt("Failed to rename " + oldName.getName() + " to " + newName.getName());
-        }
-    }
-
-    public void rename(String oldName, String newName) {
-        rename(indexes.get(oldName), newName);
+        cachedTagHistogram = null;
     }
 
     public void scry() {

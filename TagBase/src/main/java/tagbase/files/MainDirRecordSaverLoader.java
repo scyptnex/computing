@@ -31,7 +31,7 @@ public class MainDirRecordSaverLoader implements RecordSaver, RecordLoader{
     @Override
     public void save(RecordKeeper rk) throws IOException {
             PrintWriter pw = new PrintWriter(new File(mainDir, LIST_NAME));
-            for(int i=0; i<rk.getSize(); i++){
+            for(int i=0; i<rk.getCount(); i++){
                 Record rec = rk.getRecord(i);
                 pw.println(rec.getName());
                 pw.println(rec.getTags());
@@ -45,7 +45,7 @@ public class MainDirRecordSaverLoader implements RecordSaver, RecordLoader{
     }
 
     private static Stream<Map<String, String>> serializeState(RecordKeeper rk){
-        return IntStream.range(0, rk.getSize())
+        return IntStream.range(0, rk.getCount())
                 .mapToObj(rk::getRecord)
                 .map(r -> new String[]{
                         "name", r.getName(),

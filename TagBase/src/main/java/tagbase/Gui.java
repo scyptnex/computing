@@ -1,12 +1,14 @@
 package tagbase;
 
+import tagbase.application.Interactor;
+import tagbase.data.Record;
+import tagbase.data.RecordKeeper;
+
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,11 +35,13 @@ public class Gui extends JFrame {
     private final Tabulator tableModel;
     private final TableRowSorter<Tabulator> tableSorter;
 
-    private final TagBaseII tb;
+    private final RecordKeeper rk;
+    private final Interactor in;
 
-    public Gui(TagBaseII base) {
+    public Gui(RecordKeeper keeper, Interactor inter) {
         super("Tag Base");
-        tb = base;
+        rk = keeper;
+        in = inter;
 
         tableModel = new Tabulator();
         tableSorter = new TableRowSorter<Tabulator>(tableModel);
@@ -46,7 +50,7 @@ public class Gui extends JFrame {
         btnScry = new JButton("Rescan");
         btnScry.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-                tb.scry();
+                in.synchronize();
                 tableModel.fireTableDataChanged();
                 showInfo();
             }
@@ -61,20 +65,12 @@ public class Gui extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3) {
                     tblItems.setRowSelectionInterval(e.getY() / tblItems.getRowHeight(), e.getY() / tblItems.getRowHeight());
+                } else if(e.getButton() == MouseEvent.BUTTON2) {
+                    tblItems.clearSelection();
                 }
                 if (e.getClickCount() > 1 || e.getButton() == MouseEvent.BUTTON3) {
                     int idx = tblItems.convertRowIndexToModel(tblItems.getSelectedRow());
-                    //System.out.println("Do something with item " + idx);
-                    File fi = new File(tb.mainDir, tb.path(idx));
-                    if (!fi.exists()) {
-                        System.err.println("Couldnt find " + fi.getName() + ", try rescanning");
-                        return;
-                    }
-                    try {
-                        Main.use(fi);
-                    } catch (IOException e1) {
-                        System.err.println("Failed to open");
-                    }
+                    in.use(rk.getRecord(idx));
                 }
                 showInfo();
             }
@@ -100,9 +96,6 @@ public class Gui extends JFrame {
 
             public void keyReleased(KeyEvent arg0) {
                 filterBase(txaSearch.getText());
-                if (txaSearch.getText().equalsIgnoreCase("-tags")) {
-                    tb.displayTags();
-                }
             }
 
             public void keyTyped(KeyEvent arg0) {
@@ -180,23 +173,24 @@ public class Gui extends JFrame {
 
         @Override
         public int getRowCount() {
-            return tb.count();
+            return rk.getCount();
         }
 
         @Override
         public Object getValueAt(int row, int col) {
+            Record rec = rk.getRecord(row);
             switch (col) {
                 case COL_NAME: {
-                    return tb.name(row);
+                    return rec.getName();
                 }
                 case COL_TAGS: {
-                    return tb.tag(row);
+                    return rec.getTags();
                 }
                 case COL_DATE: {
-                    return tb.date(row);
+                    return rec.getDateAdded();
                 }
                 default: {
-                    return Main.twoDecimal(tb.size(row) / SIZE_UNIT);
+                    return Main.twoDecimal(rec.getSizeBytes() / SIZE_UNIT);
                 }
             }
         }
@@ -207,30 +201,33 @@ public class Gui extends JFrame {
         }
 
         public boolean isCellEditable(int row, int col) {
-            return (col == COL_NAME || col == COL_TAGS);
+            return col == COL_TAGS;
         }
 
         public void setValueAt(Object value, int row, int col) {
-            if (col == COL_NAME) {
-                tb.rename(row, (String) value);
-            } else if (col == COL_TAGS) {
-                tb.retag(row, ((String) value).toLowerCase());
-            }
+            if(col != COL_TAGS) return;
+            rk.retag(row, ((String) value).toLowerCase());
         }
 
     }
 
     public void showInfo() {
-        txaStatus.setText("Count:\t" + tb.count() + "\nSize:\t" + tb.getTotalSize() + "\n");
+        txaStatus.setText("Count:\t" + rk.getCount() + "\nSize:\t" + rk.getTotalSizeBytes() + "\n");
         if (tblItems.getSelectedRow() != -1) {
             int idx = tblItems.convertRowIndexToModel(tblItems.getSelectedRow());
+            Record rec = rk.getRecord(idx);
             txaStatus.append("\nSelected(" + idx + ")");
-            txaStatus.append("\n - " + tb.name(idx));
-            txaStatus.append("\n - " + tb.tag(idx));
-            txaStatus.append("\n - " + tb.date(idx));
-            txaStatus.append("\n - " + tb.size(idx));
-            txaStatus.append("\n - " + tb.path(idx));
-
+            txaStatus.append("\n - " + rec.getName());
+            txaStatus.append("\n - " + rec.getTags());
+            txaStatus.append("\n - " + rec.getDateAdded());
+            txaStatus.append("\n - " + rec.getSizeBytes());
+            txaStatus.append("\n - " + rec.getPath());
+        } else {
+            txaStatus.append("\nTags:");
+            rk.getTagHistogram().entrySet().stream()
+                    .sorted((a,b) -> b.getValue().compareTo(a.getValue()))
+                    .map(e ->"\n - " + e.getKey() + ": " + e.getValue())
+                    .forEachOrdered(txaStatus::append);
         }
     }
 

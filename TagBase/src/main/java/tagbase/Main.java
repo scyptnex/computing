@@ -19,7 +19,7 @@ public class Main {
 		tb = TagBaseII.getBase(args.length < 1 || ! new File(args[0]).isDirectory() ? new File("."): new File(args[0]));
 		if(tb == null) exitErr("Failed to load tagbase");
 		else{
-			gui = new Gui(tb);
+			gui = new Gui(tb, tb);
 		}
 	}
 	
@@ -34,7 +34,7 @@ public class Main {
 				Process p = Runtime.getRuntime().exec(cmd);
 				return;
 			} catch (IOException exc){
-				// dp nothing
+				// do nothing
 			}
 		}
 		Desktop.getDesktop().open(fi);
