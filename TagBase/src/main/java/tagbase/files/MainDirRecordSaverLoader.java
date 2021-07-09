@@ -1,24 +1,19 @@
 package tagbase.files;
 
-import tagbase.data.Record;
 import tagbase.data.RecordKeeper;
 import tagbase.data.RecordKeeperBuilder;
-import tagbase.data.SimpleRecord;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MainDirRecordSaverLoader implements RecordSaver, RecordLoader{
 
-    public static final String LIST_NAME = "zzList.txt";
     public static final String FILE_NAME = "zzTagBase.json";
 
     private File mainDir;
@@ -29,17 +24,7 @@ public class MainDirRecordSaverLoader implements RecordSaver, RecordLoader{
 
 
     @Override
-    public void save(RecordKeeper rk) throws IOException {
-            PrintWriter pw = new PrintWriter(new File(mainDir, LIST_NAME));
-            for(int i=0; i<rk.getCount(); i++){
-                Record rec = rk.getRecord(i);
-                pw.println(rec.getName());
-                pw.println(rec.getTags());
-                pw.println(rec.getDateAdded());
-                pw.println(rec.getSizeBytes());
-                pw.println(rec.getPath());
-            }
-            pw.close();
+    public void save(File mainDir, RecordKeeper rk) throws IOException {
             Path p = Paths.get(mainDir.getPath(), FILE_NAME);
             StateRecorder.saveState(serializeState(rk), p);
     }
@@ -60,19 +45,12 @@ public class MainDirRecordSaverLoader implements RecordSaver, RecordLoader{
     }
 
     @Override
-    public RecordKeeper load(RecordKeeperBuilder builder) throws IOException{
-        File list = new File(mainDir, LIST_NAME);
-        list.createNewFile();
-        Scanner sca = new Scanner(list);
-        while(sca.hasNextLine()){
-            String nm = sca.nextLine();
-            String ta = sca.nextLine();
-            String da = sca.nextLine();
-            long sz = Long.parseLong(sca.nextLine());
-            String pa = sca.nextLine();
-            builder.addRecord(new SimpleRecord(nm, pa, ta, sz, da));
-        }
-        sca.close();
-        return builder.build();
+    public RecordKeeper load(File mainDir, RecordKeeperBuilder builder) throws IOException{
+        throw new IOException("not implemented");
+    }
+
+    @Override
+    public boolean isTagBaseDir(File mainDir) {
+        return false;
     }
 }

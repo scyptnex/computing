@@ -1,5 +1,7 @@
 package tagbase;
 
+import tagbase.files.MultiSaver;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -50,7 +52,7 @@ public class Main {
 	
 	public static void exit(){
 		try {
-			tb.saver().save(tb);
+			new MultiSaver().save(tb.mainDir, tb);
 			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();

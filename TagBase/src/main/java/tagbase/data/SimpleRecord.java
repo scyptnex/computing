@@ -1,6 +1,6 @@
 package tagbase.data;
 
-public class SimpleRecord implements Record {
+public class SimpleRecord implements Record, Comparable<Record>{
 
     private String name;
     private String path;
@@ -39,5 +39,14 @@ public class SimpleRecord implements Record {
     @Override
     public String getDateAdded() {
         return dateAdded;
+    }
+
+    void setTags(String tags){
+        this.tags = tags;
+    }
+
+    @Override
+    public int compareTo(Record o) {
+        return getPath().compareTo(o.getPath());
     }
 }

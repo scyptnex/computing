@@ -1,6 +1,7 @@
 package tagbase.gui;
 
-import tagbase.application.DefaultReader;
+import tagbase.files.PriorityLoader;
+import tagbase.files.RecordLoader;
 
 import javax.swing.*;
 import java.io.File;
@@ -12,15 +13,21 @@ public class BaseChooser {
     private static final Object[] OPTIONS = {"Cancel", "Choose elsewhere", "Create here"};
     private static final String MESSAGE_LOC = "\"%s\" is not a TagBase directory.\n\nMake it one?";
 
-    public static File choose() throws IOException {
+    private RecordLoader loader;
+
+    public BaseChooser(RecordLoader loader){
+        this.loader = loader;
+    }
+
+    public File choose() throws IOException {
         return choose(".");
     }
 
-    public static File choose(String s) throws IOException {
+    public File choose(String s) throws IOException {
         return choose(new File(s));
     }
 
-    public static File choose(File fi) throws IOException {
+    public File choose(File fi) throws IOException {
         while (!checkDirIsBase(fi)) {
             if (!fi.isDirectory()) fi = fi.getParentFile();
             fi = fi.getCanonicalFile();
@@ -42,12 +49,12 @@ public class BaseChooser {
         return fi;
     }
 
-    private static boolean checkDirIsBase(File fi) {
-        return fi.isDirectory() && new File(fi, new DefaultReader().getListName()).exists();
+    private boolean checkDirIsBase(File fi) {
+        return fi.isDirectory() && loader.isTagBaseDir(fi);
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println(choose());
+        System.out.println(new BaseChooser(new PriorityLoader()).choose());
     }
 
 }

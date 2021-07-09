@@ -44,16 +44,14 @@ public class Gui extends JFrame {
         in = inter;
 
         tableModel = new Tabulator();
-        tableSorter = new TableRowSorter<Tabulator>(tableModel);
+        tableSorter = new TableRowSorter<>(tableModel);
 
         c = this.getContentPane();
         btnScry = new JButton("Rescan");
-        btnScry.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                in.synchronize();
-                tableModel.fireTableDataChanged();
-                showInfo();
-            }
+        btnScry.addActionListener(ev -> {
+            in.synchronize();
+            tableModel.fireTableDataChanged();
+            showInfo();
         });
 
         tblItems = new JTable(tableModel);
@@ -212,7 +210,8 @@ public class Gui extends JFrame {
     }
 
     public void showInfo() {
-        txaStatus.setText("Count:\t" + rk.getCount() + "\nSize:\t" + rk.getTotalSizeBytes() + "\n");
+        txaStatus.setText("Count:\t" + rk.getCount());
+        txaStatus.append("\nSize:\t" + bytesToHumanReadable(rk.getTotalSizeBytes()) + "\n");
         if (tblItems.getSelectedRow() != -1) {
             int idx = tblItems.convertRowIndexToModel(tblItems.getSelectedRow());
             Record rec = rk.getRecord(idx);
@@ -220,15 +219,26 @@ public class Gui extends JFrame {
             txaStatus.append("\n - " + rec.getName());
             txaStatus.append("\n - " + rec.getTags());
             txaStatus.append("\n - " + rec.getDateAdded());
-            txaStatus.append("\n - " + rec.getSizeBytes());
+            txaStatus.append("\n - " + bytesToHumanReadable(rec.getSizeBytes()));
             txaStatus.append("\n - " + rec.getPath());
         } else {
             txaStatus.append("\nTags:");
             rk.getTagHistogram().entrySet().stream()
                     .sorted((a,b) -> b.getValue().compareTo(a.getValue()))
-                    .map(e ->"\n - " + e.getKey() + ": " + e.getValue())
+                    .map(e ->"\n - " + e.getKey() + "\t" + e.getValue())
                     .forEachOrdered(txaStatus::append);
         }
+    }
+
+    public static String bytesToHumanReadable(long totalSize) {
+        String[] ends = {"B", "KB", "MB", "GB", "TB"};
+        int end = 0;
+        double div = 1;
+        while (totalSize / div > 2048.0 && end < ends.length - 1) {
+            end++;
+            div = div * 1024;
+        }
+        return Main.twoDecimal(totalSize / div) + " " + ends[end];
     }
 
     public void filterBase(String ft) {

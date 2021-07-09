@@ -4,16 +4,14 @@ import tagbase.application.Interactor;
 import tagbase.data.Record;
 import tagbase.data.RecordKeeper;
 import tagbase.data.RecordKeeperBuilder;
-import tagbase.files.MainDirRecordSaverLoader;
+import tagbase.data.SimpleRecordKeeper;
+import tagbase.files.PriorityLoader;
 import tagbase.files.RecordLoader;
-import tagbase.files.RecordSaver;
 import tagbase.gui.BaseChooser;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class TagBaseII implements RecordKeeper, RecordKeeperBuilder, Interactor {
 
@@ -38,27 +36,27 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder, Interactor 
 
     public static TagBaseII getBase(File mainDir) {
         try {
-            mainDir = BaseChooser.choose(mainDir);
+            RecordLoader loader = new PriorityLoader();
+            mainDir = new BaseChooser(loader).choose(mainDir);
             if (mainDir == null) return null; // exit when user cancels
 
 
-            return new TagBaseII(mainDir);
+            return new TagBaseII(loader, mainDir);
         } catch (IOException exc) {
             return null; // exit on error
         }
     }
 
-    private TagBaseII(File mainDir) throws IOException {
+    private TagBaseII(RecordLoader loader, File mainDir) throws IOException {
         this.mainDir = mainDir;
-        names = new ArrayList<String>();
-        indexes = new HashMap<String, Integer>();
-        tags = new HashMap<String, String>();
-        dates = new HashMap<String, String>();
-        sizes = new HashMap<String, Long>();
-        paths = new HashMap<String, String>();
+        names = new ArrayList<>();
+        indexes = new HashMap<>();
+        tags = new HashMap<>();
+        dates = new HashMap<>();
+        sizes = new HashMap<>();
+        paths = new HashMap<>();
         totalSize = 0;
-        RecordLoader loader = new MainDirRecordSaverLoader(this.mainDir);
-        RecordKeeper rk = loader.load(this);
+        RecordKeeper rk = loader.load(mainDir,this);
         assert rk == this;
     }
 
@@ -146,7 +144,7 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder, Interactor 
      * Methods
      */
 
-    private class Recordlet implements Record {
+    private class Recordlet implements Record, Comparable<Record> {
         private int idx;
 
         Recordlet(int i) {
@@ -177,6 +175,11 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder, Interactor 
         public String getDateAdded() {
             return date(idx);
         }
+
+        @Override
+        public int compareTo(Record o) {
+            return getPath().compareTo(o.getPath());
+        }
     }
 
     @Override
@@ -192,10 +195,7 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder, Interactor 
     @Override
     public Map<String, Long> getTagHistogram() {
         if(cachedTagHistogram == null) {
-            cachedTagHistogram = tags.values().stream()
-                    .flatMap(t -> Arrays.stream(t.split(" ")))
-                    .filter(s -> !s.isEmpty())
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            cachedTagHistogram = SimpleRecordKeeper.streamOfTagsToHistogram(tags.values().stream());
         }
         return cachedTagHistogram;
     }
@@ -207,21 +207,6 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder, Interactor 
 
     public int count() {
         return names.size();
-    }
-
-    public RecordSaver saver(){
-        return new MainDirRecordSaverLoader(mainDir);
-    }
-
-    public String getTotalSize() {
-        String[] ends = {"B", "KB", "MB", "GB", "TB"};
-        int end = 0;
-        double div = 1;
-        while (totalSize / div > 2048.0 && end < ends.length - 1) {
-            end++;
-            div = div * 1024;
-        }
-        return Main.twoDecimal(totalSize / div) + " " + ends[end];
     }
 
     public void retag(int idx, String tag) {
@@ -322,39 +307,22 @@ public class TagBaseII implements RecordKeeper, RecordKeeperBuilder, Interactor 
         }
         //otherwise
         else for (File fi : curDir.listFiles()) {
+            if(fi.getName().startsWith("."))
+                continue;
             if (fi.isDirectory()) {
-                if (!fi.getName().startsWith(".Trash"))
-                    recurFileTree(newPaths, knownNames, curPath + fi.getName() + "/", fi);
+                recurFileTree(newPaths, knownNames, curPath + fi.getName() + "/", fi);
             } else {
                 String name = fi.getName();
                 String loc = curPath + name;
-                if (!fi.getName().equals(MainDirRecordSaverLoader.LIST_NAME)) {
-                    if (knownNames.contains(name)) {
-                        knownNames.remove(name);
-                        if (fi.length() != sizes.get(name)) {
-                            totalSize = totalSize - sizes.get(name) + fi.length();
-                            sizes.put(name, fi.length());
-                        }
-                        paths.put(name, loc);
-                    } else {
-                        newPaths.add(loc);
+                if (knownNames.contains(name)) {
+                    knownNames.remove(name);
+                    if (fi.length() != sizes.get(name)) {
+                        totalSize = totalSize - sizes.get(name) + fi.length();
+                        sizes.put(name, fi.length());
                     }
-                }
-            }
-        }
-    }
-
-    public static <T> void sortBy(T[] vals, int[] sorts) {
-        //bubble sort, cos im lazy
-        for (int end = sorts.length; end > 1; end--) {
-            for (int start = 1; start < end; start++) {
-                if (sorts[start] < sorts[start - 1]) {
-                    int ts = sorts[start];
-                    T tv = vals[start];
-                    sorts[start] = sorts[start - 1];
-                    vals[start] = vals[start - 1];
-                    sorts[start - 1] = ts;
-                    vals[start - 1] = tv;
+                    paths.put(name, loc);
+                } else {
+                    newPaths.add(loc);
                 }
             }
         }
