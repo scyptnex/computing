@@ -121,6 +121,7 @@ public class Gui extends JFrame {
             }
 
             public void windowClosed(WindowEvent evt) {
+                setVisible(false);
                 Main.exit();
             }
 

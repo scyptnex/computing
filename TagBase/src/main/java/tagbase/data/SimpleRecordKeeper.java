@@ -55,6 +55,8 @@ public class SimpleRecordKeeper implements RecordKeeper, RecordKeeperBuilder{
 
     public static Map<String, Long> streamOfTagsToHistogram(Stream<String> streamOfTags){
         return streamOfTags
+                .filter(t -> !t.contains("zz"))
+                .filter(t -> !t.contains("zh"))
                 .flatMap(t -> Arrays.stream(t.split(" ")))
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));

@@ -53,8 +53,11 @@ public class Main {
 	public static void exit(){
 		try {
 			new MultiSaver().save(tb.mainDir, tb);
+			System.out.println();
+			System.out.println("Exiting in 5 seconds");
+			Thread.sleep(5000);
 			System.exit(0);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}

@@ -144,4 +144,8 @@ public class Collect {
         return ret;
     }
 
+    public static <T> String stringify(List<T> items){
+        return items.stream().map(T::toString).collect(Collectors.joining(","));
+    }
+
 }
